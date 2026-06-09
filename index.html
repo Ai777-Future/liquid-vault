@@ -1047,11 +1047,11 @@ async function loadAdminData(){
 
   // Load all prompts
   const{data:allPrompts}=await sb.from('prompts').select('*').order('created_at',{ascending:false}).limit(50);
-  const tbody=document.getElementById('adminPromptsBody');
+  const tbodyPrompts=document.getElementById('adminPromptsBody');
   if(!allPrompts?.length){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">No prompts yet</td></tr>';
+    tbodyPrompts.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">No prompts yet</td></tr>';
   } else {
-    tbody.innerHTML=(allPrompts||[]).map(p=>{
+    tbodyPrompts.innerHTML=(allPrompts||[]).map(p=>{
       const owner=profileMap[p.user_id]||p.user_id;
       const dt=new Date(p.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
       return`<tr>
