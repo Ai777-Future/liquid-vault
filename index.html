@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LIQUID.VAULT v3</title>
+<title>LIQUID.VAULT v2</title>
 
 <!-- ============================================================
-  LIQUID.VAULT v3 — Prompt Generator Edition
+  LIQUID.VAULT v2 — Multi-User Edition
   
   SETUP (3 jagah change karo):
   1. Line ~40 → SUPABASE_URL apna daal
@@ -229,40 +229,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
 .loading-fill{width:0%;height:100%;background:var(--green);animation:loadfill 1.5s ease forwards}
 @keyframes loadfill{to{width:100%}}
 .loading-text{font-size:11px;color:var(--text3);letter-spacing:3px}
-
-/* ===== PROMPT GENERATOR ===== */
-.prompt-bar{padding:12px 20px;background:var(--bg3);border-bottom:2px solid rgba(170,68,255,0.3);display:flex;gap:10px;align-items:center}
-.prompt-bar-label{font-size:10px;color:var(--purple);letter-spacing:3px;white-space:nowrap;display:flex;align-items:center;gap:6px}
-.prompt-input-wrap{flex:1;position:relative;display:flex;align-items:center}
-.prompt-prefix{position:absolute;left:12px;font-size:12px;color:var(--purple);z-index:1}
-.prompt-input{width:100%;background:var(--bg);border:1px solid rgba(170,68,255,0.3);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 12px 10px 36px;outline:none;transition:border-color 0.2s;letter-spacing:1px}
-.prompt-input:focus{border-color:var(--purple);box-shadow:0 0 10px rgba(170,68,255,0.08)}
-.prompt-input::placeholder{color:var(--text3)}
-.prompt-selects{display:flex;gap:8px}
-.prompt-select{background:var(--bg);border:1px solid rgba(170,68,255,0.25);color:var(--text2);font-family:var(--mono);font-size:10px;padding:10px 10px;outline:none;cursor:pointer;letter-spacing:1px}
-.prompt-btn{background:rgba(170,68,255,0.1);border:1px solid var(--purple);color:var(--purple);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:10px 18px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s;white-space:nowrap}
-.prompt-btn:hover{background:rgba(170,68,255,0.2);box-shadow:0 0 15px rgba(170,68,255,0.15)}
-.prompt-history-btn{background:transparent;border:1px solid var(--border);color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:10px 14px;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.prompt-history-btn:hover{border-color:var(--purple);color:var(--purple)}
-
-/* ===== PROMPT HISTORY MODAL ===== */
-.prompt-history-list{display:flex;flex-direction:column;gap:10px}
-.prompt-history-item{background:var(--bg3);border:1px solid var(--border);padding:14px 16px;position:relative;transition:border-color 0.15s}
-.prompt-history-item:hover{border-color:rgba(170,68,255,0.4)}
-.phi-text{font-size:12px;color:var(--text);line-height:1.6;margin-bottom:8px;letter-spacing:0.5px}
-.phi-meta{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--text3);letter-spacing:1px}
-.phi-type{color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:2px 8px;font-size:9px;letter-spacing:2px}
-.phi-user{color:var(--pink)}
-.phi-actions{display:flex;gap:6px;margin-top:10px}
-.phi-btn{background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 12px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:5px}
-.phi-btn:hover{border-color:var(--purple);color:var(--purple)}
-
-/* Admin prompts table */
-.prompts-table{width:100%;border-collapse:collapse;margin-bottom:24px}
-.prompts-table th{font-size:10px;letter-spacing:2px;color:var(--text3);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)}
-.prompts-table td{font-size:11px;color:var(--text);padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
-.prompts-table tr:hover td{background:rgba(170,68,255,0.03)}
-.prompt-cell{max-width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
 </style>
 </head>
 <body>
@@ -330,7 +296,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
       </div>
     </div>
     <div class="topbar-right">
-      <div style="font-size:10px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:2px">v3</div>
       <div class="user-chip">
         <div class="user-avatar" id="userAvatar">--</div>
         <span class="user-name" id="userNameDisplay">--</span>
@@ -385,32 +350,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
         <option value="type">BY TYPE</option>
       </select>
     </div>
-
-    <!-- PROMPT GENERATOR BAR -->
-    <div class="prompt-bar" id="promptBar">
-      <div class="prompt-bar-label"><i class="ti ti-robot"></i> AI PROMPT</div>
-      <div class="prompt-input-wrap">
-        <span class="prompt-prefix">✦</span>
-        <input class="prompt-input" id="promptInput" placeholder="describe karo kya section chahiye... e.g. hero section with video background and CTA button" onkeydown="if(event.key==='Enter')sendPromptToClaude()" />
-      </div>
-      <div class="prompt-selects">
-        <select class="prompt-select" id="promptTheme">
-          <option value="Dawn">DAWN</option>
-          <option value="Prestige">PRESTIGE</option>
-          <option value="Debut">DEBUT</option>
-          <option value="Impulse">IMPULSE</option>
-          <option value="Custom">CUSTOM</option>
-        </select>
-        <select class="prompt-select" id="promptSecType">
-          <option value="section">SECTION</option>
-          <option value="header">HEADER</option>
-          <option value="snippet">SNIPPET</option>
-          <option value="template">TEMPLATE</option>
-        </select>
-      </div>
-      <button class="prompt-btn" onclick="sendPromptToClaude()"><i class="ti ti-send"></i> GENERATE</button>
-      <button class="prompt-history-btn" onclick="openPromptHistory()"><i class="ti ti-history"></i> HISTORY</button>
-    </div>
     <!-- User sections grid -->
     <div class="sections-grid" id="sectionsGrid"></div>
     <!-- Admin panel -->
@@ -432,14 +371,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
       </table>
       <div style="font-size:10px;color:var(--text3);letter-spacing:3px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">ALL SECTIONS (LATEST)</div>
       <div id="adminSectionsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
-
-      <div style="font-size:10px;color:var(--purple);letter-spacing:3px;margin:24px 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(170,68,255,0.3)"><i class="ti ti-robot"></i> USER PROMPTS (LATEST 50)</div>
-      <table class="prompts-table" id="adminPromptsTable">
-        <thead><tr>
-          <th>USER</th><th>PROMPT</th><th>THEME</th><th>TYPE</th><th>TIME</th>
-        </tr></thead>
-        <tbody id="adminPromptsBody"></tbody>
-      </table>
     </div>
   </div>
 </div>
@@ -539,22 +470,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal('viewModal')">CLOSE</button>
       <button class="btn-save" id="editFromViewBtn" onclick="editFromView()"><i class="ti ti-edit"></i> EDIT</button>
-    </div>
-  </div>
-</div>
-
-<!-- PROMPT HISTORY MODAL -->
-<div id="promptHistoryModal" style="display:none" class="modal-overlay">
-  <div class="modal" style="max-width:760px">
-    <div class="modal-header">
-      <div class="modal-title" style="color:var(--purple)">// PROMPT HISTORY</div>
-      <button class="modal-close" onclick="closeModal('promptHistoryModal')">✕</button>
-    </div>
-    <div class="modal-body" id="promptHistoryBody">
-      <div style="text-align:center;padding:40px;color:var(--text3);font-size:12px;letter-spacing:1px">LOADING...</div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal('promptHistoryModal')">CLOSE</button>
     </div>
   </div>
 </div>
@@ -1041,28 +956,9 @@ async function loadAdminData(){
   const latest=(allSections||[]).slice(0,30);
   if(!latest.length){
     grid.innerHTML='<div style="color:var(--text3);font-size:12px;letter-spacing:1px;padding:20px 0">No sections yet</div>';
-  } else {
-    grid.innerHTML=latest.map(s=>sectionCard(s,true,s._ownerName)).join('');
+    return;
   }
-
-  // Load all prompts
-  const{data:allPrompts}=await sb.from('prompts').select('*').order('created_at',{ascending:false}).limit(50);
-  const tbody=document.getElementById('adminPromptsBody');
-  if(!allPrompts?.length){
-    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">No prompts yet</td></tr>';
-  } else {
-    tbody.innerHTML=(allPrompts||[]).map(p=>{
-      const owner=profileMap[p.user_id]||p.user_id;
-      const dt=new Date(p.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-      return`<tr>
-        <td style="color:var(--pink)">${owner}</td>
-        <td class="prompt-cell">${p.prompt_text}</td>
-        <td style="color:var(--cyan)">${p.theme||'--'}</td>
-        <td style="color:var(--purple)">${p.section_type||'--'}</td>
-        <td style="color:var(--text3)">${dt}</td>
-      </tr>`;
-    }).join('');
-  }
+  grid.innerHTML=latest.map(s=>sectionCard(s,true,s._ownerName)).join('');
 }
 
 // ============================================================
@@ -1106,103 +1002,6 @@ document.addEventListener('keydown',e=>{
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
 });
-
-// ============================================================
-//  PROMPT GENERATOR
-// ============================================================
-async function sendPromptToClaude() {
-  const promptText = v('promptInput').trim();
-  if (!promptText) { showToast('Prompt likho pehle!', 'error'); return; }
-
-  const theme    = document.getElementById('promptTheme').value;
-  const secType  = document.getElementById('promptSecType').value;
-
-  // Build full prompt for Claude
-  const fullPrompt = `Mujhe ek Shopify Liquid ${secType} banana hai ${theme} theme ke liye.
-
-Description: ${promptText}
-
-Requirements:
-- Full Liquid code do with schema settings
-- Sabhi colors, fonts, spacing customizer mein expose karo
-- Mobile responsive hona chahiye
-- Clean CSS custom properties use karo
-- No font-family declarations
-
-Poora ready-to-use code do.`;
-
-  // Save to Supabase
-  try {
-    await sb.from('prompts').insert({
-      user_id: currentUser.id,
-      prompt_text: promptText,
-      section_type: secType,
-      theme: theme
-    });
-  } catch(e) { console.log('Prompt save error:', e); }
-
-  // Copy to clipboard
-  try {
-    await navigator.clipboard.writeText(fullPrompt);
-    showToast('Prompt copied! Claude mein paste karo (Ctrl+V)', 'warn');
-  } catch(e) {
-    showToast('Prompt taiyar hai — copy button use karo', 'warn');
-  }
-
-  // Open Claude in new tab
-  setTimeout(() => {
-    window.open('https://claude.ai/new', '_blank');
-  }, 600);
-
-  document.getElementById('promptInput').value = '';
-}
-
-async function openPromptHistory() {
-  show('promptHistoryModal');
-  const body = document.getElementById('promptHistoryBody');
-  body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:12px;letter-spacing:1px">LOADING...</div>';
-
-  const { data, error } = await sb.from('prompts')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false })
-    .limit(30);
-
-  if (error || !data?.length) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:12px;letter-spacing:1px">KOI PROMPT NAHI MILA</div>';
-    return;
-  }
-
-  body.innerHTML = '<div class="prompt-history-list">' + data.map(p => {
-    const dt = new Date(p.created_at).toLocaleString('en-IN', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    return `<div class="prompt-history-item">
-      <div class="phi-text">${p.prompt_text}</div>
-      <div class="phi-meta">
-        <span class="phi-type">${p.section_type.toUpperCase()}</span>
-        <span style="color:var(--cyan)">${p.theme}</span>
-        <span>${dt}</span>
-      </div>
-      <div class="phi-actions">
-        <button class="phi-btn" onclick="reUsePrompt('${p.id}','${encodeURIComponent(p.prompt_text)}','${p.theme}','${p.section_type}')"><i class="ti ti-refresh"></i> RE-USE</button>
-        <button class="phi-btn" onclick="deletePrompt('${p.id}',this)" style="color:var(--red)"><i class="ti ti-trash"></i> DELETE</button>
-      </div>
-    </div>`;
-  }).join('') + '</div>';
-}
-
-function reUsePrompt(id, encodedText, theme, secType) {
-  document.getElementById('promptInput').value = decodeURIComponent(encodedText);
-  document.getElementById('promptTheme').value = theme;
-  document.getElementById('promptSecType').value = secType;
-  closeModal('promptHistoryModal');
-  showToast('Prompt load hua — GENERATE dabao!');
-}
-
-async function deletePrompt(id, btn) {
-  await sb.from('prompts').delete().eq('id', id);
-  btn.closest('.prompt-history-item').remove();
-  showToast('Prompt deleted', 'error');
-}
 
 init();
 </script>
