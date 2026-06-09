@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIQUID.VAULT v2</title>
+
+<!-- ============================================================
+  LIQUID.VAULT v2 — Multi-User Edition
+  
+  SETUP (3 jagah change karo):
+  1. Line ~40 → SUPABASE_URL apna daal
+  2. Line ~41 → SUPABASE_ANON_KEY apna daal
+  3. Line ~42 → ADMIN_EMAIL apna email daal (same jo signup mein use karega)
+============================================================ -->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0e;--bg2:#0a1520;--bg3:#0d1f2e;--bg4:#102a3f;
+  --green:#00ff88;--green2:#00cc6a;--cyan:#00d4ff;--cyan2:#0099cc;
+  --red:#ff3366;--amber:#ffaa00;--purple:#aa44ff;--pink:#ff44aa;
+  --border:#1a3a4a;--border2:#00ff8830;--border3:#00d4ff30;
+  --text:#b0d0e0;--text2:#6a9ab0;--text3:#3a6a80;
+  --mono:'Share Tech Mono',monospace;--raj:'Rajdhani',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;overflow-x:hidden}
+.scanlines{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
+
+/* ===== AUTH SCREEN ===== */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:420px;position:relative}
+.auth-box::before{content:'';position:absolute;top:-1px;left:20px;right:20px;height:1px;background:var(--green);box-shadow:0 0 15px var(--green2)}
+.auth-header{padding:28px 28px 20px;text-align:center}
+.auth-logo{font-family:var(--raj);font-size:26px;font-weight:700;letter-spacing:4px;color:var(--green);margin-bottom:4px}
+.auth-sub{font-size:10px;letter-spacing:4px;color:var(--text3)}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border)}
+.auth-tab{flex:1;padding:12px;background:none;border:none;color:var(--text2);font-family:var(--mono);font-size:11px;letter-spacing:2px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s}
+.auth-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.auth-body{padding:24px 28px}
+.auth-field{margin-bottom:16px}
+.auth-label{font-size:10px;letter-spacing:3px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.auth-label::before{content:'>';color:var(--green)}
+.auth-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:11px 14px;outline:none;letter-spacing:1px;transition:border-color 0.2s}
+.auth-input:focus{border-color:var(--green2)}
+.auth-input::placeholder{color:var(--text3)}
+.auth-btn{width:100%;background:rgba(0,255,136,0.08);border:1px solid var(--green2);color:var(--green);font-family:var(--mono);font-size:12px;letter-spacing:3px;padding:13px;cursor:pointer;margin-top:8px;transition:all 0.2s}
+.auth-btn:hover{background:rgba(0,255,136,0.15)}
+.auth-btn:disabled{opacity:0.4;cursor:not-allowed}
+.auth-err{font-size:11px;color:var(--red);letter-spacing:1px;margin-top:10px;display:none;padding:10px;border:1px solid rgba(255,51,102,0.2);background:rgba(255,51,102,0.05)}
+
+/* ===== MAIN APP ===== */
+.app{display:grid;grid-template-rows:auto 1fr;grid-template-columns:260px 1fr;min-height:100vh;gap:0}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px;cursor:pointer}
+.logo-icon{width:36px;height:36px;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--green)}
+.logo-text{font-family:var(--raj);font-size:20px;font-weight:700;letter-spacing:3px;color:var(--green)}
+.logo-sub{font-size:10px;color:var(--text2);letter-spacing:4px}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);padding:6px 14px;cursor:pointer;transition:border-color 0.2s}
+.user-chip:hover{border-color:var(--cyan2)}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:rgba(0,212,255,0.15);border:1px solid var(--border3);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--cyan)}
+.user-name{font-size:11px;color:var(--text2);letter-spacing:1px}
+.admin-badge{font-size:9px;letter-spacing:2px;color:var(--amber);border:1px solid rgba(255,170,0,0.3);padding:2px 7px}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:7px 14px;cursor:pointer;transition:all 0.2s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ===== SIDEBAR ===== */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-section{padding:16px}
+.sidebar-label{font-size:10px;color:var(--text3);letter-spacing:3px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sidebar-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.new-folder-btn{width:100%;background:transparent;border:1px solid var(--green2);color:var(--green);font-family:var(--mono);font-size:12px;letter-spacing:2px;padding:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+.new-folder-btn:hover{background:rgba(0,255,136,0.08)}
+.admin-view-btn{width:100%;background:transparent;border:1px solid rgba(255,170,0,0.4);color:var(--amber);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-top:8px}
+.admin-view-btn:hover{background:rgba(255,170,0,0.08)}
+.admin-view-btn.active{background:rgba(255,170,0,0.12);border-color:var(--amber)}
+.folder-list{flex:1;overflow-y:auto;padding:0 8px 8px}
+.folder-list::-webkit-scrollbar{width:4px}
+.folder-list::-webkit-scrollbar-thumb{background:var(--border)}
+.folder-item{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;border-left:2px solid transparent;transition:all 0.15s;margin-bottom:2px}
+.folder-item:hover{background:rgba(0,212,255,0.06);border-left-color:var(--cyan2)}
+.folder-item.active{background:rgba(0,255,136,0.08);border-left-color:var(--green)}
+.folder-item i{font-size:15px;color:var(--text2);flex-shrink:0}
+.folder-item.active i{color:var(--green)}
+.folder-name{font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.folder-item.active .folder-name{color:var(--green)}
+.folder-count{font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 7px}
+.folder-del{opacity:0;background:none;border:none;color:var(--red);cursor:pointer;padding:2px;font-size:12px;transition:opacity 0.15s}
+.folder-item:hover .folder-del{opacity:1}
+
+/* ===== MAIN ===== */
+.main{background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.main-header{background:var(--bg3);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.folder-title{display:flex;align-items:center;gap:12px}
+.folder-title i{font-size:18px;color:var(--green)}
+.folder-title-text{font-family:var(--raj);font-size:18px;font-weight:600;letter-spacing:2px;color:var(--text)}
+.folder-path{font-size:11px;color:var(--text3);letter-spacing:1px}
+.header-actions{display:flex;gap:10px}
+.btn{background:transparent;border:1px solid;font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all 0.2s}
+.btn-primary{border-color:var(--green2);color:var(--green)}
+.btn-primary:hover{background:rgba(0,255,136,0.1)}
+.btn-ghost{border-color:var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--cyan2);color:var(--cyan)}
+.search-bar{padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center}
+.search-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-prefix{position:absolute;left:12px;font-size:12px;color:var(--green);z-index:1}
+.search-input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 12px 9px 36px;outline:none;transition:border-color 0.2s;letter-spacing:1px}
+.search-input:focus{border-color:var(--green2)}
+.search-input::placeholder{color:var(--text3)}
+.sort-select{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:9px 12px;outline:none;cursor:pointer}
+.sections-grid{flex:1;overflow-y:auto;padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start}
+.sections-grid::-webkit-scrollbar{width:4px}
+.sections-grid::-webkit-scrollbar-thumb{background:var(--border)}
+
+/* ===== ADMIN PANEL ===== */
+.admin-panel{flex:1;overflow-y:auto;padding:20px}
+.admin-panel::-webkit-scrollbar{width:4px}
+.admin-panel::-webkit-scrollbar-thumb{background:var(--border)}
+.admin-title{font-family:var(--raj);font-size:22px;font-weight:700;letter-spacing:3px;color:var(--amber);margin-bottom:4px}
+.admin-subtitle{font-size:11px;color:var(--text3);letter-spacing:2px;margin-bottom:20px}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.admin-stat{background:var(--bg2);border:1px solid var(--border);padding:16px;text-align:center}
+.admin-stat-val{font-family:var(--raj);font-size:28px;font-weight:700;color:var(--cyan);display:block}
+.admin-stat-label{font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:4px;display:block}
+.users-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.users-table th{font-size:10px;letter-spacing:2px;color:var(--text3);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.users-table td{font-size:12px;color:var(--text);padding:10px 14px;border-bottom:1px solid var(--border)}
+.users-table tr:hover td{background:rgba(0,212,255,0.03)}
+.user-status{font-size:9px;letter-spacing:2px;padding:3px 9px;border:1px solid}
+.status-admin{color:var(--amber);border-color:rgba(255,170,0,0.3);background:rgba(255,170,0,0.06)}
+.status-user{color:var(--cyan);border-color:var(--border3);background:rgba(0,212,255,0.05)}
+
+/* ===== CARDS ===== */
+.section-card{background:var(--bg2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.section-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan2),transparent);opacity:0;transition:opacity 0.2s}
+.section-card:hover{border-color:var(--cyan2);box-shadow:0 0 20px rgba(0,212,255,0.08)}
+.section-card:hover::before{opacity:1}
+.card-image{width:100%;height:160px;object-fit:cover;display:block;border-bottom:1px solid var(--border);background:var(--bg3)}
+.card-image-placeholder{width:100%;height:100px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--text3);font-size:11px;letter-spacing:1px}
+.card-image-placeholder i{font-size:28px;opacity:0.4}
+.card-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.card-title{font-family:var(--raj);font-size:15px;font-weight:600;letter-spacing:1px;color:var(--text);line-height:1.3}
+.card-tag{font-size:9px;letter-spacing:2px;padding:3px 8px;border:1px solid;flex-shrink:0;margin-top:2px}
+.tag-header{color:var(--cyan);border-color:var(--border3)}
+.tag-section{color:var(--purple);border-color:rgba(170,68,255,0.3)}
+.tag-snippet{color:var(--amber);border-color:rgba(255,170,0,0.3)}
+.tag-template{color:var(--green);border-color:var(--border2)}
+.card-body{padding:10px 16px 14px}
+.card-desc{font-size:11px;color:var(--text2);line-height:1.6;letter-spacing:0.5px;margin-bottom:10px}
+.card-meta{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--text3);letter-spacing:1px;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:4px}
+.card-owner-tag{font-size:9px;color:var(--pink);border:1px solid rgba(255,68,170,0.3);padding:2px 7px;letter-spacing:1px}
+.card-actions{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--bg3)}
+.card-btn{background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:6px 12px;cursor:pointer;flex:1;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.card-btn:hover{border-color:var(--green2);color:var(--green)}
+.card-btn.del:hover{border-color:var(--red);color:var(--red)}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:0.4}
+.empty-title{font-family:var(--raj);font-size:20px;letter-spacing:3px;color:var(--text2);margin-bottom:8px}
+.empty-sub{font-size:12px;letter-spacing:1px;line-height:1.8}
+
+/* ===== MODALS ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(5,10,14,0.92);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:820px;max-height:90vh;display:flex;flex-direction:column;position:relative}
+.modal::before{content:'';position:absolute;top:-1px;left:30px;right:30px;height:1px;background:var(--green);box-shadow:0 0 15px var(--green2)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:var(--raj);font-size:18px;font-weight:600;letter-spacing:2px;color:var(--green)}
+.modal-close{background:none;border:1px solid var(--border);color:var(--text2);width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--mono)}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+.modal-body{padding:20px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:10px;letter-spacing:3px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.form-label::before{content:'>';color:var(--green);font-size:10px}
+.form-input{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 14px;outline:none;transition:border-color 0.2s;letter-spacing:1px;width:100%}
+.form-input:focus{border-color:var(--green2)}
+.form-input::placeholder{color:var(--text3)}
+.form-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 14px;outline:none;cursor:pointer;width:100%;letter-spacing:1px}
+.form-select option{background:var(--bg3)}
+.code-area{background:var(--bg);border:1px solid var(--border);color:#00ff88;font-family:var(--mono);font-size:12px;padding:14px;outline:none;transition:border-color 0.2s;width:100%;resize:vertical;min-height:180px;line-height:1.7;letter-spacing:0.5px;tab-size:2}
+.code-area:focus{border-color:var(--green2)}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:var(--bg3)}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:10px 20px;cursor:pointer;transition:all 0.15s}
+.btn-cancel:hover{border-color:var(--red);color:var(--red)}
+.btn-save{background:rgba(0,255,136,0.08);border:1px solid var(--green2);color:var(--green);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:10px 24px;cursor:pointer;transition:all 0.2s}
+.btn-save:hover{background:rgba(0,255,136,0.15)}
+
+/* ===== IMAGE UPLOAD ===== */
+.img-upload-zone{border:2px dashed var(--border);background:var(--bg3);position:relative;transition:all 0.2s;cursor:pointer;overflow:hidden}
+.img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--cyan2);background:rgba(0,212,255,0.04)}
+.img-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-upload-empty{padding:22px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text3)}
+.img-upload-empty i{font-size:32px;color:var(--cyan2);opacity:0.5}
+.img-upload-empty span{font-size:11px;letter-spacing:2px}
+.img-preview-wrap{position:relative;width:100%}
+.img-preview{width:100%;max-height:200px;object-fit:cover;display:block}
+.img-remove-btn{position:absolute;top:8px;right:8px;background:rgba(5,10,14,0.85);border:1px solid var(--red);color:var(--red);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s}
+.img-badge{position:absolute;bottom:8px;left:8px;background:rgba(5,10,14,0.85);border:1px solid var(--border3);color:var(--cyan);font-size:10px;letter-spacing:1px;padding:4px 10px}
+
+/* ===== VIEW MODAL ===== */
+.view-modal .code-view{background:var(--bg);border:1px solid var(--border);padding:16px;font-family:var(--mono);font-size:12px;color:var(--green);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}
+.view-modal .code-view::-webkit-scrollbar{width:4px}
+.view-modal .code-view::-webkit-scrollbar-thumb{background:var(--border)}
+.view-image-full{width:100%;max-height:280px;object-fit:cover;border:1px solid var(--border);display:block}
+
+.stats-strip{padding:8px 20px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;gap:24px;font-size:10px;color:var(--text3);letter-spacing:1px}
+.stat{display:flex;align-items:center;gap:6px}
+.stat-val{color:var(--cyan);font-size:12px}
+
+.folder-input-wrap{padding:8px 8px 0;display:none}
+.folder-input-wrap.visible{display:block}
+.folder-input{width:100%;background:var(--bg3);border:1px solid var(--green2);color:var(--green);font-family:var(--mono);font-size:12px;padding:9px 12px;outline:none;letter-spacing:1px}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--green2);color:var(--green);font-family:var(--mono);font-size:12px;letter-spacing:2px;padding:12px 20px;z-index:9999;transform:translateY(20px);opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--red);color:var(--red)}
+.toast.warn{border-color:var(--amber);color:var(--amber)}
+
+.loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.loading-logo{font-family:var(--raj);font-size:32px;font-weight:700;letter-spacing:6px;color:var(--green)}
+.loading-bar{width:200px;height:2px;background:var(--border);overflow:hidden}
+.loading-fill{width:0%;height:100%;background:var(--green);animation:loadfill 1.5s ease forwards}
+@keyframes loadfill{to{width:100%}}
+.loading-text{font-size:11px;color:var(--text3);letter-spacing:3px}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">LIQUID.VAULT</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+  <div class="loading-text">INITIALIZING...</div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="authScreen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="auth-logo">LIQUID.VAULT</div>
+      <div class="auth-sub">SHOPIFY SECTION MANAGER v2</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')" id="loginTab">LOGIN</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')" id="signupTab">SIGN UP</button>
+    </div>
+    <div class="auth-body">
+      <div id="loginForm">
+        <div class="auth-field">
+          <div class="auth-label">EMAIL</div>
+          <input class="auth-input" id="loginEmail" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="auth-field">
+          <div class="auth-label">PASSWORD</div>
+          <input class="auth-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+        </div>
+        <button class="auth-btn" onclick="doLogin()" id="loginBtn">ENTER VAULT</button>
+        <div class="auth-err" id="loginErr"></div>
+      </div>
+      <div id="signupForm" style="display:none">
+        <div class="auth-field">
+          <div class="auth-label">DISPLAY NAME</div>
+          <input class="auth-input" id="signupName" placeholder="your name" />
+        </div>
+        <div class="auth-field">
+          <div class="auth-label">EMAIL</div>
+          <input class="auth-input" id="signupEmail" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="auth-field">
+          <div class="auth-label">PASSWORD</div>
+          <input class="auth-input" id="signupPass" type="password" placeholder="min 6 characters" onkeydown="if(event.key==='Enter')doSignup()" />
+        </div>
+        <button class="auth-btn" onclick="doSignup()" id="signupBtn">CREATE ACCOUNT</button>
+        <div class="auth-err" id="signupErr"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-code"></i></div>
+      <div>
+        <div class="logo-text">LIQUID.VAULT</div>
+        <div class="logo-sub">SHOPIFY SECTION MANAGER</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatar">--</div>
+        <span class="user-name" id="userNameDisplay">--</span>
+      </div>
+      <div class="admin-badge" id="adminBadge" style="display:none"><i class="ti ti-shield"></i> ADMIN</div>
+      <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i> LOGOUT</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">WORKSPACE</div>
+      <button class="new-folder-btn" onclick="toggleFolderInput()"><i class="ti ti-folder-plus"></i> NEW FOLDER</button>
+      <div class="folder-input-wrap" id="folderInputWrap">
+        <input class="folder-input" id="folderInputField" placeholder="folder name..." onkeydown="handleFolderKey(event)" />
+      </div>
+      <button class="admin-view-btn" id="adminViewBtn" style="display:none" onclick="toggleAdminView()">
+        <i class="ti ti-shield"></i> ADMIN VIEW
+      </button>
+    </div>
+    <div class="folder-list" id="folderList"></div>
+  </div>
+
+  <div class="main">
+    <div class="main-header">
+      <div class="folder-title">
+        <i class="ti ti-folder-open" id="headerIcon"></i>
+        <div>
+          <div class="folder-title-text" id="headerTitle">SELECT A FOLDER</div>
+          <div class="folder-path" id="headerPath">vault://</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportData()"><i class="ti ti-download"></i> EXPORT</button>
+        <button class="btn btn-primary" id="addSectionBtn" onclick="openAddModal()"><i class="ti ti-plus"></i> ADD SECTION</button>
+      </div>
+    </div>
+    <div class="stats-strip">
+      <div class="stat"><i class="ti ti-database"></i><span class="stat-val" id="statTotal">0</span> SECTIONS</div>
+      <div class="stat"><i class="ti ti-folder"></i><span class="stat-val" id="statFolders">0</span> FOLDERS</div>
+      <div class="stat"><i class="ti ti-users"></i><span class="stat-val" id="statUsers">--</span></div>
+    </div>
+    <div class="search-bar">
+      <div class="search-wrap">
+        <span class="search-prefix">_</span>
+        <input class="search-input" id="searchInput" placeholder="search sections..." oninput="renderSections()" />
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="renderSections()">
+        <option value="newest">NEWEST</option>
+        <option value="oldest">OLDEST</option>
+        <option value="name">NAME A-Z</option>
+        <option value="type">BY TYPE</option>
+      </select>
+    </div>
+    <!-- User sections grid -->
+    <div class="sections-grid" id="sectionsGrid"></div>
+    <!-- Admin panel -->
+    <div class="admin-panel" id="adminPanel" style="display:none">
+      <div class="admin-title">ADMIN CONSOLE</div>
+      <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
+      <div class="admin-stats">
+        <div class="admin-stat"><span class="admin-stat-val" id="adStatUsers">0</span><span class="admin-stat-label">USERS</span></div>
+        <div class="admin-stat"><span class="admin-stat-val" id="adStatFolders">0</span><span class="admin-stat-label">FOLDERS</span></div>
+        <div class="admin-stat"><span class="admin-stat-val" id="adStatSections">0</span><span class="admin-stat-label">SECTIONS</span></div>
+        <div class="admin-stat"><span class="admin-stat-val" id="adStatToday">0</span><span class="admin-stat-label">TODAY</span></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:3px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">REGISTERED USERS</div>
+      <table class="users-table" id="usersTable">
+        <thead><tr>
+          <th>USER</th><th>EMAIL</th><th>SECTIONS</th><th>FOLDERS</th><th>JOINED</th><th>ROLE</th>
+        </tr></thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:3px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">ALL SECTIONS (LATEST)</div>
+      <div id="adminSectionsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div id="addModal" style="display:none" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">// ADD NEW SECTION</div>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">SECTION NAME</label>
+          <input class="form-input" id="secName" placeholder="e.g. hero-banner" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">TYPE</label>
+          <select class="form-select" id="secType">
+            <option value="section">SECTION</option>
+            <option value="header">HEADER</option>
+            <option value="snippet">SNIPPET</option>
+            <option value="template">TEMPLATE</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DESCRIPTION</label>
+        <input class="form-input" id="secDesc" placeholder="brief description..." />
+      </div>
+      <div class="form-group full">
+        <label class="form-label">PREVIEW IMAGE</label>
+        <div class="img-upload-zone" id="imgUploadZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+          <input type="file" id="imgFileInput" accept="image/*" onchange="handleImageChange(event)" />
+          <div class="img-upload-empty" id="imgUploadEmpty">
+            <i class="ti ti-photo-up"></i>
+            <span>CLICK OR DRAG IMAGE HERE</span>
+          </div>
+          <div class="img-preview-wrap" id="imgPreviewWrap" style="display:none">
+            <img class="img-preview" id="imgPreviewEl" src="" alt="preview" />
+            <div class="img-badge"><i class="ti ti-photo"></i> PREVIEW ATTACHED</div>
+            <button class="img-remove-btn" onclick="removeImage(event)"><i class="ti ti-x"></i> REMOVE</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">LIQUID CODE</label>
+        <textarea class="code-area" id="secCode" placeholder="{% comment %} Liquid code here {% endcomment %}"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('addModal')">CANCEL</button>
+      <button class="btn-save" onclick="saveSection()"><i class="ti ti-device-floppy"></i> SAVE SECTION</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div id="viewModal" style="display:none" class="modal-overlay view-modal">
+  <div class="modal" style="max-width:920px">
+    <div class="modal-header">
+      <div class="modal-title" id="viewTitle">// VIEW SECTION</div>
+      <button class="modal-close" onclick="closeModal('viewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group full" id="viewImageGroup" style="display:none">
+        <label class="form-label">PREVIEW</label>
+        <img class="view-image-full" id="viewImageEl" src="" alt="preview" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">NAME</label>
+          <input class="form-input" id="viewName" readonly style="color:var(--cyan);cursor:default" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">TYPE</label>
+          <input class="form-input" id="viewType" readonly style="cursor:default" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DESCRIPTION</label>
+        <input class="form-input" id="viewDesc" readonly style="cursor:default" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">SAVED BY</label>
+        <input class="form-input" id="viewOwner" readonly style="color:var(--pink);cursor:default" />
+      </div>
+      <div class="form-group full">
+        <label class="form-label" style="justify-content:space-between;margin-bottom:6px">
+          <span style="display:flex;align-items:center;gap:6px"><span style="color:var(--green)">></span> LIQUID CODE</span>
+          <button class="card-btn" onclick="copyCode()" style="width:auto;padding:4px 14px;border:1px solid var(--border3);color:var(--cyan);background:transparent;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-copy"></i> COPY</button>
+        </label>
+        <pre class="code-view" id="viewCode"></pre>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('viewModal')">CLOSE</button>
+      <button class="btn-save" id="editFromViewBtn" onclick="editFromView()"><i class="ti ti-edit"></i> EDIT</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"><i class="ti ti-check" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+//  CONFIG — YAHAN APNI VALUES DAAL
+// ============================================================
+const SUPABASE_URL  = 'https://qukzwkpzijcaiuqmoxih.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_WFq5GW5PugLkektc2PhJPg_JjTTIPeH';
+const ADMIN_EMAIL   = 'aifuture7777@gmail.com';  // e.g. 'you@gmail.com'
+// ============================================================
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser   = null;
+let currentProfile= null;
+let isAdmin       = false;
+let adminViewOn   = false;
+let folders       = [];
+let sections      = [];
+let activeFolderId= null;
+let editingId     = null;
+let viewingId     = null;
+let viewingSection= null;
+let currentImageData = null;
+
+// ============================================================
+//  INIT
+// ============================================================
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    await bootApp(session.user);
+  } else {
+    hide('loadingScreen'); show('authScreen');
+  }
+}
+
+async function bootApp(user) {
+  currentUser = user;
+  isAdmin = (user.email === ADMIN_EMAIL);
+  const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = prof;
+
+  // Set admin flag in DB if needed
+  if (isAdmin && prof && !prof.is_admin) {
+    await sb.from('profiles').update({ is_admin: true }).eq('id', user.id);
+  }
+
+  // Update UI
+  const name = prof?.display_name || user.email.split('@')[0];
+  setEl('userAvatar', name.slice(0,2).toUpperCase());
+  setEl('userNameDisplay', name.toUpperCase());
+  if (isAdmin) { show('adminBadge'); show('adminViewBtn'); }
+
+  await loadFolders();
+  await loadSections();
+  renderFolders();
+  renderSections();
+  updateStats();
+
+  hide('loadingScreen'); hide('authScreen');
+  document.getElementById('mainApp').style.display = 'grid';
+}
+
+// ============================================================
+//  AUTH
+// ============================================================
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display  = tab==='login'  ? 'block' : 'none';
+  document.getElementById('signupForm').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('loginTab').className  = 'auth-tab' + (tab==='login'  ? ' active' : '');
+  document.getElementById('signupTab').className = 'auth-tab' + (tab==='signup' ? ' active' : '');
+}
+
+async function doLogin() {
+  const email = v('loginEmail'), pass = v('loginPass');
+  if (!email||!pass) { showAuthErr('loginErr','Fill in all fields'); return; }
+  setBtn('loginBtn', true, 'LOGGING IN...');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  setBtn('loginBtn', false, 'ENTER VAULT');
+  if (error) { showAuthErr('loginErr', error.message); return; }
+  hide('loginErr');
+  await bootApp(data.user);
+}
+
+async function doSignup() {
+  const name = v('signupName'), email = v('signupEmail'), pass = v('signupPass');
+  if (!name||!email||!pass) { showAuthErr('signupErr','Fill in all fields'); return; }
+  if (pass.length < 6) { showAuthErr('signupErr','Password min 6 chars'); return; }
+  setBtn('signupBtn', true, 'CREATING...');
+  const { data, error } = await sb.auth.signUp({
+    email, password: pass,
+    options: { data: { display_name: name } }
+  });
+  setBtn('signupBtn', false, 'CREATE ACCOUNT');
+  if (error) { showAuthErr('signupErr', error.message); return; }
+  hide('signupErr');
+  showToast('Account created! Check email to verify.');
+  // Auto-login if no email confirm needed (Supabase default)
+  if (data.session) await bootApp(data.user);
+  else showAuthErr('signupErr', 'Check your email to confirm signup, then login.');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
+  folders = []; sections = [];
+  document.getElementById('mainApp').style.display = 'none';
+  show('authScreen');
+}
+
+// ============================================================
+//  DATA LOADING
+// ============================================================
+async function loadFolders() {
+  const { data } = await sb.from('folders').select('*').eq('user_id', currentUser.id).order('created_at');
+  folders = data || [];
+}
+
+async function loadSections() {
+  const { data } = await sb.from('sections').select('*').eq('user_id', currentUser.id).order('updated_at', { ascending: false });
+  sections = data || [];
+}
+
+// ============================================================
+//  FOLDERS
+// ============================================================
+function renderFolders() {
+  const list = document.getElementById('folderList');
+  if (!folders.length) {
+    list.innerHTML = '<div style="padding:20px 12px;text-align:center;font-size:11px;color:var(--text3);letter-spacing:1px;line-height:2">NO FOLDERS<br>CREATE ONE ABOVE</div>';
+    return;
+  }
+  list.innerHTML = folders.map(f => {
+    const count = sections.filter(s => s.folder_id === f.id).length;
+    const active = activeFolderId === f.id;
+    return `<div class="folder-item${active?' active':''}" onclick="selectFolder('${f.id}')">
+      <i class="ti ti-${active?'folder-open':'folder'}"></i>
+      <span class="folder-name">${f.name}</span>
+      <span class="folder-count">${count}</span>
+      <button class="folder-del" onclick="deleteFolder('${f.id}',event)"><i class="ti ti-trash"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function selectFolder(id) {
+  if (adminViewOn) return;
+  activeFolderId = activeFolderId === id ? null : id;
+  const f = folders.find(x => x.id === id);
+  if (activeFolderId && f) {
+    setEl('headerTitle', f.name.toUpperCase());
+    setEl('headerPath', `vault://${currentProfile?.display_name||'user'}/${f.name}/`);
+  } else {
+    setEl('headerTitle', 'ALL SECTIONS');
+    setEl('headerPath', 'vault://all/');
+  }
+  renderFolders(); renderSections();
+}
+
+function toggleFolderInput() {
+  if (adminViewOn) return;
+  const w = document.getElementById('folderInputWrap');
+  const f = document.getElementById('folderInputField');
+  w.classList.toggle('visible');
+  if (w.classList.contains('visible')) f.focus();
+  else f.value = '';
+}
+
+function handleFolderKey(e) {
+  if (e.key === 'Enter') {
+    const val = v('folderInputField');
+    if (val) createFolder(val);
+  }
+  if (e.key === 'Escape') toggleFolderInput();
+}
+
+async function createFolder(name) {
+  const { data, error } = await sb.from('folders').insert({ user_id: currentUser.id, name }).select().single();
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  folders.push(data);
+  document.getElementById('folderInputField').value = '';
+  document.getElementById('folderInputWrap').classList.remove('visible');
+  renderFolders(); renderSections(); updateStats();
+  showToast('Folder created: ' + name);
+}
+
+async function deleteFolder(id, e) {
+  e.stopPropagation();
+  const f = folders.find(x => x.id === id);
+  const count = sections.filter(s => s.folder_id === id).length;
+  if (count > 0 && !confirm(`Delete folder "${f.name}" and its ${count} section(s)?`)) return;
+  await sb.from('sections').delete().eq('folder_id', id);
+  await sb.from('folders').delete().eq('id', id);
+  folders = folders.filter(x => x.id !== id);
+  sections = sections.filter(s => s.folder_id !== id);
+  if (activeFolderId === id) activeFolderId = null;
+  renderFolders(); renderSections(); updateStats();
+  showToast('Folder deleted', 'error');
+}
+
+// ============================================================
+//  SECTIONS RENDER
+// ============================================================
+function renderSections() {
+  if (adminViewOn) return;
+  const grid = document.getElementById('sectionsGrid');
+  const search = v('searchInput').toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+  let secs = sections.filter(s => !activeFolderId || s.folder_id === activeFolderId);
+  if (search) secs = secs.filter(s =>
+    s.name.toLowerCase().includes(search) ||
+    (s.description||'').toLowerCase().includes(search) ||
+    (s.code||'').toLowerCase().includes(search)
+  );
+  if (sort==='newest') secs.sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
+  else if (sort==='oldest') secs.sort((a,b)=>new Date(a.updated_at)-new Date(b.updated_at));
+  else if (sort==='name') secs.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (sort==='type') secs.sort((a,b)=>a.type.localeCompare(b.type));
+
+  if (!secs.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><i class="ti ti-code-off"></i></div>
+      <div class="empty-title">${!activeFolderId?'NO FOLDER SELECTED':'NO SECTIONS'}</div>
+      <div class="empty-sub">${!activeFolderId?'Select a folder from the sidebar<br>or create a new one':'Add your first section using ADD SECTION'}</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = secs.map(s => sectionCard(s, false)).join('');
+}
+
+function sectionCard(s, isAdminCard, ownerName='') {
+  const tagClass = {section:'tag-section',header:'tag-header',snippet:'tag-snippet',template:'tag-template'}[s.type]||'tag-section';
+  const dt = new Date(s.updated_at||s.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
+  const lines = (s.code||'').split('\n').length;
+  const imgHtml = s.image_data
+    ? `<img class="card-image" src="${s.image_data}" alt="${s.name}" loading="lazy" />`
+    : `<div class="card-image-placeholder"><i class="ti ti-photo-off"></i><span>NO PREVIEW</span></div>`;
+  const canEdit = !isAdminCard || isAdmin;
+  return `<div class="section-card">
+    ${imgHtml}
+    <div class="card-header">
+      <div class="card-title">${s.name}</div>
+      <div class="card-tag ${tagClass}">${s.type.toUpperCase()}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-desc">${s.description||'<span style="color:var(--text3)">No description</span>'}</div>
+      <div class="card-meta">
+        <span><i class="ti ti-calendar"></i>${dt}</span>
+        <span><i class="ti ti-file-code"></i>${lines} LINES</span>
+        ${ownerName?`<span class="card-owner-tag"><i class="ti ti-user"></i> ${ownerName}</span>`:''}
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="card-btn" onclick="viewSectionById('${s.id}',${isAdminCard})"><i class="ti ti-eye"></i> VIEW</button>
+      <button class="card-btn" onclick="copyCodeById('${s.id}',${isAdminCard})"><i class="ti ti-copy"></i> COPY</button>
+      ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
+      ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><i class="ti ti-trash"></i></button>`:''}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+//  IMAGE HANDLING
+// ============================================================
+function handleImageChange(e){const f=e.target.files[0];if(f)readImageFile(f);}
+function handleDragOver(e){e.preventDefault();document.getElementById('imgUploadZone').classList.add('drag');}
+function handleDragLeave(){document.getElementById('imgUploadZone').classList.remove('drag');}
+function handleDrop(e){e.preventDefault();document.getElementById('imgUploadZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))readImageFile(f);}
+function readImageFile(file){
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      const MAX=800;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      currentImageData=canvas.toDataURL('image/jpeg',0.82);
+      showImagePreview(currentImageData);
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+}
+function showImagePreview(src){
+  document.getElementById('imgUploadEmpty').style.display='none';
+  document.getElementById('imgPreviewWrap').style.display='block';
+  document.getElementById('imgPreviewEl').src=src;
+}
+function removeImage(e){
+  e.stopPropagation();e.preventDefault();
+  currentImageData=null;
+  document.getElementById('imgPreviewEl').src='';
+  document.getElementById('imgPreviewWrap').style.display='none';
+  document.getElementById('imgUploadEmpty').style.display='flex';
+  document.getElementById('imgFileInput').value='';
+}
+function resetImageUpload(){
+  currentImageData=null;
+  document.getElementById('imgPreviewEl').src='';
+  document.getElementById('imgPreviewWrap').style.display='none';
+  document.getElementById('imgUploadEmpty').style.display='flex';
+  document.getElementById('imgFileInput').value='';
+}
+
+// ============================================================
+//  SECTION CRUD
+// ============================================================
+function openAddModal(){
+  if(adminViewOn){showToast('Switch to your workspace first','warn');return;}
+  if(!activeFolderId&&folders.length===0){showToast('Create a folder first!','error');return;}
+  editingId=null;
+  setEl('modalTitle','// ADD NEW SECTION');
+  document.getElementById('secName').value='';
+  document.getElementById('secType').value='section';
+  document.getElementById('secDesc').value='';
+  document.getElementById('secCode').value='';
+  resetImageUpload();
+  show('addModal');
+}
+
+function editSection(id){
+  const s=sections.find(x=>x.id===id);
+  if(!s)return;
+  editingId=id;
+  setEl('modalTitle','// EDIT SECTION');
+  document.getElementById('secName').value=s.name;
+  document.getElementById('secType').value=s.type;
+  document.getElementById('secDesc').value=s.description||'';
+  document.getElementById('secCode').value=s.code||'';
+  resetImageUpload();
+  if(s.image_data){currentImageData=s.image_data;showImagePreview(s.image_data);}
+  show('addModal');
+}
+
+async function saveSection(){
+  const name=v('secName').trim();
+  const type=document.getElementById('secType').value;
+  const description=v('secDesc').trim();
+  const code=document.getElementById('secCode').value;
+  if(!name){showToast('Section name required!','error');return;}
+  const folder_id=activeFolderId||(folders[0]?folders[0].id:null);
+  if(!folder_id){showToast('Select or create a folder first!','error');return;}
+
+  const payload={user_id:currentUser.id,folder_id,name,type,description,code,image_data:currentImageData||null,updated_at:new Date().toISOString()};
+
+  if(editingId){
+    const{error}=await sb.from('sections').update(payload).eq('id',editingId);
+    if(error){showToast('Save error: '+error.message,'error');return;}
+    const idx=sections.findIndex(x=>x.id===editingId);
+    if(idx>-1)sections[idx]={...sections[idx],...payload};
+    showToast('Section updated!');
+  } else {
+    const{data,error}=await sb.from('sections').insert(payload).select().single();
+    if(error){showToast('Save error: '+error.message,'error');return;}
+    sections.unshift(data);
+    showToast('Section saved!');
+    // If admin email has account, notify admin (sections auto-visible via RLS)
+  }
+  renderFolders();renderSections();updateStats();
+  closeModal('addModal');
+}
+
+async function deleteSection(id){
+  const s=sections.find(x=>x.id===id);
+  if(!confirm(`Delete "${s.name}"?`))return;
+  await sb.from('sections').delete().eq('id',id);
+  sections=sections.filter(x=>x.id!==id);
+  renderFolders();renderSections();updateStats();
+  showToast('Section deleted','error');
+}
+
+// ============================================================
+//  VIEW
+// ============================================================
+let adminSectionsCache = [];
+
+async function viewSectionById(id, isAdminCard=false) {
+  let s;
+  if (isAdminCard) {
+    s = adminSectionsCache.find(x => x.id === id);
+  } else {
+    s = sections.find(x => x.id === id);
+  }
+  if (!s) return;
+  viewingId = id;
+  viewingSection = s;
+
+  setEl('viewTitle', `// ${s.name.toUpperCase()}`);
+  document.getElementById('viewName').value = s.name;
+  document.getElementById('viewType').value = s.type.toUpperCase();
+  document.getElementById('viewDesc').value = s.description||'--';
+  document.getElementById('viewCode').textContent = s.code||'(no code)';
+  document.getElementById('viewOwner').value = isAdminCard ? (s._ownerName||s.user_id) : (currentProfile?.display_name||currentUser.email);
+
+  const imgG = document.getElementById('viewImageGroup');
+  const imgE = document.getElementById('viewImageEl');
+  if(s.image_data){imgG.style.display='block';imgE.src=s.image_data;}
+  else{imgG.style.display='none';imgE.src='';}
+
+  // Only allow edit button for own sections
+  document.getElementById('editFromViewBtn').style.display = isAdminCard ? 'none' : 'flex';
+  show('viewModal');
+}
+
+function editFromView(){closeModal('viewModal');if(viewingId&&!adminViewOn)editSection(viewingId);}
+function copyCode(){navigator.clipboard.writeText(document.getElementById('viewCode').textContent).then(()=>showToast('Code copied!'));}
+
+async function copyCodeById(id, isAdminCard=false){
+  const list = isAdminCard ? adminSectionsCache : sections;
+  const s=list.find(x=>x.id===id);
+  if(s)navigator.clipboard.writeText(s.code||'').then(()=>showToast('Code copied!'));
+}
+
+// ============================================================
+//  ADMIN VIEW
+// ============================================================
+async function toggleAdminView(){
+  if(!isAdmin)return;
+  adminViewOn=!adminViewOn;
+  document.getElementById('adminViewBtn').classList.toggle('active', adminViewOn);
+  document.getElementById('sectionsGrid').style.display = adminViewOn ? 'none' : 'grid';
+  document.getElementById('adminPanel').style.display = adminViewOn ? 'block' : 'none';
+  document.getElementById('addSectionBtn').style.display = adminViewOn ? 'none' : 'flex';
+
+  if(adminViewOn){
+    setEl('headerTitle', 'ADMIN CONSOLE');
+    setEl('headerPath', 'vault://admin/');
+    await loadAdminData();
+  } else {
+    setEl('headerTitle', 'ALL SECTIONS');
+    setEl('headerPath', 'vault://all/');
+  }
+}
+
+async function loadAdminData(){
+  // Load all profiles
+  const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
+  // Load all sections (admin RLS allows this)
+  const{data:allSections}=await sb.from('sections').select('*').order('updated_at',{ascending:false});
+  // Load all folders
+  const{data:allFolders}=await sb.from('folders').select('*');
+
+  adminSectionsCache = allSections||[];
+
+  // Attach owner names to sections
+  const profileMap={};
+  (profiles||[]).forEach(p=>profileMap[p.id]=p.display_name||p.email);
+  adminSectionsCache.forEach(s=>s._ownerName=profileMap[s.user_id]||s.user_id);
+
+  // Stats
+  const today=new Date().toDateString();
+  const todayCount=(allSections||[]).filter(s=>new Date(s.created_at).toDateString()===today).length;
+  setEl('adStatUsers', (profiles||[]).length);
+  setEl('adStatFolders', (allFolders||[]).length);
+  setEl('adStatSections', (allSections||[]).length);
+  setEl('adStatToday', todayCount);
+
+  // Users table
+  const tbody=document.getElementById('usersTableBody');
+  tbody.innerHTML=(profiles||[]).map(p=>{
+    const uSections=(allSections||[]).filter(s=>s.user_id===p.id).length;
+    const uFolders=(allFolders||[]).filter(f=>f.user_id===p.id).length;
+    const joined=new Date(p.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
+    const isAdm=p.email===ADMIN_EMAIL;
+    return`<tr>
+      <td>${p.display_name||'--'}</td>
+      <td style="color:var(--text2)">${p.email||'--'}</td>
+      <td style="color:var(--cyan)">${uSections}</td>
+      <td>${uFolders}</td>
+      <td style="color:var(--text3)">${joined}</td>
+      <td><span class="user-status ${isAdm?'status-admin':'status-user'}">${isAdm?'ADMIN':'USER'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Sections grid
+  const grid=document.getElementById('adminSectionsGrid');
+  const latest=(allSections||[]).slice(0,30);
+  if(!latest.length){
+    grid.innerHTML='<div style="color:var(--text3);font-size:12px;letter-spacing:1px;padding:20px 0">No sections yet</div>';
+    return;
+  }
+  grid.innerHTML=latest.map(s=>sectionCard(s,true,s._ownerName)).join('');
+}
+
+// ============================================================
+//  STATS + UTILS
+// ============================================================
+function updateStats(){
+  setEl('statTotal', sections.length);
+  setEl('statFolders', folders.length);
+  setEl('statUsers', isAdmin ? 'ADMIN' : currentProfile?.display_name||'USER');
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify({folders,sections},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='liquid-vault-backup.json';a.click();
+  showToast('Data exported!');
+}
+
+function closeModal(id){document.getElementById(id).style.display='none';}
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+function v(id){return document.getElementById(id).value;}
+function setEl(id,txt){document.getElementById(id).textContent=txt;}
+function setBtn(id,disabled,text){const b=document.getElementById(id);b.disabled=disabled;b.textContent=text;}
+function showAuthErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';}
+
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.className='toast'+(type==='error'?' error':type==='warn'?' warn':'');
+  document.getElementById('toastIcon').className='ti ti-'+(type==='error'?'alert-triangle':type==='warn'?'alert-circle':'check');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');}
+});
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
+});
+
+init();
+</script>
+</body>
+</html>
