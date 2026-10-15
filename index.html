@@ -6,7 +6,7 @@
 <title>LIQUID.VAULT v3</title>
 
 <!-- ============================================================
-  LIQUID.VAULT v3 — Prompt Generator Edition
+  LIQUID.VAULT v3 — Prompt Generator Edition + Public Library
   
   SETUP (3 jagah change karo):
   1. Line ~40 → SUPABASE_URL apna daal
@@ -78,6 +78,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
 .admin-view-btn{width:100%;background:transparent;border:1px solid rgba(255,170,0,0.4);color:var(--amber);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-top:8px}
 .admin-view-btn:hover{background:rgba(255,170,0,0.08)}
 .admin-view-btn.active{background:rgba(255,170,0,0.12);border-color:var(--amber)}
+.public-lib-btn{width:100%;background:transparent;border:1px solid rgba(0,212,255,0.4);color:var(--cyan);font-family:var(--mono);font-size:11px;letter-spacing:2px;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-top:8px}
+.public-lib-btn:hover{background:rgba(0,212,255,0.08)}
+.public-lib-btn.active{background:rgba(0,212,255,0.14);border-color:var(--cyan)}
 .folder-list{flex:1;overflow-y:auto;padding:0 8px 8px}
 .folder-list::-webkit-scrollbar{width:4px}
 .folder-list::-webkit-scrollbar-thumb{background:var(--border)}
@@ -347,6 +350,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:1
       <div class="folder-input-wrap" id="folderInputWrap">
         <input class="folder-input" id="folderInputField" placeholder="folder name..." onkeydown="handleFolderKey(event)" />
       </div>
+      <button class="public-lib-btn" id="publicLibBtn" onclick="togglePublicLibrary()">
+        <i class="ti ti-world"></i> PUBLIC LIBRARY
+      </button>
       <button class="admin-view-btn" id="adminViewBtn" style="display:none" onclick="toggleAdminView()">
         <i class="ti ti-shield"></i> ADMIN VIEW
       </button>
@@ -586,6 +592,8 @@ let editingId     = null;
 let viewingId     = null;
 let viewingSection= null;
 let currentImageData = null;
+let publicViewOn  = false;
+let publicSections = [];
 
 // ============================================================
 //  INIT
@@ -669,6 +677,8 @@ async function doLogout() {
   await sb.auth.signOut();
   currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
   folders = []; sections = [];
+  publicSections = []; publicViewOn = false;
+  document.getElementById('publicLibBtn').classList.remove('active');
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -709,6 +719,7 @@ function renderFolders() {
 
 function selectFolder(id) {
   if (adminViewOn) return;
+  if (publicViewOn) exitPublicView();
   activeFolderId = activeFolderId === id ? null : id;
   const f = folders.find(x => x.id === id);
   if (activeFolderId && f) {
@@ -770,7 +781,9 @@ function renderSections() {
   const grid = document.getElementById('sectionsGrid');
   const search = v('searchInput').toLowerCase();
   const sort = document.getElementById('sortSelect').value;
-  let secs = sections.filter(s => !activeFolderId || s.folder_id === activeFolderId);
+  let secs = publicViewOn
+    ? [...publicSections]
+    : sections.filter(s => !activeFolderId || s.folder_id === activeFolderId);
   if (search) secs = secs.filter(s =>
     s.name.toLowerCase().includes(search) ||
     (s.description||'').toLowerCase().includes(search) ||
@@ -782,36 +795,43 @@ function renderSections() {
   else if (sort==='type') secs.sort((a,b)=>a.type.localeCompare(b.type));
 
   if (!secs.length) {
+    const title = publicViewOn ? 'NO PUBLIC SECTIONS' : (!activeFolderId?'NO FOLDER SELECTED':'NO SECTIONS');
+    const sub = publicViewOn ? 'Nothing found in the public library' : (!activeFolderId?'Select a folder from the sidebar<br>or create a new one':'Add your first section using ADD SECTION');
     grid.innerHTML = `<div class="empty-state">
       <div class="empty-icon"><i class="ti ti-code-off"></i></div>
-      <div class="empty-title">${!activeFolderId?'NO FOLDER SELECTED':'NO SECTIONS'}</div>
-      <div class="empty-sub">${!activeFolderId?'Select a folder from the sidebar<br>or create a new one':'Add your first section using ADD SECTION'}</div>
+      <div class="empty-title">${title}</div>
+      <div class="empty-sub">${sub}</div>
     </div>`;
     return;
   }
-  grid.innerHTML = secs.map(s => sectionCard(s, false)).join('');
+  grid.innerHTML = secs.map(s => publicViewOn ? sectionCard(s, true, s._ownerName) : sectionCard(s, false)).join('');
+}
+
+function esc(str){
+  return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function sectionCard(s, isAdminCard, ownerName='') {
   const tagClass = {section:'tag-section',header:'tag-header',snippet:'tag-snippet',template:'tag-template'}[s.type]||'tag-section';
   const dt = new Date(s.updated_at||s.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
   const lines = (s.code||'').split('\n').length;
-  const imgHtml = s.image_data
-    ? `<img class="card-image" src="${s.image_data}" alt="${s.name}" loading="lazy" />`
+  const safeImg = (s.image_data||'').startsWith('data:image/') ? s.image_data : '';
+  const imgHtml = safeImg
+    ? `<img class="card-image" src="${safeImg}" alt="${esc(s.name)}" loading="lazy" />`
     : `<div class="card-image-placeholder"><i class="ti ti-photo-off"></i><span>NO PREVIEW</span></div>`;
   const canEdit = !isAdminCard || isAdmin;
   return `<div class="section-card">
     ${imgHtml}
     <div class="card-header">
-      <div class="card-title">${s.name}</div>
-      <div class="card-tag ${tagClass}">${s.type.toUpperCase()}</div>
+      <div class="card-title">${esc(s.name)}</div>
+      <div class="card-tag ${tagClass}">${esc(s.type).toUpperCase()}</div>
     </div>
     <div class="card-body">
-      <div class="card-desc">${s.description||'<span style="color:var(--text3)">No description</span>'}</div>
+      <div class="card-desc">${s.description?esc(s.description):'<span style="color:var(--text3)">No description</span>'}</div>
       <div class="card-meta">
         <span><i class="ti ti-calendar"></i>${dt}</span>
         <span><i class="ti ti-file-code"></i>${lines} LINES</span>
-        ${ownerName?`<span class="card-owner-tag"><i class="ti ti-user"></i> ${ownerName}</span>`:''}
+        ${ownerName?`<span class="card-owner-tag"><i class="ti ti-user"></i> ${esc(ownerName)}</span>`:''}
       </div>
     </div>
     <div class="card-actions">
@@ -941,7 +961,7 @@ let adminSectionsCache = [];
 async function viewSectionById(id, isAdminCard=false) {
   let s;
   if (isAdminCard) {
-    s = adminSectionsCache.find(x => x.id === id);
+    s = adminSectionsCache.find(x => x.id === id) || publicSections.find(x => x.id === id);
   } else {
     s = sections.find(x => x.id === id);
   }
@@ -970,7 +990,7 @@ function editFromView(){closeModal('viewModal');if(viewingId&&!adminViewOn)editS
 function copyCode(){navigator.clipboard.writeText(document.getElementById('viewCode').textContent).then(()=>showToast('Code copied!'));}
 
 async function copyCodeById(id, isAdminCard=false){
-  const list = isAdminCard ? adminSectionsCache : sections;
+  const list = isAdminCard ? [...adminSectionsCache, ...publicSections] : sections;
   const s=list.find(x=>x.id===id);
   if(s)navigator.clipboard.writeText(s.code||'').then(()=>showToast('Code copied!'));
 }
@@ -981,6 +1001,7 @@ async function copyCodeById(id, isAdminCard=false){
 async function toggleAdminView(){
   if(!isAdmin)return;
   adminViewOn=!adminViewOn;
+  if (adminViewOn && publicViewOn) exitPublicView();
   document.getElementById('adminViewBtn').classList.toggle('active', adminViewOn);
   document.getElementById('sectionsGrid').style.display = adminViewOn ? 'none' : 'grid';
   document.getElementById('adminPanel').style.display = adminViewOn ? 'block' : 'none';
@@ -1063,6 +1084,45 @@ async function loadAdminData(){
       </tr>`;
     }).join('');
   }
+}
+
+// ============================================================
+//  PUBLIC LIBRARY (read + copy only)
+// ============================================================
+async function loadPublicSections() {
+  const [{ data: secs, error }, { data: profs }] = await Promise.all([
+    sb.from('sections').select('*').order('updated_at', { ascending: false }).limit(300),
+    sb.from('profiles').select('id, display_name')
+  ]);
+  if (error) { showToast('Library error: ' + error.message, 'error'); publicSections = []; return; }
+  const nameMap = {};
+  (profs || []).forEach(p => nameMap[p.id] = p.display_name);
+  publicSections = (secs || []).map(s => ({ ...s, _ownerName: nameMap[s.user_id] || 'user' }));
+}
+
+function exitPublicView() {
+  publicViewOn = false;
+  document.getElementById('publicLibBtn').classList.remove('active');
+  document.getElementById('addSectionBtn').style.display = 'flex';
+}
+
+async function togglePublicLibrary() {
+  if (adminViewOn) await toggleAdminView();
+  if (publicViewOn) {
+    exitPublicView();
+    const f = folders.find(x => x.id === activeFolderId);
+    setEl('headerTitle', f ? f.name.toUpperCase() : 'ALL SECTIONS');
+    setEl('headerPath', f ? `vault://${currentProfile?.display_name||'user'}/${f.name}/` : 'vault://all/');
+    renderSections();
+    return;
+  }
+  publicViewOn = true;
+  document.getElementById('publicLibBtn').classList.add('active');
+  document.getElementById('addSectionBtn').style.display = 'none';
+  setEl('headerTitle', 'PUBLIC LIBRARY');
+  setEl('headerPath', 'vault://public/');
+  await loadPublicSections();
+  renderSections();
 }
 
 // ============================================================
