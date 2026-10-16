@@ -411,6 +411,9 @@ html[data-theme="light"] .ic-sun{display:none}
 .img-remove-btn,.img-badge{background:var(--bg2)}
 .empty-title{color:var(--text)}
 .app-footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 24px;border-top:1px solid var(--border);background:var(--bg2);font-size:12.5px;color:var(--text3)}
+.admin-ctrl{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;box-shadow:var(--shadow)}
+.admin-ctrl-label{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--text3);margin-bottom:8px}
+.admin-ctrl-row{display:flex;gap:10px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -570,9 +573,17 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="admin-panel" id="adminPanel" style="display:none">
       <div class="admin-title">ADMIN CONSOLE</div>
       <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-        <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL MY SECTIONS PRIVATE</button>
-        <button class="btn btn-primary" onclick="setAllMineVisibility(true)">MAKE ALL MY SECTIONS PUBLIC</button>
+      <div class="admin-ctrl">
+        <div class="admin-ctrl-label">MY SECTIONS</div>
+        <div class="admin-ctrl-row">
+          <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL MY SECTIONS PRIVATE</button>
+          <button class="btn btn-primary" onclick="setAllMineVisibility(true)">MAKE ALL MY SECTIONS PUBLIC</button>
+        </div>
+        <div class="admin-ctrl-label" style="margin-top:16px">PUBLIC LIBRARY (ALL USERS)</div>
+        <div class="admin-ctrl-row">
+          <button class="btn btn-ghost" onclick="setAllLibraryVisibility(false)">MAKE ALL LIBRARY SECTIONS PRIVATE</button>
+          <button class="btn btn-primary" onclick="setAllLibraryVisibility(true)">MAKE ALL USERS' SECTIONS PUBLIC</button>
+        </div>
       </div>
       <div class="admin-stats">
         <div class="admin-stat"><span class="admin-stat-val" id="adStatUsers">0</span><span class="admin-stat-label">USERS</span></div>
@@ -1201,6 +1212,23 @@ async function setAllMineVisibility(makePublic){
   if(makePublic) await loadPublicSections();
   else publicSections=publicSections.filter(x=>x.user_id!==currentUser.id);
   showToast((data||[]).length+' section(s) set to '+(makePublic?'public':'private'));
+}
+
+async function setAllLibraryVisibility(makePublic){
+  if(!isAdmin)return;
+  const msg=makePublic
+    ?"Make EVERY user's sections public? All sections of all users will appear in the Public Library."
+    :'Make ALL sections currently in the Public Library private? Nobody except their owners will see them.';
+  if(!confirm(msg))return;
+  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('is_public',!makePublic).select('id');
+  if(error){showToast('Error: '+error.message,'error');return;}
+  const count=(data||[]).length;
+  if(!count){showToast('No sections were changed','warn');return;}
+  await loadSections();
+  await loadPublicSections();
+  await loadAdminData();
+  renderFolders();updateStats();
+  showToast(count+' section(s) set to '+(makePublic?'public':'private'));
 }
 
 async function toggleVisibility(id){
