@@ -8,10 +8,10 @@
 <!-- ============================================================
   LIQUID.VAULT v3 — Prompt Generator Edition + Public Library
   
-  SETUP (3 jagah change karo):
-  1. Line ~40 → SUPABASE_URL apna daal
-  2. Line ~41 → SUPABASE_ANON_KEY apna daal
-  3. Line ~42 → ADMIN_EMAIL apna email daal (same jo signup mein use karega)
+  SETUP (change these 3 values):
+  1. Line ~40 → set your SUPABASE_URL
+  2. Line ~41 → set your SUPABASE_ANON_KEY
+  3. Line ~42 → set ADMIN_EMAIL (use the same email you sign up with)
 ============================================================ -->
 
 <script>
@@ -359,6 +359,15 @@ body{font-size:14px;line-height:1.5}
 .theme-btn svg{display:block;flex-shrink:0}
 html[data-theme="dark"] .ic-moon{display:none}
 html[data-theme="light"] .ic-sun{display:none}
+
+/* ===== VISIBILITY TAG + DELETE ICON ===== */
+.vis-tag{font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:4px;border:1px solid}
+.vis-public{color:var(--cyan);border-color:color-mix(in srgb,var(--cyan) 45%,transparent);background:color-mix(in srgb,var(--cyan) 10%,transparent)}
+.vis-private{color:var(--text2);border-color:var(--border);background:var(--hover)}
+.card-btn.del{color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent);flex:0 0 44px}
+.card-btn.del:hover{background:color-mix(in srgb,var(--red) 12%,transparent)}
+.card-btn svg,.phi-btn svg,.folder-del svg{display:block;flex-shrink:0}
+.folder-del{display:flex;align-items:center}
 </style>
 </head>
 <body>
@@ -491,7 +500,7 @@ html[data-theme="light"] .ic-sun{display:none}
       <div class="prompt-bar-label"><i class="ti ti-robot"></i> AI PROMPT</div>
       <div class="prompt-input-wrap">
         
-        <input class="prompt-input" id="promptInput" placeholder="describe karo kya section chahiye... e.g. hero section with video background and CTA button" onkeydown="if(event.key==='Enter')sendPromptToClaude()" />
+        <input class="prompt-input" id="promptInput" placeholder="describe the section you need... e.g. hero section with video background and CTA button" onkeydown="if(event.key==='Enter')sendPromptToClaude()" />
       </div>
       <div class="prompt-selects">
         <select class="prompt-select" id="promptTheme">
@@ -517,6 +526,9 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="admin-panel" id="adminPanel" style="display:none">
       <div class="admin-title">ADMIN CONSOLE</div>
       <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
+      <div style="margin-bottom:20px">
+        <button class="btn btn-ghost" onclick="makeAllMyPrivate()"><i class="ti ti-lock"></i> MAKE ALL MY SECTIONS PRIVATE</button>
+      </div>
       <div class="admin-stats">
         <div class="admin-stat"><span class="admin-stat-val" id="adStatUsers">0</span><span class="admin-stat-label">USERS</span></div>
         <div class="admin-stat"><span class="admin-stat-val" id="adStatFolders">0</span><span class="admin-stat-label">FOLDERS</span></div>
@@ -570,6 +582,13 @@ html[data-theme="light"] .ic-sun{display:none}
       <div class="form-group">
         <label class="form-label">DESCRIPTION</label>
         <input class="form-input" id="secDesc" placeholder="brief description..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">VISIBILITY</label>
+        <select class="form-select" id="secVisibility">
+          <option value="private">PRIVATE — only me</option>
+          <option value="public">PUBLIC — everyone can view &amp; copy</option>
+        </select>
       </div>
       <div class="form-group full">
         <label class="form-label">PREVIEW IMAGE</label>
@@ -665,7 +684,7 @@ html[data-theme="light"] .ic-sun{display:none}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
-//  CONFIG — YAHAN APNI VALUES DAAL
+//  CONFIG — ENTER YOUR VALUES HERE
 // ============================================================
 const SUPABASE_URL  = 'https://qukzwkpzijcaiuqmoxih.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_WFq5GW5PugLkektc2PhJPg_JjTTIPeH';
@@ -806,7 +825,7 @@ function renderFolders() {
       <i class="ti ti-${active?'folder-open':'folder'}"></i>
       <span class="folder-name">${f.name}</span>
       <span class="folder-count">${count}</span>
-      <button class="folder-del" onclick="deleteFolder('${f.id}',event)"><i class="ti ti-trash"></i></button>
+      <button class="folder-del" onclick="deleteFolder('${f.id}',event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg></button>
     </div>`;
   }).join('');
 }
@@ -925,6 +944,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
       <div class="card-meta">
         <span><i class="ti ti-calendar"></i>${dt}</span>
         <span><i class="ti ti-file-code"></i>${lines} LINES</span>
+        ${!isAdminCard?`<span class="vis-tag ${s.is_public?'vis-public':'vis-private'}">${s.is_public?'PUBLIC':'PRIVATE'}</span>`:''}
         ${ownerName?`<span class="card-owner-tag"><i class="ti ti-user"></i> ${esc(ownerName)}</span>`:''}
       </div>
     </div>
@@ -932,7 +952,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
       <button class="card-btn" onclick="viewSectionById('${s.id}',${isAdminCard})"><i class="ti ti-eye"></i> VIEW</button>
       <button class="card-btn" onclick="copyCodeById('${s.id}',${isAdminCard})"><i class="ti ti-copy"></i> COPY</button>
       ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
-      ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><i class="ti ti-trash"></i></button>`:''}
+      ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg></button>`:''}
     </div>
   </div>`;
 }
@@ -991,6 +1011,7 @@ function openAddModal(){
   document.getElementById('secName').value='';
   document.getElementById('secType').value='section';
   document.getElementById('secDesc').value='';
+  document.getElementById('secVisibility').value='private';
   document.getElementById('secCode').value='';
   resetImageUpload();
   show('addModal');
@@ -1004,6 +1025,7 @@ function editSection(id){
   document.getElementById('secName').value=s.name;
   document.getElementById('secType').value=s.type;
   document.getElementById('secDesc').value=s.description||'';
+  document.getElementById('secVisibility').value=s.is_public?'public':'private';
   document.getElementById('secCode').value=s.code||'';
   resetImageUpload();
   if(s.image_data){currentImageData=s.image_data;showImagePreview(s.image_data);}
@@ -1019,7 +1041,7 @@ async function saveSection(){
   const folder_id=activeFolderId||(folders[0]?folders[0].id:null);
   if(!folder_id){showToast('Select or create a folder first!','error');return;}
 
-  const payload={user_id:currentUser.id,folder_id,name,type,description,code,image_data:currentImageData||null,updated_at:new Date().toISOString()};
+  const payload={user_id:currentUser.id,folder_id,name,type,description,code,image_data:currentImageData||null,is_public:document.getElementById('secVisibility').value==='public',updated_at:new Date().toISOString()};
 
   if(editingId){
     const{error}=await sb.from('sections').update(payload).eq('id',editingId);
@@ -1111,6 +1133,17 @@ async function toggleAdminView(){
   }
 }
 
+async function makeAllMyPrivate(){
+  if(!isAdmin)return;
+  if(!confirm('Make ALL of your own sections private? Other users will no longer see them in the Public Library.'))return;
+  const{data,error}=await sb.from('sections').update({is_public:false}).eq('user_id',currentUser.id).select('id');
+  if(error){showToast('Error: '+error.message,'error');return;}
+  sections.forEach(x=>{x.is_public=false;});
+  adminSectionsCache.forEach(x=>{if(x.user_id===currentUser.id)x.is_public=false;});
+  publicSections=publicSections.filter(x=>x.user_id!==currentUser.id);
+  showToast((data||[]).length+' section(s) set to private');
+}
+
 async function loadAdminData(){
   // Load all profiles
   const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
@@ -1185,7 +1218,7 @@ async function loadAdminData(){
 // ============================================================
 async function loadPublicSections() {
   const [{ data: secs, error }, { data: profs }] = await Promise.all([
-    sb.from('sections').select('*').order('updated_at', { ascending: false }).limit(300),
+    sb.from('sections').select('*').eq('is_public', true).order('updated_at', { ascending: false }).limit(300),
     sb.from('profiles').select('id, display_name')
   ]);
   if (error) { showToast('Library error: ' + error.message, 'error'); publicSections = []; return; }
@@ -1266,24 +1299,24 @@ document.querySelectorAll('.modal-overlay').forEach(m=>{
 // ============================================================
 async function sendPromptToClaude() {
   const promptText = v('promptInput').trim();
-  if (!promptText) { showToast('Prompt likho pehle!', 'error'); return; }
+  if (!promptText) { showToast('Write a prompt first!', 'error'); return; }
 
   const theme    = document.getElementById('promptTheme').value;
   const secType  = document.getElementById('promptSecType').value;
 
   // Build full prompt for Claude
-  const fullPrompt = `Mujhe ek Shopify Liquid ${secType} banana hai ${theme} theme ke liye.
+  const fullPrompt = `I need a Shopify Liquid ${secType} for the ${theme} theme.
 
 Description: ${promptText}
 
 Requirements:
-- Full Liquid code do with schema settings
-- Sabhi colors, fonts, spacing customizer mein expose karo
-- Mobile responsive hona chahiye
-- Clean CSS custom properties use karo
+- Provide the full Liquid code with schema settings
+- Expose all colors, fonts and spacing in the theme customizer
+- Must be mobile responsive
+- Use clean CSS custom properties
 - No font-family declarations
 
-Poora ready-to-use code do.`;
+Provide complete, ready-to-use code.`;
 
   // Save to Supabase
   try {
@@ -1298,9 +1331,9 @@ Poora ready-to-use code do.`;
   // Copy to clipboard
   try {
     await navigator.clipboard.writeText(fullPrompt);
-    showToast('Prompt copied! Claude mein paste karo (Ctrl+V)', 'warn');
+    showToast('Prompt copied! Paste it into Claude (Ctrl+V)', 'warn');
   } catch(e) {
-    showToast('Prompt taiyar hai — copy button use karo', 'warn');
+    showToast('Prompt is ready — copy it manually', 'warn');
   }
 
   // Open Claude in new tab
@@ -1323,7 +1356,7 @@ async function openPromptHistory() {
     .limit(30);
 
   if (error || !data?.length) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px;letter-spacing:.04em">KOI PROMPT NAHI MILA</div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:14px;letter-spacing:.04em">NO PROMPTS FOUND</div>';
     return;
   }
 
@@ -1338,7 +1371,7 @@ async function openPromptHistory() {
       </div>
       <div class="phi-actions">
         <button class="phi-btn" onclick="reUsePrompt('${p.id}','${encodeURIComponent(p.prompt_text)}','${p.theme}','${p.section_type}')"><i class="ti ti-refresh"></i> RE-USE</button>
-        <button class="phi-btn" onclick="deletePrompt('${p.id}',this)" style="color:var(--red)"><i class="ti ti-trash"></i> DELETE</button>
+        <button class="phi-btn" onclick="deletePrompt('${p.id}',this)" style="color:var(--red)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg> DELETE</button>
       </div>
     </div>`;
   }).join('') + '</div>';
@@ -1349,7 +1382,7 @@ function reUsePrompt(id, encodedText, theme, secType) {
   document.getElementById('promptTheme').value = theme;
   document.getElementById('promptSecType').value = secType;
   closeModal('promptHistoryModal');
-  showToast('Prompt load hua — GENERATE dabao!');
+  showToast('Prompt loaded — press GENERATE!');
 }
 
 async function deletePrompt(id, btn) {
