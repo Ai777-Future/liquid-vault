@@ -20,28 +20,28 @@ try{document.documentElement.setAttribute('data-theme',localStorage.getItem('lv-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-/* ===== THEME VARIABLES (VS Code style) ===== */
+/* ===== THEME VARIABLES ===== */
 :root,html[data-theme="dark"]{
-  --bg:#1e1e1e;--bg2:#252526;--bg3:#2b2b2c;--bg4:#333333;
-  --card:#252526;--input:#3c3c3c;--hover:rgba(255,255,255,.06);--sel:rgba(55,148,255,.18);
-  --btn:#0e639c;--btn-h:#1177bb;
-  --green:#3794ff;--green2:#3794ff;--cyan:#4ec9b0;--cyan2:#3794ff;
-  --red:#f14c4c;--amber:#dcdcaa;--purple:#c586c0;--pink:#ce9178;
-  --border:#3c3c3c;--border2:rgba(55,148,255,.3);--border3:rgba(78,201,176,.3);
-  --text:#cccccc;--text2:#a0a0a0;--text3:#7d7d7d;
-  --shadow:0 2px 10px rgba(0,0,0,.35);
+  --bg:#0f1214;--bg2:#15191c;--bg3:#1a1f23;--bg4:#222830;
+  --card:#171b1f;--input:#1d2328;--hover:rgba(255,255,255,.05);--sel:rgba(62,207,154,.14);
+  --btn:#0a7f5e;--btn-h:#0d9570;
+  --green:#3ecf9a;--green2:#3ecf9a;--cyan:#5cb8ff;--cyan2:#3ecf9a;
+  --red:#ff6b57;--amber:#f2b84b;--purple:#a99bff;--pink:#e58fb0;
+  --border:#262d33;--border2:rgba(62,207,154,.3);--border3:rgba(92,184,255,.3);
+  --text:#e6e8ea;--text2:#a1a9b0;--text3:#7b848b;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25);
   --ui:'IBM Plex Sans','Segoe UI',system-ui,-apple-system,sans-serif;
   --code:'JetBrains Mono',Consolas,'Courier New',monospace;
 }
 html[data-theme="light"]{
-  --bg:#fafafa;--bg2:#f3f3f3;--bg3:#ffffff;--bg4:#e8e8e8;
-  --card:#ffffff;--input:#ffffff;--hover:rgba(0,0,0,.05);--sel:rgba(0,102,184,.12);
-  --btn:#007acc;--btn-h:#0062a3;
-  --green:#0066b8;--green2:#0066b8;--cyan:#007a6a;--cyan2:#0066b8;
-  --red:#d32f2f;--amber:#8a6d00;--purple:#8e24aa;--pink:#a31515;
-  --border:#d9d9d9;--border2:rgba(0,102,184,.3);--border3:rgba(0,122,106,.3);
-  --text:#333333;--text2:#616161;--text3:#767676;
-  --shadow:0 2px 10px rgba(0,0,0,.08);
+  --bg:#f4f5f7;--bg2:#ffffff;--bg3:#fafbfb;--bg4:#eceef0;
+  --card:#ffffff;--input:#ffffff;--hover:rgba(0,0,0,.045);--sel:rgba(0,128,96,.10);
+  --btn:#008060;--btn-h:#006e52;
+  --green:#007a5a;--green2:#007a5a;--cyan:#2c6ecb;--cyan2:#007a5a;
+  --red:#d72c0d;--amber:#8a6116;--purple:#6b4fd8;--pink:#b5386b;
+  --border:#e1e4e7;--border2:rgba(0,122,90,.3);--border3:rgba(44,110,203,.3);
+  --text:#1f2328;--text2:#59636e;--text3:#6e7781;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.06);
 }
 body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
 .scanlines{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
@@ -368,6 +368,49 @@ html[data-theme="light"] .ic-sun{display:none}
 .card-btn.del:hover{background:color-mix(in srgb,var(--red) 12%,transparent)}
 .card-btn svg,.phi-btn svg,.folder-del svg{display:block;flex-shrink:0}
 .folder-del{display:flex;align-items:center}
+
+/* ===== PALETTE + LAYOUT POLISH ===== */
+::selection{background:var(--sel)}
+.app{grid-template-rows:auto 1fr auto}
+.auth-screen{background:var(--bg)}
+.auth-logo{color:var(--text)}
+.auth-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.auth-credit{padding:14px 28px;border-top:1px solid var(--border);text-align:center;font-size:12.5px;color:var(--text3)}
+.auth-credit strong,.app-footer strong{color:var(--text);font-weight:600}
+.topbar{background:var(--bg2);padding:12px 24px}
+.logo-icon{background:var(--btn);border:none;color:#fff;border-radius:8px}
+.logo-sub{color:var(--text3)}
+.user-chip{background:var(--bg);border-radius:20px}
+.user-avatar{background:var(--btn);border:none;color:#fff;font-weight:600}
+.admin-badge{border-radius:4px;color:var(--amber);border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 12%,transparent)}
+.sidebar{background:var(--bg2)}
+.main-header{background:var(--bg2);padding:16px 24px}
+.folder-title i{color:var(--green)}
+.stats-strip{background:var(--bg);border-bottom:none;padding:12px 24px 8px}
+.stat-val{color:var(--green);font-weight:600}
+.search-bar{background:var(--bg);border-bottom:none;padding:4px 24px 12px}
+.prompt-bar{background:var(--card);border:1px solid var(--border);border-radius:10px;margin:0 24px 8px;padding:12px 14px;box-shadow:var(--shadow)}
+.prompt-bar-label{color:var(--purple);font-weight:600}
+.sections-grid{padding:12px 24px 28px}
+.admin-panel{padding:24px}
+.admin-title{color:var(--text)}
+.admin-stat{background:var(--card);box-shadow:var(--shadow);border-radius:8px}
+.admin-stat-val{color:var(--green)}
+.users-table th,.prompts-table th{background:var(--bg3)}
+.card-image,.card-image-placeholder{background:var(--bg4)}
+.card-tag{border-radius:999px}
+.tag-header{color:var(--cyan);border-color:color-mix(in srgb,var(--cyan) 40%,transparent);background:color-mix(in srgb,var(--cyan) 10%,transparent)}
+.tag-section{color:var(--purple);border-color:color-mix(in srgb,var(--purple) 40%,transparent);background:color-mix(in srgb,var(--purple) 10%,transparent)}
+.tag-snippet{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent)}
+.tag-template{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 10%,transparent)}
+.card-owner-tag{color:var(--pink);border-color:color-mix(in srgb,var(--pink) 40%,transparent);border-radius:4px}
+.vis-tag{border-radius:999px}
+.status-admin,.status-user{border-radius:4px}
+.card-btn.vis{flex:0 0 44px}
+.card-btn.vis:hover{border-color:var(--green);color:var(--green)}
+.img-remove-btn,.img-badge{background:var(--bg2)}
+.empty-title{color:var(--text)}
+.app-footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 24px;border-top:1px solid var(--border);background:var(--bg2);font-size:12.5px;color:var(--text3)}
 </style>
 </head>
 <body>
@@ -421,6 +464,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="auth-err" id="signupErr"></div>
       </div>
     </div>
+    <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong></div>
   </div>
 </div>
 
@@ -526,8 +570,9 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="admin-panel" id="adminPanel" style="display:none">
       <div class="admin-title">ADMIN CONSOLE</div>
       <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
-      <div style="margin-bottom:20px">
-        <button class="btn btn-ghost" onclick="makeAllMyPrivate()"><i class="ti ti-lock"></i> MAKE ALL MY SECTIONS PRIVATE</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL MY SECTIONS PRIVATE</button>
+        <button class="btn btn-primary" onclick="setAllMineVisibility(true)">MAKE ALL MY SECTIONS PUBLIC</button>
       </div>
       <div class="admin-stats">
         <div class="admin-stat"><span class="admin-stat-val" id="adStatUsers">0</span><span class="admin-stat-label">USERS</span></div>
@@ -554,6 +599,11 @@ html[data-theme="light"] .ic-sun{display:none}
       </table>
     </div>
   </div>
+
+  <footer class="app-footer">
+    <span>Developed and managed by <strong>Sandeep Singh</strong></span>
+    <span>LIQUID.VAULT v3</span>
+  </footer>
 </div>
 
 <!-- ADD/EDIT MODAL -->
@@ -920,6 +970,9 @@ function renderSections() {
   grid.innerHTML = secs.map(s => publicViewOn ? sectionCard(s, true, s._ownerName) : sectionCard(s, false)).join('');
 }
 
+const ICON_LOCK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const ICON_GLOBE='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg>';
+
 function esc(str){
   return String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -933,6 +986,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
     ? `<img class="card-image" src="${safeImg}" alt="${esc(s.name)}" loading="lazy" />`
     : `<div class="card-image-placeholder"><i class="ti ti-photo-off"></i><span>NO PREVIEW</span></div>`;
   const canEdit = !isAdminCard || isAdmin;
+  const isOwn = !!currentUser && s.user_id === currentUser.id;
   return `<div class="section-card">
     ${imgHtml}
     <div class="card-header">
@@ -944,13 +998,14 @@ function sectionCard(s, isAdminCard, ownerName='') {
       <div class="card-meta">
         <span><i class="ti ti-calendar"></i>${dt}</span>
         <span><i class="ti ti-file-code"></i>${lines} LINES</span>
-        ${!isAdminCard?`<span class="vis-tag ${s.is_public?'vis-public':'vis-private'}">${s.is_public?'PUBLIC':'PRIVATE'}</span>`:''}
+        ${isOwn?`<span class="vis-tag ${s.is_public?'vis-public':'vis-private'}">${s.is_public?'PUBLIC':'PRIVATE'}</span>`:''}
         ${ownerName?`<span class="card-owner-tag"><i class="ti ti-user"></i> ${esc(ownerName)}</span>`:''}
       </div>
     </div>
     <div class="card-actions">
       <button class="card-btn" onclick="viewSectionById('${s.id}',${isAdminCard})"><i class="ti ti-eye"></i> VIEW</button>
       <button class="card-btn" onclick="copyCodeById('${s.id}',${isAdminCard})"><i class="ti ti-copy"></i> COPY</button>
+      ${isOwn?`<button class="card-btn vis" onclick="toggleVisibility('${s.id}')" title="${s.is_public?'Public — click to make private':'Private — click to make public'}">${s.is_public?ICON_GLOBE:ICON_LOCK}</button>`:''}
       ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
       ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg></button>`:''}
     </div>
@@ -1133,15 +1188,31 @@ async function toggleAdminView(){
   }
 }
 
-async function makeAllMyPrivate(){
+async function setAllMineVisibility(makePublic){
   if(!isAdmin)return;
-  if(!confirm('Make ALL of your own sections private? Other users will no longer see them in the Public Library.'))return;
-  const{data,error}=await sb.from('sections').update({is_public:false}).eq('user_id',currentUser.id).select('id');
+  const msg=makePublic
+    ?'Make ALL of your own sections public? Everyone will see them in the Public Library.'
+    :'Make ALL of your own sections private? Other users will no longer see them in the Public Library.';
+  if(!confirm(msg))return;
+  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('user_id',currentUser.id).select('id');
   if(error){showToast('Error: '+error.message,'error');return;}
-  sections.forEach(x=>{x.is_public=false;});
-  adminSectionsCache.forEach(x=>{if(x.user_id===currentUser.id)x.is_public=false;});
-  publicSections=publicSections.filter(x=>x.user_id!==currentUser.id);
-  showToast((data||[]).length+' section(s) set to private');
+  sections.forEach(x=>{x.is_public=makePublic;});
+  adminSectionsCache.forEach(x=>{if(x.user_id===currentUser.id)x.is_public=makePublic;});
+  if(makePublic) await loadPublicSections();
+  else publicSections=publicSections.filter(x=>x.user_id!==currentUser.id);
+  showToast((data||[]).length+' section(s) set to '+(makePublic?'public':'private'));
+}
+
+async function toggleVisibility(id){
+  const s=sections.find(x=>x.id===id)||publicSections.find(x=>x.id===id)||adminSectionsCache.find(x=>x.id===id);
+  if(!s)return;
+  const next=!s.is_public;
+  const{error}=await sb.from('sections').update({is_public:next}).eq('id',id);
+  if(error){showToast('Error: '+error.message,'error');return;}
+  [sections,publicSections,adminSectionsCache].forEach(list=>{const x=list.find(y=>y.id===id);if(x)x.is_public=next;});
+  if(!next)publicSections=publicSections.filter(x=>x.id!==id);
+  showToast('Section is now '+(next?'public':'private'));
+  if(adminViewOn)await loadAdminData();else renderSections();
 }
 
 async function loadAdminData(){
