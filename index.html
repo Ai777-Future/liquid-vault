@@ -49,7 +49,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100
 .scanlines{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
 
 /* ===== AUTH SCREEN ===== */
-.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .auth-box{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:420px;position:relative}
 .auth-box::before{content:'';position:absolute;top:-1px;left:20px;right:20px;height:1px;background:var(--green);box-shadow:0 0 15px var(--green2)}
 .auth-header{padding:28px 28px 20px;text-align:center}
@@ -437,6 +437,13 @@ html[data-theme="light"] .ic-sun{display:none}
 .fb-bell .fb-badge{top:-6px;right:-6px}
 .fb-bot{background:var(--sel);border:1px solid var(--border2);border-radius:10px 10px 10px 2px;padding:10px 12px;font-size:13px;line-height:1.5;color:var(--text)}
 .fb-bot-tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--green);margin-bottom:4px}
+.pub-folder{background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s}
+.pub-folder:hover{border-color:var(--green);transform:translateY(-1px)}
+.pub-folder-icon{width:46px;height:46px;border-radius:10px;background:var(--sel);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px}
+.pub-folder-info{min-width:0;flex:1}
+.pub-folder-name{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pub-folder-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.pub-folder-you{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--green);margin-left:6px}
 </style>
 </head>
 <body>
@@ -808,6 +815,7 @@ let viewingSection= null;
 let currentImageData = null;
 let publicViewOn  = false;
 let publicSections = [];
+let publicOwnerId = null;
 
 // ============================================================
 //  INIT
@@ -892,7 +900,7 @@ async function doLogout() {
   await sb.auth.signOut();
   currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
   folders = []; sections = [];
-  publicSections = []; publicViewOn = false;
+  publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
   fbStop();
   document.getElementById('mainApp').style.display = 'none';
@@ -997,8 +1005,9 @@ function renderSections() {
   const grid = document.getElementById('sectionsGrid');
   const search = v('searchInput').toLowerCase();
   const sort = document.getElementById('sortSelect').value;
+  if (publicViewOn && !publicOwnerId && !search) { renderPublicFolders(grid); return; }
   let secs = publicViewOn
-    ? [...publicSections]
+    ? publicSections.filter(s => !publicOwnerId || s.user_id === publicOwnerId)
     : sections.filter(s => !activeFolderId || s.folder_id === activeFolderId);
   if (search) secs = secs.filter(s =>
     s.name.toLowerCase().includes(search) ||
@@ -1010,17 +1019,20 @@ function renderSections() {
   else if (sort==='name') secs.sort((a,b)=>a.name.localeCompare(b.name));
   else if (sort==='type') secs.sort((a,b)=>a.type.localeCompare(b.type));
 
+  const backBar = (publicViewOn && publicOwnerId)
+    ? '<div style="grid-column:1/-1"><button class="btn btn-ghost" onclick="closePublicOwner()"><i class="ti ti-arrow-left"></i> ALL USERS</button></div>'
+    : '';
   if (!secs.length) {
     const title = publicViewOn ? 'NO PUBLIC SECTIONS' : (!activeFolderId?'NO FOLDER SELECTED':'NO SECTIONS');
     const sub = publicViewOn ? 'Nothing found in the public library' : (!activeFolderId?'Select a folder from the sidebar<br>or create a new one':'Add your first section using ADD SECTION');
-    grid.innerHTML = `<div class="empty-state">
+    grid.innerHTML = backBar + `<div class="empty-state">
       <div class="empty-icon"><i class="ti ti-code-off"></i></div>
       <div class="empty-title">${title}</div>
       <div class="empty-sub">${sub}</div>
     </div>`;
     return;
   }
-  grid.innerHTML = secs.map(s => publicViewOn ? sectionCard(s, true, s._ownerName) : sectionCard(s, false)).join('');
+  grid.innerHTML = backBar + secs.map(s => publicViewOn ? sectionCard(s, true, s._ownerName) : sectionCard(s, false)).join('');
 }
 
 const ICON_LOCK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -1370,8 +1382,56 @@ async function loadPublicSections() {
   publicSections = (secs || []).map(s => ({ ...s, _ownerName: nameMap[s.user_id] || 'user' }));
 }
 
+function renderPublicFolders(grid) {
+  const map = {};
+  publicSections.forEach(s => {
+    if (!map[s.user_id]) map[s.user_id] = { id: s.user_id, name: s._ownerName || 'user', count: 0 };
+    map[s.user_id].count++;
+  });
+  const owners = Object.values(map).sort((a, b) => {
+    const am = !!currentUser && a.id === currentUser.id, bm = !!currentUser && b.id === currentUser.id;
+    if (am !== bm) return am ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  if (!owners.length) {
+    grid.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><i class="ti ti-code-off"></i></div>
+      <div class="empty-title">NO PUBLIC SECTIONS</div>
+      <div class="empty-sub">Nothing found in the public library</div>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = owners.map(o => {
+    const mine = !!currentUser && o.id === currentUser.id;
+    return `<div class="pub-folder" onclick="openPublicOwner('${o.id}')">
+      <div class="pub-folder-icon"><i class="ti ti-folder"></i></div>
+      <div class="pub-folder-info">
+        <div class="pub-folder-name">${esc(o.name)}${mine ? '<span class="pub-folder-you">YOU</span>' : ''}</div>
+        <div class="pub-folder-meta">${o.count} public section${o.count === 1 ? '' : 's'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openPublicOwner(id) {
+  publicOwnerId = id;
+  const first = publicSections.find(s => s.user_id === id);
+  const name = (first && first._ownerName) || 'user';
+  setEl('headerTitle', name.toUpperCase());
+  setEl('headerPath', `vault://public/${name}/`);
+  renderSections();
+}
+
+function closePublicOwner() {
+  publicOwnerId = null;
+  setEl('headerTitle', 'PUBLIC LIBRARY');
+  setEl('headerPath', 'vault://public/');
+  renderSections();
+}
+
 function exitPublicView() {
   publicViewOn = false;
+  publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
   document.getElementById('addSectionBtn').style.display = 'flex';
 }
@@ -1387,6 +1447,7 @@ async function togglePublicLibrary() {
     return;
   }
   publicViewOn = true;
+  publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.add('active');
   document.getElementById('addSectionBtn').style.display = 'none';
   setEl('headerTitle', 'PUBLIC LIBRARY');
