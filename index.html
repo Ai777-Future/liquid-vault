@@ -6,12 +6,14 @@
 <title>LIQUID.VAULT v3</title>
 
 <!-- ============================================================
-  LIQUID.VAULT v3 — Prompt Generator Edition + Public Library
+  LIQUID.VAULT v3 — Prompt Generator Edition + Public Library + Feedback Chat
   
   SETUP (change these 3 values):
   1. Line ~40 → set your SUPABASE_URL
   2. Line ~41 → set your SUPABASE_ANON_KEY
   3. Line ~42 → set ADMIN_EMAIL (use the same email you sign up with)
+
+  NOTE: Run the feedback table SQL in Supabase before using the chat widget.
 ============================================================ -->
 
 <script>
@@ -414,6 +416,25 @@ html[data-theme="light"] .ic-sun{display:none}
 .admin-ctrl{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;box-shadow:var(--shadow)}
 .admin-ctrl-label{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--text3);margin-bottom:8px}
 .admin-ctrl-row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ===== FEEDBACK WIDGET ===== */
+.fb-fab{position:fixed;right:22px;bottom:22px;width:56px;height:56px;border-radius:50%;background:var(--btn);color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:900;transition:transform .15s}
+.fb-fab:hover{transform:scale(1.08);background:var(--btn-h)}
+.fb-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.fb-panel{position:fixed;right:22px;bottom:90px;width:380px;max-width:calc(100vw - 32px);max-height:70vh;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);z-index:901;display:none;flex-direction:column;overflow:hidden}
+.fb-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+.fb-tabs{display:flex;border-bottom:1px solid var(--border)}
+.fb-tab{flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:var(--ui);font-size:13px;cursor:pointer}
+.fb-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.fb-body{padding:14px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.fb-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px}
+.fb-item.new{border-color:var(--green)}
+.fb-meta{display:flex;gap:8px;align-items:center;font-size:11.5px;color:var(--text3);margin-bottom:6px;flex-wrap:wrap}
+.fb-reply{margin-top:8px;padding:8px 10px;border-left:3px solid var(--green);background:var(--sel);border-radius:4px;color:var(--text)}
+.fb-msg{white-space:pre-wrap;word-break:break-word;color:var(--text)}
+.fb-bell{position:relative;background:none;border:1px solid var(--border);color:var(--text2);width:36px;height:36px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fb-bell:hover{border-color:var(--green);color:var(--green)}
+.fb-bell .fb-badge{top:-6px;right:-6px}
 </style>
 </head>
 <body>
@@ -484,6 +505,7 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="topbar-right">
       <div style="font-size:12px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:.04em">v3</div>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
       <div class="user-chip">
         <div class="user-avatar" id="userAvatar">--</div>
         <span class="user-name" id="userNameDisplay">--</span>
@@ -585,6 +607,8 @@ html[data-theme="light"] .ic-sun{display:none}
           <button class="btn btn-primary" onclick="setAllLibraryVisibility(true)">MAKE ALL USERS' SECTIONS PUBLIC</button>
         </div>
       </div>
+      <div style="font-size:12px;color:var(--green);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">USER FEEDBACK / PROBLEMS</div>
+      <div id="adminFeedbackList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
       <div class="admin-stats">
         <div class="admin-stat"><span class="admin-stat-val" id="adStatUsers">0</span><span class="admin-stat-label">USERS</span></div>
         <div class="admin-stat"><span class="admin-stat-val" id="adStatFolders">0</span><span class="admin-stat-label">FOLDERS</span></div>
@@ -739,6 +763,20 @@ html[data-theme="light"] .ic-sun{display:none}
   </div>
 </div>
 
+<!-- FEEDBACK CHAT WIDGET -->
+<button class="fb-fab" id="fbFab" onclick="fbToggle()" title="Feedback / Help" aria-label="Feedback">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <span class="fb-badge" id="fbFabBadge"></span>
+</button>
+<div class="fb-panel" id="fbPanel">
+  <div class="fb-head"><span>Feedback &amp; Support</span><button class="modal-close" onclick="fbToggle()">✕</button></div>
+  <div class="fb-tabs">
+    <button class="fb-tab active" id="fbTabNew" onclick="fbTab('new')">NEW MESSAGE</button>
+    <button class="fb-tab" id="fbTabMine" onclick="fbTab('mine')">MY MESSAGES</button>
+  </div>
+  <div class="fb-body" id="fbBody"></div>
+</div>
+
 <div id="toast" class="toast"><i class="ti ti-check" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css"/>
@@ -806,6 +844,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
+  fbStart();
 }
 
 // ============================================================
@@ -853,6 +892,7 @@ async function doLogout() {
   folders = []; sections = [];
   publicSections = []; publicViewOn = false;
   document.getElementById('publicLibBtn').classList.remove('active');
+  fbStop();
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -1310,6 +1350,8 @@ async function loadAdminData(){
       </tr>`;
     }).join('');
   }
+
+  loadAdminFeedback();
 }
 
 // ============================================================
@@ -1497,6 +1539,138 @@ function toggleTheme(){
   const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',next);
   try{localStorage.setItem('lv-theme',next);}catch(e){}
+}
+
+// ============================================================
+//  FEEDBACK / SUPPORT CHAT
+// ============================================================
+let myFeedback=[], adminOpenCount=0, fbTimer=null, fbCurTab='new';
+const FB_CATS={feedback:'FEEDBACK',feature:'FEATURE REQUEST',problem:'PROBLEM'};
+
+function fbStart(){
+  document.getElementById('fbFab').style.display='flex';
+  fbRefresh();
+  clearInterval(fbTimer);
+  fbTimer=setInterval(fbRefresh,30000);
+}
+function fbStop(){
+  clearInterval(fbTimer);
+  document.getElementById('fbFab').style.display='none';
+  document.getElementById('fbPanel').style.display='none';
+  myFeedback=[];adminOpenCount=0;
+  fbBadges();
+}
+async function fbRefresh(){
+  if(!currentUser)return;
+  const prevUnread=fbUnread();
+  const{data}=await sb.from('feedback').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  myFeedback=data||[];
+  if(isAdmin){
+    const{count}=await sb.from('feedback').select('id',{count:'exact',head:true}).eq('status','open');
+    adminOpenCount=count||0;
+  }
+  if(fbUnread()>prevUnread)showToast('Admin ne aapke message ka reply diya!','warn');
+  fbBadges();
+  if(document.getElementById('fbPanel').style.display==='flex'&&fbCurTab==='mine')fbRenderMine(false);
+}
+function fbUnread(){return myFeedback.filter(f=>f.admin_reply&&!f.reply_seen).length;}
+function fbBadges(){
+  const u=fbUnread(), total=u+(isAdmin?adminOpenCount:0);
+  const fab=document.getElementById('fbFabBadge'), bell=document.getElementById('fbBellBadge');
+  fab.textContent=total;fab.style.display=total?'flex':'none';
+  bell.textContent=u;bell.style.display=u?'flex':'none';
+}
+function fbToggle(){
+  const p=document.getElementById('fbPanel');
+  if(p.style.display==='flex'){p.style.display='none';return;}
+  fbOpen(fbUnread()?'mine':'new');
+}
+function fbOpen(tab){document.getElementById('fbPanel').style.display='flex';fbTab(tab);}
+function fbTab(tab){
+  fbCurTab=tab;
+  document.getElementById('fbTabNew').classList.toggle('active',tab==='new');
+  document.getElementById('fbTabMine').classList.toggle('active',tab==='mine');
+  if(tab==='new')fbRenderNew();else fbRenderMine(true);
+}
+function fbRenderNew(){
+  document.getElementById('fbBody').innerHTML=`
+    <select class="form-select" id="fbCat">
+      <option value="problem">PROBLEM / BUG</option>
+      <option value="feature">NEW FEATURE REQUEST</option>
+      <option value="feedback">GENERAL FEEDBACK</option>
+    </select>
+    <textarea class="form-input" id="fbMsg" rows="5" maxlength="2000" placeholder="Apni baat likho..." style="resize:vertical"></textarea>
+    <button class="btn-save" id="fbSendBtn" onclick="fbSubmit()">SEND TO ADMIN</button>`;
+}
+async function fbSubmit(){
+  const message=document.getElementById('fbMsg').value.trim();
+  const category=document.getElementById('fbCat').value;
+  if(!message){showToast('Message likho pehle!','error');return;}
+  const b=document.getElementById('fbSendBtn');b.disabled=true;
+  const{error}=await sb.from('feedback').insert({user_id:currentUser.id,category,message});
+  b.disabled=false;
+  if(error){showToast('Error: '+error.message,'error');return;}
+  showToast('Message admin ko bhej diya!');
+  await fbRefresh();fbTab('mine');
+}
+async function fbRenderMine(markSeen){
+  const body=document.getElementById('fbBody');
+  if(!myFeedback.length){body.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px 0">Abhi koi message nahi hai</div>';return;}
+  body.innerHTML=myFeedback.map(f=>{
+    const isNew=f.admin_reply&&!f.reply_seen;
+    const dt=new Date(f.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="fb-item${isNew?' new':''}">
+      <div class="fb-meta"><span class="vis-tag vis-private">${FB_CATS[f.category]||'FEEDBACK'}</span>
+      <span class="vis-tag ${f.status==='resolved'?'vis-public':'vis-private'}">${f.status==='resolved'?'RESOLVED':'OPEN'}</span><span>${dt}</span>${isNew?'<span style="color:var(--green);font-weight:600">NEW REPLY</span>':''}</div>
+      <div class="fb-msg">${esc(f.message)}</div>
+      ${f.admin_reply?`<div class="fb-reply"><b>Admin:</b> <span class="fb-msg">${esc(f.admin_reply)}</span></div>`:''}
+    </div>`;
+  }).join('');
+  if(markSeen&&fbUnread()){
+    await sb.rpc('mark_replies_seen');
+    myFeedback.forEach(f=>{if(f.admin_reply)f.reply_seen=true;});
+    fbBadges();
+  }
+}
+
+// ---- ADMIN SIDE ----
+async function loadAdminFeedback(){
+  const box=document.getElementById('adminFeedbackList');
+  const[{data:items},{data:profs}]=await Promise.all([
+    sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(100),
+    sb.from('profiles').select('id,display_name,email')
+  ]);
+  const pm={};(profs||[]).forEach(p=>pm[p.id]=p.display_name||p.email);
+  adminOpenCount=(items||[]).filter(f=>f.status==='open').length;fbBadges();
+  if(!items?.length){box.innerHTML='<div style="color:var(--text3);font-size:14px">Koi feedback nahi aaya abhi</div>';return;}
+  box.innerHTML=items.map(f=>{
+    const dt=new Date(f.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="fb-item">
+      <div class="fb-meta"><span class="card-owner-tag">${esc(pm[f.user_id]||'user')}</span>
+      <span class="vis-tag vis-private">${FB_CATS[f.category]||'FEEDBACK'}</span>
+      <span class="vis-tag ${f.status==='resolved'?'vis-public':'vis-private'}">${f.status==='resolved'?'RESOLVED':'OPEN'}</span><span>${dt}</span></div>
+      <div class="fb-msg">${esc(f.message)}</div>
+      ${f.admin_reply?`<div class="fb-reply"><b>Your reply:</b> <span class="fb-msg">${esc(f.admin_reply)}</span></div>`:''}
+      <textarea class="form-input" id="fbr_${f.id}" rows="2" placeholder="${f.admin_reply?'Reply update karo...':'Reply likho...'}" style="margin-top:8px;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-save" onclick="fbAdminReply('${f.id}')">SEND REPLY &amp; RESOLVE</button>
+        <button class="btn-cancel" onclick="fbAdminDelete('${f.id}')">DELETE</button>
+      </div></div>`;
+  }).join('');
+}
+async function fbAdminReply(id){
+  const text=document.getElementById('fbr_'+id).value.trim();
+  if(!text){showToast('Reply likho pehle!','error');return;}
+  const{error}=await sb.from('feedback').update({admin_reply:text,replied_at:new Date().toISOString(),status:'resolved',reply_seen:false}).eq('id',id);
+  if(error){showToast('Error: '+error.message,'error');return;}
+  showToast('Reply bhej diya!');
+  loadAdminFeedback();
+}
+async function fbAdminDelete(id){
+  if(!confirm('Ye feedback delete karna hai?'))return;
+  const{error}=await sb.from('feedback').delete().eq('id',id);
+  if(error){showToast('Error: '+error.message,'error');return;}
+  loadAdminFeedback();
 }
 
 init();
