@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LIQUID.VAULT v3</title>
+<title>LIQUID.VAULT v3 | Toolverse</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=%220 0 64 64%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient id=%22lvgf%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%235b8cff%22/%3E%3Cstop offset=%221%22 stop-color=%22%232dd4bf%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22url%28%23lvgf%29%22/%3E%3Cpath d=%22M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z%22 fill=%22%23fff%22/%3E%3Cpath d=%22M24 40a8 8 0 0 0 5 7%22 fill=%22none%22 stroke=%22%232f6bff%22 stroke-width=%222%22 stroke-linecap=%22round%22 opacity=%22.35%22/%3E%3Ccircle cx=%2232%22 cy=%2238%22 r=%224.6%22 fill=%22%232f6bff%22/%3E%3Crect x=%2230%22 y=%2240%22 width=%224%22 height=%229%22 rx=%222%22 fill=%22%232f6bff%22/%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg viewBox=%220 0 64 64%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient id=%22lvgf%22 x1=%220%22 y1=%220%22 x2=%221%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%235b8cff%22/%3E%3Cstop offset=%221%22 stop-color=%22%232dd4bf%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22url%28%23lvgf%29%22/%3E%3Cpath d=%22M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z%22 fill=%22%23fff%22/%3E%3Cpath d=%22M24 40a8 8 0 0 0 5 7%22 fill=%22none%22 stroke=%22%232f6bff%22 stroke-width=%222%22 stroke-linecap=%22round%22 opacity=%22.35%22/%3E%3Ccircle cx=%2232%22 cy=%2238%22 r=%224.6%22 fill=%22%232f6bff%22/%3E%3Crect x=%2230%22 y=%2240%22 width=%224%22 height=%229%22 rx=%222%22 fill=%22%232f6bff%22/%3E%3C/svg%3E" />
+<meta name="theme-color" content="#1f5eff" />
 
 <!-- ============================================================
   LIQUID.VAULT v3 — Prompt Generator Edition + Public Library + Feedback Chat
@@ -444,6 +447,14 @@ html[data-theme="light"] .ic-sun{display:none}
 .pub-folder-name{font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pub-folder-meta{font-size:12px;color:var(--text3);margin-top:2px}
 .pub-folder-you{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--green);margin-left:6px}
+.logo-mark{width:38px;height:38px;flex-shrink:0;display:block}
+.logo-mark svg,.loading-mark svg,.auth-mark svg{width:100%;height:100%;display:block}
+.loading-mark{width:68px;height:68px}
+.auth-mark{width:58px;height:58px;margin:0 auto 12px}
+.tv-badge{display:flex;align-items:center;gap:8px}
+.tv-badge svg{width:22px;height:22px;display:block;flex-shrink:0}
+.tv-inline{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
+.tv-inline svg{width:16px;height:16px;display:block}
 </style>
 </head>
 <body>
@@ -451,6 +462,7 @@ html[data-theme="light"] .ic-sun{display:none}
 
 <!-- LOADING -->
 <div class="loading-screen" id="loadingScreen">
+  <div class="loading-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="LIQUID.VAULT logo"><defs><linearGradient id="lvgl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lvgl)"/><path d="M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z" fill="#fff"/><path d="M24 40a8 8 0 0 0 5 7" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" opacity=".35"/><circle cx="32" cy="38" r="4.6" fill="#2f6bff"/><rect x="30" y="40" width="4" height="9" rx="2" fill="#2f6bff"/></svg></div>
   <div class="loading-logo">LIQUID.VAULT</div>
   <div class="loading-bar"><div class="loading-fill"></div></div>
   <div class="loading-text">INITIALIZING...</div>
@@ -460,6 +472,7 @@ html[data-theme="light"] .ic-sun{display:none}
 <div class="auth-screen" id="authScreen" style="display:none">
   <div class="auth-box">
     <div class="auth-header">
+      <div class="auth-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="LIQUID.VAULT logo"><defs><linearGradient id="lvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lvga)"/><path d="M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z" fill="#fff"/><path d="M24 40a8 8 0 0 0 5 7" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" opacity=".35"/><circle cx="32" cy="38" r="4.6" fill="#2f6bff"/><rect x="30" y="40" width="4" height="9" rx="2" fill="#2f6bff"/></svg></div>
       <div class="auth-logo">LIQUID.VAULT</div>
       <div class="auth-sub">SHOPIFY SECTION MANAGER v2</div>
     </div>
@@ -497,7 +510,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="auth-err" id="signupErr"></div>
       </div>
     </div>
-    <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong></div>
+    <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
   </div>
 </div>
 
@@ -505,7 +518,7 @@ html[data-theme="light"] .ic-sun{display:none}
 <div class="app" id="mainApp" style="display:none">
   <div class="topbar">
     <div class="logo">
-      <div class="logo-icon"><i class="ti ti-code"></i></div>
+      <div class="logo-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="LIQUID.VAULT logo"><defs><linearGradient id="lvgt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lvgt)"/><path d="M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z" fill="#fff"/><path d="M24 40a8 8 0 0 0 5 7" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" opacity=".35"/><circle cx="32" cy="38" r="4.6" fill="#2f6bff"/><rect x="30" y="40" width="4" height="9" rx="2" fill="#2f6bff"/></svg></div>
       <div>
         <div class="logo-text">LIQUID.VAULT</div>
         <div class="logo-sub">SHOPIFY SECTION MANAGER</div>
@@ -646,6 +659,7 @@ html[data-theme="light"] .ic-sun{display:none}
 
   <footer class="app-footer">
     <span>Developed and managed by <strong>Sandeep Singh</strong></span>
+    <span class="tv-badge"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvgf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvgf)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg><span>LIQUID.VAULT is a part of <strong>Toolverse</strong></span></span>
     <span>LIQUID.VAULT v3</span>
   </footer>
 </div>
