@@ -613,6 +613,7 @@ html[data-theme="light"] .ic-sun{display:none}
       <div style="font-size:12px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:.04em">v3</div>
       <button class="btn btn-primary sup-btn" id="supportBtn" style="display:none" onclick="openSupport()">SUPPORT <span class="bin-count" id="supportBadge">0</span></button>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button class="fb-bell" id="soundBtn" onclick="toggleSound()" aria-label="Notification sound"></button>
       <button class="fb-bell" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
       <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
       <div class="user-chip">
@@ -1054,7 +1055,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
-  fbStart();chatStart();presLoadLastSeen().then(presenceStart);
+  fbStart();chatStart();presLoadLastSeen().then(presenceStart);notifyStart();
 }
 
 // ============================================================
@@ -1103,7 +1104,7 @@ async function doLogout() {
   folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
-  fbStop();chatStop();presenceStop();
+  fbStop();chatStop();presenceStop();notifyStop();
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -2003,11 +2004,17 @@ async function fbRefresh(){
   const prevUnread=fbUnread();
   const{data}=await sb.from('feedback').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
   myFeedback=data||[];
+  if(!isAdmin&&myFeedback.length){
+    const{data:sm}=await sb.from('support_messages').select('id,sender_id').in('ticket_id',myFeedback.map(f=>f.id));
+    const cnt=(sm||[]).filter(x=>x.sender_id!==currentUser.id).length;
+    if(lvSupCnt!==null&&cnt>lvSupCnt){showToast('Support replied to your ticket!','warn');lvNotify('Support replied','Admin replied to your ticket');}
+    lvSupCnt=cnt;
+  }
   if(isAdmin){
     const{count}=await sb.from('feedback').select('id',{count:'exact',head:true}).eq('status','open');
     adminOpenCount=count||0;
   }
-  if(fbUnread()>prevUnread)showToast('Admin replied to your message!','warn');
+  if(fbUnread()>prevUnread){showToast('Admin replied to your message!','warn');lvNotify('Support replied','Admin replied to your message');}
   fbBadges();
   if(document.getElementById('fbPanel').style.display==='flex'&&fbCurTab==='mine')fbRenderMine(false);
 }
@@ -2387,7 +2394,10 @@ async function chatOnNew(m) {
   await chatRefresh();
   const c = chatConvs.find(x => x.id === m.conversation_id);
   const viewing = chatIsOpen() && chatActive && chatActive.id === m.conversation_id;
-  if (c && chatMember(c) && m.sender_id !== currentUser.id && !viewing) showToast('New message from ' + chatNm(m.sender_id), 'warn');
+  if (c && chatMember(c) && m.sender_id !== currentUser.id) {
+    if (!viewing) showToast('New message from ' + chatNm(m.sender_id), 'warn');
+    lvNotify('New message from ' + chatNm(m.sender_id), m.body ? String(m.body).slice(0, 100) : '[file] ' + (m.attachment_name || ''));
+  }
 }
 
 async function chatOnUpdate(m) {
@@ -2506,6 +2516,9 @@ async function supportLoad() {
   supTickets = t || []; supMsgs = {};
   (m || []).forEach(x => (supMsgs[x.ticket_id] = supMsgs[x.ticket_id] || []).push(x));
   adminOpenCount = supTickets.filter(x => x.status === 'open').length;
+  const lvSig = supTickets.length + (m || []).filter(x => { const tk = supTickets.find(y => y.id === x.ticket_id); return tk && x.sender_id === tk.user_id; }).length;
+  if (lvAdminSig !== null && lvSig > lvAdminSig) lvNotify('Support', 'New ticket or message from a user');
+  lvAdminSig = lvSig;
   fbBadges();
   const waiting = supTickets.filter(x => x.status === 'open' && !supLast(x).admin).length;
   const bd = document.getElementById('supportBadge');
@@ -2779,6 +2792,95 @@ setInterval(() => { if (currentUser) presRefreshUI(); }, 30000);
 
 const _origRenderThread = chatRenderThread;
 chatRenderThread = function(){ _origRenderThread(); presRefreshUI(); };
+
+
+// ============================================================
+//  NOTIFICATIONS (sound + browser popup + tab title count)
+// ============================================================
+let lvAudio = null, lvLastDing = 0, lvSupCnt = null, lvAdminSig = null, lvNotifChan = null, lvAsked = false;
+let lvSound = true;
+try { lvSound = localStorage.getItem('lv-sound') !== 'off'; } catch (e) {}
+const LV_TITLE = document.title;
+const LV_ICON_ON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>';
+const LV_ICON_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg>';
+
+function lvUnlock() {
+  try {
+    if (!lvAudio) lvAudio = new (window.AudioContext || window.webkitAudioContext)();
+    if (lvAudio.state === 'suspended') lvAudio.resume();
+  } catch (e) {}
+  try {
+    if (currentUser && !lvAsked && 'Notification' in window && Notification.permission === 'default') {
+      lvAsked = true; Notification.requestPermission();
+    }
+  } catch (e) {}
+}
+['click', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, lvUnlock, { passive: true }));
+
+function lvDing() {
+  if (!lvSound || !lvAudio) return;
+  const now = Date.now();
+  if (now - lvLastDing < 1200) return;
+  lvLastDing = now;
+  try {
+    if (lvAudio.state === 'suspended') lvAudio.resume();
+    const t = lvAudio.currentTime;
+    [[880, 0], [1175, 0.14]].forEach(([f, d]) => {
+      const o = lvAudio.createOscillator(), g = lvAudio.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      o.connect(g); g.connect(lvAudio.destination);
+      g.gain.setValueAtTime(0.0001, t + d);
+      g.gain.exponentialRampToValueAtTime(0.25, t + d + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.35);
+      o.start(t + d); o.stop(t + d + 0.4);
+    });
+  } catch (e) {}
+}
+
+function lvNotify(title, body) {
+  lvDing();
+  try {
+    if ('Notification' in window && Notification.permission === 'granted' && (document.hidden || !document.hasFocus())) {
+      const n = new Notification(title, { body: body || '', tag: 'lv-' + title, renotify: true });
+      n.onclick = () => { window.focus(); n.close(); };
+      setTimeout(() => n.close(), 8000);
+    }
+  } catch (e) {}
+}
+
+function lvRenderSoundBtn() {
+  const b = document.getElementById('soundBtn');
+  if (!b) return;
+  b.innerHTML = lvSound ? LV_ICON_ON : LV_ICON_OFF;
+  b.title = lvSound ? 'Notification sound: ON (click to mute)' : 'Notification sound: OFF (click to unmute)';
+}
+function toggleSound() {
+  lvSound = !lvSound;
+  try { localStorage.setItem('lv-sound', lvSound ? 'on' : 'off'); } catch (e) {}
+  lvUnlock(); lvRenderSoundBtn();
+  if (lvSound) lvDing();
+}
+
+function notifyStart() {
+  lvRenderSoundBtn();
+  if (lvNotifChan) { sb.removeChannel(lvNotifChan); lvNotifChan = null; }
+  if (isAdmin) return;
+  lvNotifChan = sb.channel('notify-' + currentUser.id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => fbRefresh())
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'feedback' }, () => fbRefresh())
+    .subscribe();
+}
+function notifyStop() {
+  if (lvNotifChan) { sb.removeChannel(lvNotifChan); lvNotifChan = null; }
+  lvSupCnt = null; lvAdminSig = null;
+}
+
+setInterval(() => {
+  if (!currentUser) { document.title = LV_TITLE; return; }
+  let n = Object.values(chatUnreadMap).reduce((a, b) => a + b, 0) + fbUnread();
+  if (isAdmin) n += parseInt((document.getElementById('supportBadge') || {}).textContent) || 0;
+  document.title = n ? '(' + n + ') ' + LV_TITLE : LV_TITLE;
+}, 2000);
 
 
 init();
