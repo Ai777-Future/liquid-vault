@@ -530,6 +530,16 @@ html[data-theme="light"] .ic-sun{display:none}
 .sup-btn{display:flex;align-items:center;gap:6px}
 .fb-rep-row{display:flex;gap:6px;margin-top:8px}
 .fb-rep-row textarea{flex:1;resize:vertical;min-height:38px}
+
+/* ===== PRESENCE ===== */
+.pdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-right:6px}
+.pdot.on{background:#22c55e;box-shadow:0 0 0 2px color-mix(in srgb,#22c55e 25%,transparent)}
+.p-sub{font-size:11.5px;color:var(--text3);font-weight:400}
+.p-sub.on{color:#22c55e}
+.p-typing{color:var(--green);font-style:italic}
+.logs-table{width:100%;border-collapse:collapse;margin-bottom:24px}
+.logs-table th{font-size:12px;font-weight:600;color:var(--text3);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.logs-table td{font-size:13px;padding:10px 14px;border-bottom:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -585,7 +595,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="auth-err" id="signupErr"></div>
       </div>
     </div>
-    <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
+    <div class="auth-credit"><span style="display:block;margin-bottom:6px">Note: the admin can see login time and device info.</span>Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
   </div>
 </div>
 
@@ -714,6 +724,13 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="admin-stat"><span class="admin-stat-val" id="adStatFolders">0</span><span class="admin-stat-label">FOLDERS</span></div>
         <div class="admin-stat"><span class="admin-stat-val" id="adStatSections">0</span><span class="admin-stat-label">SECTIONS</span></div>
         <div class="admin-stat"><span class="admin-stat-val" id="adStatToday">0</span><span class="admin-stat-label">TODAY</span></div>
+      </div>
+      <div style="font-size:12px;color:var(--cyan);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">LOGIN ACTIVITY (LATEST 100)</div>
+      <div style="overflow-x:auto">
+      <table class="logs-table">
+        <thead><tr><th>USER</th><th>TIME</th><th>DEVICE</th><th>OS</th><th>BROWSER</th><th>SCREEN</th><th>TZ</th></tr></thead>
+        <tbody id="loginLogsBody"></tbody>
+      </table>
       </div>
       <div style="font-size:12px;color:var(--text3);letter-spacing:.04em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">REGISTERED USERS</div>
       <table class="users-table" id="usersTable">
@@ -902,7 +919,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="chat-list" id="chatList"></div>
       </div>
       <div class="chat-main">
-        <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span><div class="chat-head-actions" id="chatHeadActions"></div></div>
+        <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span><span class="p-sub" id="chatHeadSub" style="margin-left:8px"></span><div class="chat-head-actions" id="chatHeadActions"></div></div>
         <div class="chat-notice" id="chatNotice"></div>
         <div class="chat-msgs" id="chatMsgsEl"></div>
         <div class="chat-compose" id="chatCompose" style="display:none">
@@ -1037,7 +1054,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
-  fbStart();chatStart();
+  fbStart();chatStart();presLoadLastSeen().then(presenceStart);
 }
 
 // ============================================================
@@ -1080,12 +1097,13 @@ async function doSignup() {
 }
 
 async function doLogout() {
+  try{await sb.rpc('touch_last_seen');}catch(e){}
   await sb.auth.signOut();
   currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
   folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
-  fbStop();chatStop();
+  fbStop();chatStop();presenceStop();
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -1563,6 +1581,7 @@ async function loadAdminData(){
   }
 
   loadAdminFeedback();
+  loadLoginLogs();
 }
 
 // ============================================================
@@ -2194,8 +2213,9 @@ function chatRenderList() {
   }
   el.innerHTML = list.map(c => {
     const u = chatUnreadMap[c.id] || 0;
-    return `<div class="chat-row${chatActive && chatActive.id === c.id ? ' active' : ''}" onclick="chatOpenConv('${c.id}')">
-      <div class="chat-row-top"><span class="chat-row-name">${esc(chatTitle(c))}</span>${u ? `<span class="bin-count" style="display:flex">${u}</span>` : ''}</div>
+    const ou = presOther(c);
+    return `<div class="chat-row${chatActive && chatActive.id === c.id ? ' active' : ''}" data-uid="${ou||''}" onclick="chatOpenConv('${c.id}')">
+      <div class="chat-row-top"><span class="chat-row-name">${ou?`<span class="pdot${isOnline(ou)?' on':''}"></span>`:''}${esc(chatTitle(c))}</span>${u ? `<span class="bin-count" style="display:flex">${u}</span>` : ''}</div>
       <div class="chat-row-prev">${esc(c.last_preview || 'No messages yet')}</div>
       <div class="chat-row-time">${c.last_preview ? chatTime(c.last_message_at) : ''}</div>
     </div>`;
@@ -2602,6 +2622,164 @@ async function fbUserReply(id) {
   await fbRefresh();
   showToast('Reply sent');
 }
+
+// ============================================================
+//  PRESENCE (online / last seen / typing) + LOGIN LOGS
+// ============================================================
+let presChan = null, presState = {}, typingMap = {}, typingSentAt = 0, presBeat = null;
+let chatLastSeen = {};
+
+function detectDevice(){
+  const ua = navigator.userAgent;
+  let os = 'Unknown', browser = 'Unknown', device = 'Desktop';
+  if (/Windows/i.test(ua)) os = 'Windows';
+  else if (/Android/i.test(ua)) os = 'Android';
+  else if (/iPhone|iPad|iPod/i.test(ua)) os = 'iOS';
+  else if (/Mac OS X/i.test(ua)) os = 'macOS';
+  else if (/Linux/i.test(ua)) os = 'Linux';
+  if (/Edg\//.test(ua)) browser = 'Edge';
+  else if (/OPR\//.test(ua)) browser = 'Opera';
+  else if (/Chrome\//.test(ua)) browser = 'Chrome';
+  else if (/Firefox\//.test(ua)) browser = 'Firefox';
+  else if (/Safari\//.test(ua)) browser = 'Safari';
+  if (/Mobi|Android|iPhone/i.test(ua)) device = 'Mobile';
+  else if (/iPad|Tablet/i.test(ua)) device = 'Tablet';
+  return { os, browser, device, ua, screen: screen.width + 'x' + screen.height,
+           tz: Intl.DateTimeFormat().resolvedOptions().timeZone || '' };
+}
+
+async function logLogin(){
+  try{ if (sessionStorage.getItem('lv-logged')) return; }catch(e){}
+  const d = detectDevice();
+  const { error } = await sb.from('login_logs').insert({
+    user_id: currentUser.id, device: d.device, os: d.os, browser: d.browser,
+    user_agent: d.ua.slice(0, 400), screen: d.screen, tz: d.tz
+  });
+  if (!error) { try{ sessionStorage.setItem('lv-logged', '1'); }catch(e){} }
+}
+
+function presVisHandler(){
+  if (!presChan) return;
+  if (document.hidden) presChan.untrack();
+  else presChan.track({ user_id: currentUser.id, at: new Date().toISOString() });
+}
+function presLeaveHandler(){ try{ sb.rpc('touch_last_seen'); }catch(e){} }
+
+function presenceStart(){
+  logLogin();
+  sb.rpc('touch_last_seen');
+  if (presChan) sb.removeChannel(presChan);
+  presChan = sb.channel('presence-room', { config: { presence: { key: currentUser.id } } });
+  presChan
+    .on('presence', { event: 'sync' }, () => {
+      presState = presChan.presenceState();
+      presRefreshUI();
+    })
+    .on('broadcast', { event: 'typing' }, ({ payload }) => {
+      if (!payload || payload.to !== currentUser.id) return;
+      typingMap[payload.from] = Date.now();
+      presRefreshUI();
+      setTimeout(presRefreshUI, 3200);
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await presChan.track({ user_id: currentUser.id, at: new Date().toISOString() });
+      }
+    });
+  clearInterval(presBeat);
+  presBeat = setInterval(() => sb.rpc('touch_last_seen'), 60000);
+  window.addEventListener('beforeunload', presLeaveHandler);
+  document.addEventListener('visibilitychange', presVisHandler);
+}
+
+function presenceStop(){
+  clearInterval(presBeat);
+  if (presChan) { sb.removeChannel(presChan); presChan = null; }
+  presState = {}; typingMap = {};
+  window.removeEventListener('beforeunload', presLeaveHandler);
+  document.removeEventListener('visibilitychange', presVisHandler);
+  try{ sessionStorage.removeItem('lv-logged'); }catch(e){}
+}
+
+const isOnline = id => !!presState[id];
+const isTyping = id => typingMap[id] && (Date.now() - typingMap[id] < 3000);
+
+function lastSeenText(id){
+  if (isOnline(id)) return 'Online';
+  const ts = chatLastSeen[id];
+  if (!ts) return 'Offline';
+  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
+  if (diff < 1) return 'last seen just now';
+  if (diff < 60) return 'last seen ' + diff + ' min ago';
+  const d = new Date(ts);
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const t = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  return sameDay ? 'last seen today ' + t : 'last seen ' + d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) + ' ' + t;
+}
+
+async function presLoadLastSeen(){
+  const { data } = await sb.from('profiles').select('id,last_seen');
+  (data || []).forEach(p => chatLastSeen[p.id] = p.last_seen);
+}
+
+function presOther(c){
+  if (!c || !chatMember(c)) return null;
+  return c.user_a === currentUser.id ? c.user_b : c.user_a;
+}
+
+function presRefreshUI(){
+  const sub = document.getElementById('chatHeadSub');
+  if (sub) {
+    const other = presOther(chatActive);
+    if (!other) { sub.textContent = ''; sub.className = 'p-sub'; }
+    else if (isTyping(other)) { sub.textContent = 'typing...'; sub.className = 'p-sub p-typing'; }
+    else { sub.textContent = lastSeenText(other); sub.className = 'p-sub' + (isOnline(other) ? ' on' : ''); }
+  }
+  document.querySelectorAll('#chatList .chat-row').forEach(row => {
+    const id = row.getAttribute('data-uid');
+    if (!id) return;
+    const dot = row.querySelector('.pdot');
+    if (dot) dot.classList.toggle('on', isOnline(id));
+  });
+}
+
+function presSendTyping(){
+  const other = presOther(chatActive);
+  if (!other || !presChan) return;
+  if (Date.now() - typingSentAt < 2000) return;
+  typingSentAt = Date.now();
+  presChan.send({ type: 'broadcast', event: 'typing', payload: { from: currentUser.id, to: other } });
+}
+
+async function loadLoginLogs(){
+  if (!isAdmin) return;
+  const { data, error } = await sb.from('login_logs').select('*').order('created_at', { ascending: false }).limit(100);
+  const body = document.getElementById('loginLogsBody');
+  if (!body) return;
+  if (error || !data?.length) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No login logs yet</td></tr>';
+    return;
+  }
+  body.innerHTML = data.map(l => {
+    const dt = new Date(l.created_at).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    return `<tr>
+      <td style="color:var(--pink)">${esc(chatNm(l.user_id))}</td>
+      <td>${dt}</td>
+      <td>${esc(l.device||'--')}</td>
+      <td>${esc(l.os||'--')}</td>
+      <td>${esc(l.browser||'--')}</td>
+      <td style="color:var(--text3)">${esc(l.screen||'--')}</td>
+      <td style="color:var(--text3)">${esc(l.tz||'--')}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.addEventListener('input', e => { if (e.target && e.target.id === 'chatInput') presSendTyping(); });
+setInterval(() => { if (currentUser) presRefreshUI(); }, 30000);
+
+const _origRenderThread = chatRenderThread;
+chatRenderThread = function(){ _origRenderThread(); presRefreshUI(); };
+
 
 init();
 </script>
