@@ -471,6 +471,50 @@ html[data-theme="light"] .ic-sun{display:none}
 .btn-danger{background:transparent;border:1px solid var(--red);color:var(--red);font-family:var(--ui);font-size:13px;font-weight:500;letter-spacing:.03em;padding:10px 20px;cursor:pointer;border-radius:5px;transition:all .15s}
 .btn-danger:hover{background:var(--red);color:#fff}
 .btn-danger:disabled{opacity:.4;cursor:not-allowed}
+
+/* ===== CHAT ROOM ===== */
+.chat-modal{max-width:1100px;height:86vh;max-height:86vh}
+.chat-wrap{flex:1;display:grid;grid-template-columns:300px 1fr;min-height:0}
+.chat-side{border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;background:var(--bg2)}
+.chat-new{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--border)}
+.chat-new .btn-save{padding:8px 14px}
+.chat-list{flex:1;overflow-y:auto;padding:6px}
+.chat-row{padding:10px 12px;border-radius:6px;cursor:pointer;margin-bottom:2px}
+.chat-row:hover{background:var(--hover)}
+.chat-row.active{background:var(--sel)}
+.chat-row-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chat-row-name{font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-row-prev{font-size:12.5px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+.chat-row-time{font-size:11px;color:var(--text3);margin-top:2px}
+.chat-main{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--bg)}
+.chat-head{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;gap:10px;font-weight:600;min-height:50px}
+.chat-back{display:none}
+.chat-notice{padding:7px 16px;font-size:12px;color:var(--amber);background:color-mix(in srgb,var(--amber) 10%,transparent);border-bottom:1px solid var(--border)}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:78%;display:flex;flex-direction:column;gap:3px}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end}
+.chat-who{font-size:11px;color:var(--text3)}
+.chat-bubble{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:14px;max-width:100%}
+.chat-msg.mine .chat-bubble{background:var(--sel);border-color:var(--border2)}
+.chat-text{white-space:pre-wrap;word-break:break-word}
+.chat-att{margin-top:6px;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--bg3)}
+.chat-text+.chat-att{margin-top:8px}
+.chat-att-name{font-size:12.5px;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chat-att-name span{color:var(--text3);font-weight:400}
+.chat-att-actions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.chat-code{margin-top:8px;max-height:260px;overflow:auto;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:var(--code);font-size:12.5px;white-space:pre;color:var(--text)}
+.chat-compose{border-top:1px solid var(--border);padding:10px 12px;background:var(--bg2)}
+.chat-compose-row{display:flex;gap:8px;align-items:flex-end}
+.chat-compose textarea{flex:1;resize:none;min-height:42px;max-height:140px}
+.chat-attach-chip{margin-bottom:8px;display:flex;gap:8px;align-items:center}
+@media(max-width:760px){
+  .chat-wrap{grid-template-columns:1fr}
+  .chat-wrap .chat-main{display:none}
+  .chat-wrap.open .chat-side{display:none}
+  .chat-wrap.open .chat-main{display:flex}
+  .chat-back{display:flex}
+  .chat-msg{max-width:92%}
+}
 </style>
 </head>
 <body>
@@ -543,6 +587,7 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="topbar-right">
       <div style="font-size:12px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:.04em">v3</div>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button class="fb-bell" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
       <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
       <div class="user-chip">
         <div class="user-avatar" id="userAvatar">--</div>
@@ -821,6 +866,42 @@ html[data-theme="light"] .ic-sun{display:none}
   </div>
 </div>
 
+<!-- CHAT ROOM MODAL -->
+<div id="chatModal" style="display:none" class="modal-overlay">
+  <div class="modal chat-modal">
+    <div class="modal-header">
+      <div class="modal-title">// CHAT ROOM</div>
+      <button class="modal-close" onclick="closeModal('chatModal')">✕</button>
+    </div>
+    <div class="chat-wrap" id="chatWrap">
+      <div class="chat-side">
+        <div class="fb-tabs">
+          <button class="fb-tab active" id="chatTabMine" onclick="chatSetTab('mine')">MY CHATS</button>
+          <button class="fb-tab" id="chatTabAll" style="display:none" onclick="chatSetTab('all')">ALL USER CHATS</button>
+        </div>
+        <div class="chat-new" id="chatNew">
+          <select class="form-select" id="chatUserSel"></select>
+          <button class="btn-save" onclick="chatStartWith()">CHAT</button>
+        </div>
+        <div class="chat-list" id="chatList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span></div>
+        <div class="chat-notice" id="chatNotice"></div>
+        <div class="chat-msgs" id="chatMsgsEl"></div>
+        <div class="chat-compose" id="chatCompose" style="display:none">
+          <div class="chat-attach-chip" id="chatAttachChip"></div>
+          <div class="chat-compose-row">
+            <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Attach a code file (max 300 KB)"><i class="ti ti-paperclip"></i><input type="file" hidden onchange="chatPickFile(event)" accept=".liquid,.js,.css,.json,.html,.txt,.md,.scss,.ts,.jsx,.tsx,.xml,.yml,.yaml,text/*" /></label>
+            <textarea class="form-input" id="chatInput" rows="1" placeholder="Type a message... (Enter to send, Shift+Enter for new line)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}"></textarea>
+            <button class="btn-save" id="chatSendBtn" onclick="chatSend()"><i class="ti ti-send"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FEEDBACK CHAT WIDGET -->
 <button class="fb-fab" id="fbFab" onclick="fbToggle()" title="Feedback / Help" aria-label="Feedback">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -905,7 +986,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
-  fbStart();
+  fbStart();chatStart();
 }
 
 // ============================================================
@@ -953,7 +1034,7 @@ async function doLogout() {
   folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
-  fbStop();
+  fbStop();chatStop();
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -1716,7 +1797,7 @@ function showToast(msg,type='success'){
 }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');}
+  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');closeModal('chatModal');}
 });
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
@@ -1983,6 +2064,251 @@ async function fbAdminDelete(id){
   const{error}=await sb.from('feedback').delete().eq('id',id);
   if(error){showToast('Error: '+error.message,'error');return;}
   loadAdminFeedback();
+}
+
+// ============================================================
+//  CHAT ROOM (1-to-1 chats, code file sharing, admin monitoring)
+// ============================================================
+const CHAT_MAX = 300 * 1024;
+let chatConvs = [], chatNames = {}, chatUnreadMap = {}, chatActive = null, chatMsgs = [];
+let chatTabSel = 'mine', chatChan = null, chatTimer = null, chatAttach = null;
+
+const chatMember = c => c.user_a === currentUser.id || c.user_b === currentUser.id;
+const chatNm = id => chatNames[id] || 'user';
+const chatTime = ts => new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const chatIsOpen = () => document.getElementById('chatModal').style.display === 'flex';
+const chatMsgById = id => chatMsgs.find(m => m.id === id);
+function chatTitle(c) {
+  return chatMember(c) ? chatNm(c.user_a === currentUser.id ? c.user_b : c.user_a) : chatNm(c.user_a) + ' ↔ ' + chatNm(c.user_b);
+}
+
+async function chatStart() {
+  document.getElementById('chatTabAll').style.display = isAdmin ? '' : 'none';
+  const { data } = await sb.from('profiles').select('id,display_name');
+  (data || []).forEach(p => chatNames[p.id] = p.display_name || 'user');
+  await chatRefresh();
+  if (chatChan) sb.removeChannel(chatChan);
+  chatChan = sb.channel('chat-' + currentUser.id)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatOnNew(p.new))
+    .subscribe();
+  clearInterval(chatTimer);
+  chatTimer = setInterval(chatRefresh, 20000);
+}
+
+function chatStop() {
+  clearInterval(chatTimer);
+  if (chatChan) { sb.removeChannel(chatChan); chatChan = null; }
+  chatConvs = []; chatMsgs = []; chatActive = null; chatUnreadMap = {}; chatAttach = null; chatTabSel = 'mine';
+  closeModal('chatModal');
+  chatBadge();
+}
+
+async function chatRefresh() {
+  if (!currentUser) return;
+  const { data, error } = await sb.from('chat_conversations').select('*').order('last_message_at', { ascending: false });
+  if (error) { console.log('chat error:', error.message); return; }
+  chatConvs = data || [];
+  const mine = chatConvs.filter(chatMember).map(c => c.id);
+  chatUnreadMap = {};
+  if (mine.length) {
+    const { data: um } = await sb.from('chat_messages').select('conversation_id')
+      .in('conversation_id', mine).neq('sender_id', currentUser.id).is('read_at', null);
+    (um || []).forEach(m => chatUnreadMap[m.conversation_id] = (chatUnreadMap[m.conversation_id] || 0) + 1);
+  }
+  if (chatActive) chatActive = chatConvs.find(c => c.id === chatActive.id) || chatActive;
+  chatBadge();
+  if (chatIsOpen()) chatRenderList();
+}
+
+function chatBadge() {
+  const n = Object.values(chatUnreadMap).reduce((a, b) => a + b, 0);
+  const el = document.getElementById('chatBadge');
+  if (!el) return;
+  el.textContent = n; el.style.display = n ? 'flex' : 'none';
+}
+
+function openChat() {
+  const sel = document.getElementById('chatUserSel');
+  const users = Object.entries(chatNames).filter(([id]) => id !== currentUser.id).sort((a, b) => a[1].localeCompare(b[1]));
+  sel.innerHTML = users.length
+    ? users.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')
+    : '<option value="">No other users yet</option>';
+  document.getElementById('chatModal').style.display = 'flex';
+  chatSetTab(chatTabSel);
+  chatRefresh().then(() => { if (chatActive) chatOpenConv(chatActive.id); else chatRenderThread(); });
+}
+
+function chatSetTab(t) {
+  chatTabSel = t;
+  document.getElementById('chatTabMine').classList.toggle('active', t === 'mine');
+  document.getElementById('chatTabAll').classList.toggle('active', t === 'all');
+  document.getElementById('chatNew').style.display = t === 'mine' ? 'flex' : 'none';
+  chatRenderList();
+}
+
+function chatRenderList() {
+  const list = chatConvs.filter(c => chatTabSel === 'mine' ? chatMember(c) : !chatMember(c));
+  const el = document.getElementById('chatList');
+  if (!list.length) {
+    el.innerHTML = '<div class="bin-empty">' + (chatTabSel === 'mine' ? 'No chats yet. Pick a user above and press CHAT.' : 'No chats between other users yet') + '</div>';
+    return;
+  }
+  el.innerHTML = list.map(c => {
+    const u = chatUnreadMap[c.id] || 0;
+    return `<div class="chat-row${chatActive && chatActive.id === c.id ? ' active' : ''}" onclick="chatOpenConv('${c.id}')">
+      <div class="chat-row-top"><span class="chat-row-name">${esc(chatTitle(c))}</span>${u ? `<span class="bin-count" style="display:flex">${u}</span>` : ''}</div>
+      <div class="chat-row-prev">${esc(c.last_preview || 'No messages yet')}</div>
+      <div class="chat-row-time">${c.last_preview ? chatTime(c.last_message_at) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function chatStartWith() {
+  const other = v('chatUserSel');
+  if (!other) return;
+  let c = chatConvs.find(x => chatMember(x) && (x.user_a === other || x.user_b === other));
+  if (!c) {
+    const { data, error } = await sb.from('chat_conversations').insert({ user_a: currentUser.id, user_b: other }).select().single();
+    if (error) { showToast('Error: ' + error.message, 'error'); await chatRefresh(); return; }
+    c = data; chatConvs.unshift(c);
+  }
+  chatSetTab('mine');
+  chatOpenConv(c.id);
+}
+
+async function chatOpenConv(id) {
+  const c = chatConvs.find(x => x.id === id);
+  if (!c) return;
+  chatActive = c; chatAttach = null; chatRenderAttach();
+  document.getElementById('chatWrap').classList.add('open');
+  const { data, error } = await sb.from('chat_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(300);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  chatMsgs = data || [];
+  chatRenderThread(); chatRenderList();
+  chatMarkRead();
+}
+
+function chatBack() { document.getElementById('chatWrap').classList.remove('open'); }
+
+async function chatMarkRead() {
+  if (!chatActive || !chatMember(chatActive) || !chatIsOpen()) return;
+  if (!chatMsgs.some(m => m.sender_id !== currentUser.id && !m.read_at)) return;
+  await sb.rpc('mark_chat_read', { cid: chatActive.id });
+  const now = new Date().toISOString();
+  chatMsgs.forEach(m => { if (m.sender_id !== currentUser.id && !m.read_at) m.read_at = now; });
+  chatUnreadMap[chatActive.id] = 0;
+  chatBadge(); chatRenderList();
+}
+
+function chatRenderThread() {
+  const head = document.getElementById('chatHeadTitle');
+  const notice = document.getElementById('chatNotice');
+  const comp = document.getElementById('chatCompose');
+  const el = document.getElementById('chatMsgsEl');
+  if (!chatActive) {
+    head.textContent = 'Select a chat';
+    notice.style.display = isAdmin ? 'none' : 'block';
+    notice.textContent = 'Privacy notice: messages in this chat room can be reviewed by the admin.';
+    comp.style.display = 'none';
+    el.innerHTML = '<div class="bin-empty">Select a chat on the left or start a new one</div>';
+    return;
+  }
+  const member = chatMember(chatActive);
+  head.textContent = chatTitle(chatActive);
+  notice.style.display = (!isAdmin || !member) ? 'block' : 'none';
+  notice.textContent = member
+    ? 'Privacy notice: messages in this chat room can be reviewed by the admin.'
+    : 'Admin monitoring view: read-only. You are not part of this conversation.';
+  comp.style.display = member ? 'block' : 'none';
+  if (!chatMsgs.length) { el.innerHTML = '<div class="bin-empty">No messages yet. Say hello!</div>'; return; }
+  el.innerHTML = chatMsgs.map(m => {
+    const mine = member && m.sender_id === currentUser.id;
+    const text = m.body ? `<div class="chat-text">${esc(m.body)}</div>` : '';
+    const att = m.attachment_code != null ? `<div class="chat-att">
+        <div class="chat-att-name"><i class="ti ti-file-code"></i> ${esc(m.attachment_name || 'code.txt')} <span>${m.attachment_code.split('\n').length} lines</span></div>
+        <div class="chat-att-actions">
+          <button class="phi-btn" onclick="chatToggleCode('${m.id}')">VIEW</button>
+          <button class="phi-btn" onclick="chatCopyCode('${m.id}')">COPY</button>
+          <button class="phi-btn" onclick="chatDownload('${m.id}')">DOWNLOAD</button>
+        </div>
+        <pre class="chat-code" id="cc_${m.id}" style="display:none"></pre></div>` : '';
+    return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatTime(m.created_at)}</div><div class="chat-bubble">${text}${att}</div></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function chatSend() {
+  if (!chatActive || !chatMember(chatActive)) return;
+  const ta = document.getElementById('chatInput');
+  const body = ta.value.trim();
+  if (!body && !chatAttach) return;
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+  const { data, error } = await sb.from('chat_messages').insert({
+    conversation_id: chatActive.id, sender_id: currentUser.id, body,
+    attachment_name: chatAttach ? chatAttach.name : null,
+    attachment_code: chatAttach ? chatAttach.code : null
+  }).select().single();
+  btn.disabled = false;
+  if (error) { showToast('Send error: ' + error.message, 'error'); return; }
+  ta.value = ''; chatAttach = null; chatRenderAttach();
+  if (!chatMsgs.some(x => x.id === data.id)) chatMsgs.push(data);
+  chatActive.last_preview = body ? body.slice(0, 80) : '[file] ' + (data.attachment_name || '');
+  chatActive.last_message_at = data.created_at;
+  chatConvs.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+  chatRenderThread(); chatRenderList();
+}
+
+async function chatOnNew(m) {
+  if (chatActive && m.conversation_id === chatActive.id) {
+    if (!chatMsgs.some(x => x.id === m.id)) { chatMsgs.push(m); chatRenderThread(); }
+    chatMarkRead();
+  }
+  await chatRefresh();
+  const c = chatConvs.find(x => x.id === m.conversation_id);
+  const viewing = chatIsOpen() && chatActive && chatActive.id === m.conversation_id;
+  if (c && chatMember(c) && m.sender_id !== currentUser.id && !viewing) showToast('New message from ' + chatNm(m.sender_id), 'warn');
+}
+
+function chatPickFile(e) {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (f.size > CHAT_MAX) { showToast('File too large (max 300 KB)', 'error'); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    const txt = String(r.result);
+    if (txt.includes('\u0000')) { showToast('Only text / code files are supported', 'error'); return; }
+    chatAttach = { name: f.name, code: txt }; chatRenderAttach();
+  };
+  r.readAsText(f);
+}
+
+function chatRenderAttach() {
+  const el = document.getElementById('chatAttachChip');
+  if (!el) return;
+  el.innerHTML = chatAttach
+    ? `<span class="vis-tag vis-public"><i class="ti ti-paperclip"></i> ${esc(chatAttach.name)}</span><button class="phi-btn" onclick="chatAttach=null;chatRenderAttach()">REMOVE</button>`
+    : '';
+}
+
+function chatToggleCode(id) {
+  const pre = document.getElementById('cc_' + id), m = chatMsgById(id);
+  if (!pre || !m) return;
+  if (pre.style.display === 'none') { pre.textContent = m.attachment_code; pre.style.display = 'block'; }
+  else pre.style.display = 'none';
+}
+function chatCopyCode(id) {
+  const m = chatMsgById(id);
+  if (m) navigator.clipboard.writeText(m.attachment_code || '').then(() => showToast('Code copied!'));
+}
+function chatDownload(id) {
+  const m = chatMsgById(id);
+  if (!m) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([m.attachment_code || ''], { type: 'text/plain' }));
+  a.download = (m.attachment_name || 'code.txt').replace(/[^\w.\-]/g, '_');
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 init();
