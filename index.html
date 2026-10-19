@@ -515,6 +515,21 @@ html[data-theme="light"] .ic-sun{display:none}
   .chat-back{display:flex}
   .chat-msg{max-width:92%}
 }
+
+/* ===== CHAT v2 + SUPPORT CENTER ===== */
+.chat-unsend{background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:0;font-family:var(--ui)}
+.chat-unsend:hover{text-decoration:underline}
+.chat-unsent{font-style:italic;color:var(--text3)}
+.chat-arch{margin-top:6px;padding:6px 8px;border-left:3px solid var(--amber);background:color-mix(in srgb,var(--amber) 10%,transparent);font-size:12px;border-radius:4px;white-space:pre-wrap;word-break:break-word}
+.chat-emoji{display:none;grid-template-columns:repeat(10,1fr);gap:2px;max-height:150px;overflow-y:auto;padding:8px;margin-bottom:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg3)}
+.chat-emoji button{background:none;border:none;font-size:20px;cursor:pointer;border-radius:4px;padding:3px}
+.chat-emoji button:hover{background:var(--hover)}
+.chat-head-actions{margin-left:auto;display:flex;gap:6px}
+.sup-tag-wait{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent)}
+.sup-thread{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.sup-btn{display:flex;align-items:center;gap:6px}
+.fb-rep-row{display:flex;gap:6px;margin-top:8px}
+.fb-rep-row textarea{flex:1;resize:vertical;min-height:38px}
 </style>
 </head>
 <body>
@@ -586,6 +601,7 @@ html[data-theme="light"] .ic-sun{display:none}
     </div>
     <div class="topbar-right">
       <div style="font-size:12px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:.04em">v3</div>
+      <button class="btn btn-primary sup-btn" id="supportBtn" style="display:none" onclick="openSupport()">SUPPORT <span class="bin-count" id="supportBadge">0</span></button>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
       <button class="fb-bell" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
       <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
@@ -612,7 +628,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <i class="ti ti-shield"></i> ADMIN VIEW
       </button>
     </div>
-    <div class="sidebar-section" style="padding-top:0"><button class="bin-btn" id="binBtn" onclick="openBin()"><i class="ti ti-trash"></i> RECYCLE BIN <span class="bin-count" id="binCount">0</span></button></div>
+    <div class="sidebar-section" style="padding-top:0"><button class="bin-btn" id="binBtn" onclick="openBin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg> RECYCLE BIN <span class="bin-count" id="binCount">0</span></button></div>
     <div class="folder-list" id="folderList"></div>
   </div>
 
@@ -886,15 +902,50 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="chat-list" id="chatList"></div>
       </div>
       <div class="chat-main">
-        <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span></div>
+        <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span><div class="chat-head-actions" id="chatHeadActions"></div></div>
         <div class="chat-notice" id="chatNotice"></div>
         <div class="chat-msgs" id="chatMsgsEl"></div>
         <div class="chat-compose" id="chatCompose" style="display:none">
+          <div class="chat-emoji" id="chatEmoji"></div>
           <div class="chat-attach-chip" id="chatAttachChip"></div>
           <div class="chat-compose-row">
-            <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Attach a code file (max 300 KB)"><i class="ti ti-paperclip"></i><input type="file" hidden onchange="chatPickFile(event)" accept=".liquid,.js,.css,.json,.html,.txt,.md,.scss,.ts,.jsx,.tsx,.xml,.yml,.yaml,text/*" /></label>
+            <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Attach a code file (max 300 KB)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" hidden onchange="chatPickFile(event)" accept=".liquid,.js,.css,.json,.html,.txt,.md,.scss,.ts,.jsx,.tsx,.xml,.yml,.yaml,text/*" /></label>
+            <button class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Emoji" onclick="chatToggleEmoji()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg></button>
             <textarea class="form-input" id="chatInput" rows="1" placeholder="Type a message... (Enter to send, Shift+Enter for new line)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}"></textarea>
-            <button class="btn-save" id="chatSendBtn" onclick="chatSend()"><i class="ti ti-send"></i></button>
+            <button class="btn-save" id="chatSendBtn" onclick="chatSend()" style="display:flex;align-items:center;gap:6px">SEND <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPORT CENTER MODAL (admin) -->
+<div id="supportModal" style="display:none" class="modal-overlay">
+  <div class="modal chat-modal">
+    <div class="modal-header">
+      <div class="modal-title">// SUPPORT CENTER</div>
+      <button class="modal-close" onclick="closeModal('supportModal')">✕</button>
+    </div>
+    <div class="chat-wrap" id="supWrap">
+      <div class="chat-side">
+        <div class="fb-tabs">
+          <button class="fb-tab active" id="supTabOpen" onclick="supSetFilter('open')">OPEN</button>
+          <button class="fb-tab" id="supTabResolved" onclick="supSetFilter('resolved')">RESOLVED</button>
+          <button class="fb-tab" id="supTabAll" onclick="supSetFilter('all')">ALL</button>
+        </div>
+        <div class="chat-list" id="supList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-head"><button class="modal-close chat-back" onclick="document.getElementById('supWrap').classList.remove('open')">←</button><span id="supHeadTitle">Select a ticket</span><div class="chat-head-actions" id="supHeadActions"></div></div>
+        <div class="chat-msgs" id="supMsgsEl"></div>
+        <div class="chat-compose" id="supCompose" style="display:none">
+          <div class="chat-compose-row">
+            <textarea class="form-input" id="supInput" rows="2" placeholder="Write a reply to the user..."></textarea>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="btn-save" onclick="supReply(false)">SEND</button>
+              <button class="btn-save" onclick="supReply(true)">SEND &amp; RESOLVE</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1674,8 +1725,8 @@ function renderBin() {
         <div class="bin-meta"><span class="card-tag tag-template">FOLDER</span><span>${n} section(s) inside</span><span>Deleted ${fmt(f.deleted_at)}</span><span>${binDaysLeft(f.deleted_at)} days left</span></div>
       </div>
       <div class="bin-actions">
-        <button class="phi-btn" onclick="restoreFolder('${f.id}')"><i class="ti ti-restore"></i> RESTORE</button>
-        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('folder','${f.id}')"><i class="ti ti-trash-x"></i> DELETE FOREVER</button>
+        <button class="phi-btn" onclick="restoreFolder('${f.id}')">RESTORE</button>
+        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('folder','${f.id}')">DELETE FOREVER</button>
       </div>
     </div>`;
   }).join('');
@@ -1690,8 +1741,8 @@ function renderBin() {
         ${s.description ? `<div class="bin-meta">${esc(s.description)}</div>` : ''}
       </div>
       <div class="bin-actions">
-        <button class="phi-btn" onclick="restoreSection('${s.id}')"><i class="ti ti-restore"></i> RESTORE</button>
-        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('section','${s.id}')"><i class="ti ti-trash-x"></i> DELETE FOREVER</button>
+        <button class="phi-btn" onclick="restoreSection('${s.id}')">RESTORE</button>
+        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('section','${s.id}')">DELETE FOREVER</button>
       </div>
     </div>`;
   }).join('');
@@ -1797,7 +1848,7 @@ function showToast(msg,type='success'){
 }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');closeModal('chatModal');}
+  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');closeModal('chatModal');closeModal('supportModal');}
 });
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
@@ -2007,16 +2058,17 @@ async function fbSubmit(){
 }
 async function fbRenderMine(markSeen){
   const body=document.getElementById('fbBody');
+  if(!markSeen&&[...body.querySelectorAll('.fb-rep-in')].some(x=>x.value))return;
   if(!myFeedback.length){body.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px 0">No messages yet</div>';return;}
+  const{data:tm}=await sb.from('support_messages').select('*').in('ticket_id',myFeedback.map(f=>f.id)).order('created_at');
+  const th={};(tm||[]).forEach(m=>(th[m.ticket_id]=th[m.ticket_id]||[]).push(m));
   body.innerHTML=myFeedback.map(f=>{
     const isNew=f.admin_reply&&!f.reply_seen;
-    const dt=new Date(f.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     return `<div class="fb-item${isNew?' new':''}">
       <div class="fb-meta"><span class="vis-tag vis-private">${FB_CATS[f.category]||'FEEDBACK'}</span>
-      <span class="vis-tag ${f.status==='resolved'?'vis-public':'vis-private'}">${f.status==='resolved'?'RESOLVED':'OPEN'}</span><span>${dt}</span>${isNew?'<span style="color:var(--green);font-weight:600">NEW REPLY</span>':''}</div>
-      <div class="fb-msg">${esc(f.message)}</div>
-      <div class="fb-bot" style="margin-top:8px"><span class="fb-bot-tag">AUTO REPLY</span><br>${esc(fbBotText(f.category,f.id))}</div>
-      ${f.admin_reply?`<div class="fb-reply"><b>Admin:</b> <span class="fb-msg">${esc(f.admin_reply)}</span></div>`:''}
+      <span class="vis-tag ${f.status==='resolved'?'vis-public':'vis-private'}">${f.status==='resolved'?'RESOLVED':'OPEN'}</span><span>${esc(fbTicketId(f.id))}</span>${isNew?'<span style="color:var(--green);font-weight:600">NEW REPLY</span>':''}</div>
+      ${supThread(f,th[f.id]||[],false)}
+      <div class="fb-rep-row"><textarea class="form-input fb-rep-in" id="fbrep_${f.id}" rows="2" maxlength="3000" placeholder="${f.status==='resolved'?'Reply to reopen this ticket...':'Write a reply...'}"></textarea><button class="btn-save" onclick="fbUserReply('${f.id}')">SEND</button></div>
     </div>`;
   }).join('');
   if(markSeen&&fbUnread()){
@@ -2029,27 +2081,8 @@ async function fbRenderMine(markSeen){
 // ---- ADMIN SIDE ----
 async function loadAdminFeedback(){
   const box=document.getElementById('adminFeedbackList');
-  const[{data:items},{data:profs}]=await Promise.all([
-    sb.from('feedback').select('*').order('created_at',{ascending:false}).limit(100),
-    sb.from('profiles').select('id,display_name,email')
-  ]);
-  const pm={};(profs||[]).forEach(p=>pm[p.id]=p.display_name||p.email);
-  adminOpenCount=(items||[]).filter(f=>f.status==='open').length;fbBadges();
-  if(!items?.length){box.innerHTML='<div style="color:var(--text3);font-size:14px">No feedback yet</div>';return;}
-  box.innerHTML=items.map(f=>{
-    const dt=new Date(f.created_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-    return `<div class="fb-item">
-      <div class="fb-meta"><span class="card-owner-tag">${esc(pm[f.user_id]||'user')}</span>
-      <span class="vis-tag vis-private">${FB_CATS[f.category]||'FEEDBACK'}</span>
-      <span class="vis-tag ${f.status==='resolved'?'vis-public':'vis-private'}">${f.status==='resolved'?'RESOLVED':'OPEN'}</span><span>${dt}</span></div>
-      <div class="fb-msg">${esc(f.message)}</div>
-      ${f.admin_reply?`<div class="fb-reply"><b>Your reply:</b> <span class="fb-msg">${esc(f.admin_reply)}</span></div>`:''}
-      <textarea class="form-input" id="fbr_${f.id}" rows="2" placeholder="${f.admin_reply?'Update your reply...':'Write a reply...'}" style="margin-top:8px;resize:vertical"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn-save" onclick="fbAdminReply('${f.id}')">SEND REPLY &amp; RESOLVE</button>
-        <button class="btn-cancel" onclick="fbAdminDelete('${f.id}')">DELETE</button>
-      </div></div>`;
-  }).join('');
+  await supportLoad();
+  box.innerHTML='<div class="fb-item" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><b>Support tickets:</b> '+adminOpenCount+' open &middot; '+supTickets.length+' total</div><button class="btn-save" onclick="openSupport()">OPEN SUPPORT CENTER</button></div>';
 }
 async function fbAdminReply(id){
   const text=document.getElementById('fbr_'+id).value.trim();
@@ -2067,13 +2100,17 @@ async function fbAdminDelete(id){
 }
 
 // ============================================================
-//  CHAT ROOM (1-to-1 chats, code file sharing, admin monitoring)
+//  CHAT ROOM v2 (1-to-1, code files, emoji, unsend, delete chat, admin monitoring)
 // ============================================================
 const CHAT_MAX = 300 * 1024;
-let chatConvs = [], chatNames = {}, chatUnreadMap = {}, chatActive = null, chatMsgs = [];
+const CHAT_EMOJI = '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 😉 😍 🥰 😘 😎 🤩 🥳 😏 😌 🤔 🤨 😐 😑 🙄 😬 😴 😢 😭 😤 😡 🤯 😱 😳 🥺 🤗 🤝 🙏 👍 👎 👏 🙌 💪 👌 ✌️ 🤞 👋 🔥 ✨ 💯 ✅ ❌ ⚠️ ❤️ 💙 💚 💛 🧡 💜 🖤 🎉 🎊 🚀 ⭐ 💡 📌 📎 💻 🛠️ 🐞 📦 🛒 🎨 ⏰ ☕ 🍕 👀 💬'.split(' ');
+let chatConvs = [], chatNames = {}, chatUnreadMap = {}, chatActive = null, chatMsgs = [], chatArch = {};
 let chatTabSel = 'mine', chatChan = null, chatTimer = null, chatAttach = null;
 
 const chatMember = c => c.user_a === currentUser.id || c.user_b === currentUser.id;
+const chatSide = c => c.user_a === currentUser.id ? 'a' : 'b';
+const chatHidden = c => chatMember(c) && !!c['hidden_' + chatSide(c)];
+const chatCleared = c => chatMember(c) ? c['cleared_' + chatSide(c)] : null;
 const chatNm = id => chatNames[id] || 'user';
 const chatTime = ts => new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 const chatIsOpen = () => document.getElementById('chatModal').style.display === 'flex';
@@ -2086,13 +2123,16 @@ async function chatStart() {
   document.getElementById('chatTabAll').style.display = isAdmin ? '' : 'none';
   const { data } = await sb.from('profiles').select('id,display_name');
   (data || []).forEach(p => chatNames[p.id] = p.display_name || 'user');
+  document.getElementById('chatEmoji').innerHTML = CHAT_EMOJI.map(e => `<button onclick="chatAddEmoji('${e}')">${e}</button>`).join('');
   await chatRefresh();
   if (chatChan) sb.removeChannel(chatChan);
   chatChan = sb.channel('chat-' + currentUser.id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatOnNew(p.new))
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, p => chatOnUpdate(p.new))
     .subscribe();
   clearInterval(chatTimer);
   chatTimer = setInterval(chatRefresh, 20000);
+  supportStart();
 }
 
 function chatStop() {
@@ -2101,6 +2141,7 @@ function chatStop() {
   chatConvs = []; chatMsgs = []; chatActive = null; chatUnreadMap = {}; chatAttach = null; chatTabSel = 'mine';
   closeModal('chatModal');
   chatBadge();
+  supportStop();
 }
 
 async function chatRefresh() {
@@ -2108,16 +2149,16 @@ async function chatRefresh() {
   const { data, error } = await sb.from('chat_conversations').select('*').order('last_message_at', { ascending: false });
   if (error) { console.log('chat error:', error.message); return; }
   chatConvs = data || [];
-  const mine = chatConvs.filter(chatMember).map(c => c.id);
+  const mine = chatConvs.filter(c => chatMember(c) && !chatHidden(c)).map(c => c.id);
   chatUnreadMap = {};
   if (mine.length) {
     const { data: um } = await sb.from('chat_messages').select('conversation_id')
       .in('conversation_id', mine).neq('sender_id', currentUser.id).is('read_at', null);
     (um || []).forEach(m => chatUnreadMap[m.conversation_id] = (chatUnreadMap[m.conversation_id] || 0) + 1);
   }
-  if (chatActive) chatActive = chatConvs.find(c => c.id === chatActive.id) || chatActive;
+  if (chatActive) chatActive = chatConvs.find(c => c.id === chatActive.id) || null;
   chatBadge();
-  if (chatIsOpen()) chatRenderList();
+  if (chatIsOpen()) { chatRenderList(); if (!chatActive) chatRenderThread(); }
 }
 
 function chatBadge() {
@@ -2130,9 +2171,7 @@ function chatBadge() {
 function openChat() {
   const sel = document.getElementById('chatUserSel');
   const users = Object.entries(chatNames).filter(([id]) => id !== currentUser.id).sort((a, b) => a[1].localeCompare(b[1]));
-  sel.innerHTML = users.length
-    ? users.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('')
-    : '<option value="">No other users yet</option>';
+  sel.innerHTML = users.length ? users.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('') : '<option value="">No other users yet</option>';
   document.getElementById('chatModal').style.display = 'flex';
   chatSetTab(chatTabSel);
   chatRefresh().then(() => { if (chatActive) chatOpenConv(chatActive.id); else chatRenderThread(); });
@@ -2147,7 +2186,7 @@ function chatSetTab(t) {
 }
 
 function chatRenderList() {
-  const list = chatConvs.filter(c => chatTabSel === 'mine' ? chatMember(c) : !chatMember(c));
+  const list = chatConvs.filter(c => chatTabSel === 'mine' ? (chatMember(c) && !chatHidden(c)) : !chatMember(c));
   const el = document.getElementById('chatList');
   if (!list.length) {
     el.innerHTML = '<div class="bin-empty">' + (chatTabSel === 'mine' ? 'No chats yet. Pick a user above and press CHAT.' : 'No chats between other users yet') + '</div>';
@@ -2171,6 +2210,9 @@ async function chatStartWith() {
     const { data, error } = await sb.from('chat_conversations').insert({ user_a: currentUser.id, user_b: other }).select().single();
     if (error) { showToast('Error: ' + error.message, 'error'); await chatRefresh(); return; }
     c = data; chatConvs.unshift(c);
+  } else if (chatHidden(c)) {
+    await sb.rpc('chat_unhide', { cid: c.id });
+    c['hidden_' + chatSide(c)] = false;
   }
   chatSetTab('mine');
   chatOpenConv(c.id);
@@ -2181,11 +2223,22 @@ async function chatOpenConv(id) {
   if (!c) return;
   chatActive = c; chatAttach = null; chatRenderAttach();
   document.getElementById('chatWrap').classList.add('open');
-  const { data, error } = await sb.from('chat_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(300);
+  let q = sb.from('chat_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(300);
+  const cl = chatCleared(c);
+  if (cl) q = q.gt('created_at', cl);
+  const { data, error } = await q;
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
   chatMsgs = data || [];
+  await chatLoadArchive();
   chatRenderThread(); chatRenderList();
   chatMarkRead();
+}
+
+async function chatLoadArchive() {
+  chatArch = {};
+  if (!isAdmin || !chatActive) return;
+  const { data } = await sb.from('chat_unsent').select('*').eq('conversation_id', chatActive.id);
+  (data || []).forEach(a => chatArch[a.message_id] = a);
 }
 
 function chatBack() { document.getElementById('chatWrap').classList.remove('open'); }
@@ -2202,37 +2255,49 @@ async function chatMarkRead() {
 
 function chatRenderThread() {
   const head = document.getElementById('chatHeadTitle');
+  const acts = document.getElementById('chatHeadActions');
   const notice = document.getElementById('chatNotice');
   const comp = document.getElementById('chatCompose');
   const el = document.getElementById('chatMsgsEl');
+  const priv = 'Privacy notice: the admin can review all messages in this chat room, including unsent ones.';
   if (!chatActive) {
-    head.textContent = 'Select a chat';
-    notice.style.display = isAdmin ? 'none' : 'block';
-    notice.textContent = 'Privacy notice: messages in this chat room can be reviewed by the admin.';
+    head.textContent = 'Select a chat'; acts.innerHTML = '';
+    notice.style.display = isAdmin ? 'none' : 'block'; notice.textContent = priv;
     comp.style.display = 'none';
     el.innerHTML = '<div class="bin-empty">Select a chat on the left or start a new one</div>';
     return;
   }
   const member = chatMember(chatActive);
   head.textContent = chatTitle(chatActive);
+  acts.innerHTML = member
+    ? '<button class="phi-btn" style="color:var(--red)" onclick="chatDeleteChat()">DELETE CHAT</button>'
+    : (isAdmin ? '<button class="phi-btn" style="color:var(--red)" onclick="chatAdminDelete()">DELETE CONVERSATION</button>' : '');
   notice.style.display = (!isAdmin || !member) ? 'block' : 'none';
-  notice.textContent = member
-    ? 'Privacy notice: messages in this chat room can be reviewed by the admin.'
-    : 'Admin monitoring view: read-only. You are not part of this conversation.';
+  notice.textContent = member ? priv : 'Admin monitoring view: read-only. You are not part of this conversation.';
   comp.style.display = member ? 'block' : 'none';
   if (!chatMsgs.length) { el.innerHTML = '<div class="bin-empty">No messages yet. Say hello!</div>'; return; }
   el.innerHTML = chatMsgs.map(m => {
     const mine = member && m.sender_id === currentUser.id;
-    const text = m.body ? `<div class="chat-text">${esc(m.body)}</div>` : '';
-    const att = m.attachment_code != null ? `<div class="chat-att">
-        <div class="chat-att-name"><i class="ti ti-file-code"></i> ${esc(m.attachment_name || 'code.txt')} <span>${m.attachment_code.split('\n').length} lines</span></div>
+    const del = !!m.deleted_at;
+    let inner;
+    if (del) {
+      const a = isAdmin ? chatArch[m.id] : null;
+      inner = '<div class="chat-text chat-unsent">This message was unsent</div>' +
+        (a ? `<div class="chat-arch"><b>Admin only, original:</b> ${esc(a.body || '')}${a.attachment_name ? ' [file: ' + esc(a.attachment_name) + ']' : ''}</div>` : '');
+    } else {
+      const text = m.body ? `<div class="chat-text">${esc(m.body)}</div>` : '';
+      const att = m.attachment_code != null ? `<div class="chat-att">
+        <div class="chat-att-name">${esc(m.attachment_name || 'code.txt')} <span>${m.attachment_code.split('\n').length} lines</span></div>
         <div class="chat-att-actions">
           <button class="phi-btn" onclick="chatToggleCode('${m.id}')">VIEW</button>
           <button class="phi-btn" onclick="chatCopyCode('${m.id}')">COPY</button>
           <button class="phi-btn" onclick="chatDownload('${m.id}')">DOWNLOAD</button>
         </div>
         <pre class="chat-code" id="cc_${m.id}" style="display:none"></pre></div>` : '';
-    return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatTime(m.created_at)}</div><div class="chat-bubble">${text}${att}</div></div>`;
+      inner = text + att;
+    }
+    const un = mine && !del ? ` · <button class="chat-unsend" onclick="chatUnsend('${m.id}')">Unsend</button>` : '';
+    return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatTime(m.created_at)}${un}</div><div class="chat-bubble">${inner}</div></div>`;
   }).join('');
   el.scrollTop = el.scrollHeight;
 }
@@ -2252,11 +2317,46 @@ async function chatSend() {
   btn.disabled = false;
   if (error) { showToast('Send error: ' + error.message, 'error'); return; }
   ta.value = ''; chatAttach = null; chatRenderAttach();
+  document.getElementById('chatEmoji').style.display = 'none';
   if (!chatMsgs.some(x => x.id === data.id)) chatMsgs.push(data);
   chatActive.last_preview = body ? body.slice(0, 80) : '[file] ' + (data.attachment_name || '');
   chatActive.last_message_at = data.created_at;
+  chatActive['hidden_a'] = false; chatActive['hidden_b'] = false;
   chatConvs.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
   chatRenderThread(); chatRenderList();
+}
+
+async function chatUnsend(id) {
+  if (!confirm('Unsend this message? It will be removed for both of you.')) return;
+  const { error } = await sb.rpc('chat_unsend', { mid: id });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  const m = chatMsgById(id);
+  if (m) { m.deleted_at = new Date().toISOString(); m.body = ''; m.attachment_name = null; m.attachment_code = null; }
+  await chatLoadArchive();
+  chatRenderThread(); chatRefresh();
+  showToast('Message unsent');
+}
+
+async function chatDeleteChat() {
+  if (!chatActive || !chatMember(chatActive)) return;
+  if (!confirm('Delete this chat from your side? The other person keeps their copy. If they message you again, only new messages will appear.')) return;
+  const { error } = await sb.rpc('chat_clear', { cid: chatActive.id });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  chatActive = null; chatMsgs = [];
+  chatBack();
+  await chatRefresh();
+  chatRenderThread();
+  showToast('Chat deleted', 'error');
+}
+
+async function chatAdminDelete() {
+  if (!isAdmin || !chatActive) return;
+  if (!confirm('Permanently delete this whole conversation for BOTH users? This cannot be undone.')) return;
+  const { error } = await sb.from('chat_conversations').delete().eq('id', chatActive.id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  chatActive = null; chatMsgs = []; chatBack();
+  await chatRefresh(); chatRenderThread();
+  showToast('Conversation deleted', 'error');
 }
 
 async function chatOnNew(m) {
@@ -2268,6 +2368,29 @@ async function chatOnNew(m) {
   const c = chatConvs.find(x => x.id === m.conversation_id);
   const viewing = chatIsOpen() && chatActive && chatActive.id === m.conversation_id;
   if (c && chatMember(c) && m.sender_id !== currentUser.id && !viewing) showToast('New message from ' + chatNm(m.sender_id), 'warn');
+}
+
+async function chatOnUpdate(m) {
+  if (chatActive && m.conversation_id === chatActive.id) {
+    const x = chatMsgById(m.id);
+    if (x) {
+      Object.assign(x, m);
+      if (m.deleted_at) await chatLoadArchive();
+      chatRenderThread();
+    }
+  }
+  chatRefresh();
+}
+
+function chatToggleEmoji() {
+  const e = document.getElementById('chatEmoji');
+  e.style.display = e.style.display === 'grid' ? 'none' : 'grid';
+}
+function chatAddEmoji(e) {
+  const ta = document.getElementById('chatInput');
+  const s = ta.selectionStart ?? ta.value.length, en = ta.selectionEnd ?? ta.value.length;
+  ta.value = ta.value.slice(0, s) + e + ta.value.slice(en);
+  ta.focus(); ta.selectionStart = ta.selectionEnd = s + e.length;
 }
 
 function chatPickFile(e) {
@@ -2287,7 +2410,7 @@ function chatRenderAttach() {
   const el = document.getElementById('chatAttachChip');
   if (!el) return;
   el.innerHTML = chatAttach
-    ? `<span class="vis-tag vis-public"><i class="ti ti-paperclip"></i> ${esc(chatAttach.name)}</span><button class="phi-btn" onclick="chatAttach=null;chatRenderAttach()">REMOVE</button>`
+    ? `<span class="vis-tag vis-public">${esc(chatAttach.name)}</span><button class="phi-btn" onclick="chatAttach=null;chatRenderAttach()">REMOVE</button>`
     : '';
 }
 
@@ -2309,6 +2432,175 @@ function chatDownload(id) {
   a.download = (m.attachment_name || 'code.txt').replace(/[^\w.\-]/g, '_');
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ============================================================
+//  SUPPORT CENTER (tickets with threads)
+// ============================================================
+let supTickets = [], supMsgs = {}, supActive = null, supFilter = 'open', supChan = null, supTimer = null;
+const supOpen = () => document.getElementById('supportModal').style.display === 'flex';
+
+function supThread(t, msgs, vAdmin) {
+  const items = [{ admin: false, body: t.message, at: t.created_at }];
+  if (t.admin_reply && !msgs.some(m => m.sender_id !== t.user_id)) items.push({ admin: true, body: t.admin_reply, at: t.replied_at || t.created_at });
+  msgs.forEach(m => items.push({ admin: m.sender_id !== t.user_id, body: m.body, at: m.created_at }));
+  return '<div class="sup-thread">' + items.map(i => {
+    const mine = vAdmin ? i.admin : !i.admin;
+    const who = i.admin ? 'Admin' : (vAdmin ? chatNm(t.user_id) : 'You');
+    return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-who">${esc(who)} · ${chatTime(i.at)}</div><div class="chat-bubble"><div class="chat-text">${esc(i.body)}</div></div></div>`;
+  }).join('') + '</div>';
+}
+
+function supLast(t) {
+  const m = supMsgs[t.id] || [];
+  if (m.length) { const l = m[m.length - 1]; return { admin: l.sender_id !== t.user_id, at: l.created_at, body: l.body }; }
+  return t.admin_reply ? { admin: true, at: t.replied_at || t.created_at, body: t.admin_reply } : { admin: false, at: t.created_at, body: t.message };
+}
+
+async function supportStart() {
+  if (!isAdmin) return;
+  document.getElementById('supportBtn').style.display = '';
+  await supportLoad();
+  if (supChan) sb.removeChannel(supChan);
+  supChan = sb.channel('support-admin')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, () => supportLoad())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'feedback' }, () => supportLoad())
+    .subscribe();
+  clearInterval(supTimer);
+  supTimer = setInterval(supportLoad, 30000);
+}
+function supportStop() {
+  clearInterval(supTimer);
+  if (supChan) { sb.removeChannel(supChan); supChan = null; }
+  supTickets = []; supMsgs = {}; supActive = null;
+  const b = document.getElementById('supportBtn'); if (b) b.style.display = 'none';
+  closeModal('supportModal');
+}
+
+async function supportLoad() {
+  if (!isAdmin || !currentUser) return;
+  const [{ data: t }, { data: m }] = await Promise.all([
+    sb.from('feedback').select('*').order('created_at', { ascending: false }).limit(300),
+    sb.from('support_messages').select('*').order('created_at', { ascending: true }).limit(3000)
+  ]);
+  supTickets = t || []; supMsgs = {};
+  (m || []).forEach(x => (supMsgs[x.ticket_id] = supMsgs[x.ticket_id] || []).push(x));
+  adminOpenCount = supTickets.filter(x => x.status === 'open').length;
+  fbBadges();
+  const waiting = supTickets.filter(x => x.status === 'open' && !supLast(x).admin).length;
+  const bd = document.getElementById('supportBadge');
+  if (bd) { bd.textContent = waiting; bd.style.display = waiting ? 'flex' : 'none'; }
+  if (supOpen()) { supRenderList(); supRenderThread(); }
+}
+
+function openSupport() {
+  document.getElementById('supportModal').style.display = 'flex';
+  supSetFilter(supFilter);
+  supRenderThread();
+  supportLoad();
+}
+
+function supSetFilter(f) {
+  supFilter = f;
+  const c = s => supTickets.filter(x => x.status === s).length;
+  document.getElementById('supTabOpen').textContent = 'OPEN (' + c('open') + ')';
+  document.getElementById('supTabResolved').textContent = 'RESOLVED (' + c('resolved') + ')';
+  document.getElementById('supTabAll').textContent = 'ALL (' + supTickets.length + ')';
+  ['Open', 'Resolved', 'All'].forEach(n => document.getElementById('supTab' + n).classList.toggle('active', n.toLowerCase() === f));
+  supRenderList();
+}
+
+function supRenderList() {
+  const c = s => supTickets.filter(x => x.status === s).length;
+  document.getElementById('supTabOpen').textContent = 'OPEN (' + c('open') + ')';
+  document.getElementById('supTabResolved').textContent = 'RESOLVED (' + c('resolved') + ')';
+  document.getElementById('supTabAll').textContent = 'ALL (' + supTickets.length + ')';
+  const list = supTickets.filter(t => supFilter === 'all' || t.status === supFilter)
+    .map(t => ({ t, l: supLast(t) })).sort((a, b) => new Date(b.l.at) - new Date(a.l.at));
+  const el = document.getElementById('supList');
+  if (!list.length) { el.innerHTML = '<div class="bin-empty">No tickets here</div>'; return; }
+  el.innerHTML = list.map(({ t, l }) => {
+    const wait = t.status === 'open' && !l.admin;
+    return `<div class="chat-row${supActive === t.id ? ' active' : ''}" onclick="supOpenTicket('${t.id}')">
+      <div class="chat-row-top"><span class="chat-row-name">${esc(fbTicketId(t.id))} · ${esc(chatNm(t.user_id))}</span>${wait ? '<span class="vis-tag sup-tag-wait">REPLY</span>' : ''}</div>
+      <div class="chat-row-prev"><b>${esc(FB_CATS[t.category] || 'FEEDBACK')}</b> · ${esc(l.body)}</div>
+      <div class="chat-row-time">${t.status === 'resolved' ? 'RESOLVED · ' : ''}${chatTime(l.at)}</div>
+    </div>`;
+  }).join('');
+}
+
+function supOpenTicket(id) {
+  supActive = id;
+  document.getElementById('supWrap').classList.add('open');
+  supRenderList(); supRenderThread();
+}
+
+function supRenderThread() {
+  const t = supTickets.find(x => x.id === supActive);
+  const head = document.getElementById('supHeadTitle'), acts = document.getElementById('supHeadActions');
+  const el = document.getElementById('supMsgsEl'), comp = document.getElementById('supCompose');
+  if (!t) {
+    head.textContent = 'Select a ticket'; acts.innerHTML = ''; comp.style.display = 'none';
+    el.innerHTML = '<div class="bin-empty">Select a ticket on the left</div>';
+    return;
+  }
+  head.textContent = `${fbTicketId(t.id)} · ${chatNm(t.user_id)} · ${FB_CATS[t.category] || 'FEEDBACK'}`;
+  acts.innerHTML = (t.status === 'open'
+    ? '<button class="phi-btn" onclick="supSetStatus(\'resolved\')">MARK RESOLVED</button>'
+    : '<button class="phi-btn" onclick="supSetStatus(\'open\')">REOPEN</button>') +
+    '<button class="phi-btn" style="color:var(--red)" onclick="supDelete()">DELETE</button>';
+  comp.style.display = 'block';
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  el.innerHTML = supThread(t, supMsgs[t.id] || [], true);
+  if (atBottom || el.dataset.t !== t.id) el.scrollTop = el.scrollHeight;
+  el.dataset.t = t.id;
+}
+
+async function supReply(resolve) {
+  const t = supTickets.find(x => x.id === supActive);
+  if (!t) return;
+  const ta = document.getElementById('supInput'), body = ta.value.trim();
+  if (!body && !resolve) { showToast('Write a reply first!', 'error'); return; }
+  if (body) {
+    const { error } = await sb.from('support_messages').insert({ ticket_id: t.id, sender_id: currentUser.id, body });
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    ta.value = '';
+  }
+  if (resolve) {
+    const { error } = await sb.from('feedback').update({ status: 'resolved' }).eq('id', t.id);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  }
+  await supportLoad();
+  showToast(resolve ? 'Reply sent and ticket resolved' : 'Reply sent');
+}
+
+async function supSetStatus(s) {
+  const { error } = await sb.from('feedback').update({ status: s }).eq('id', supActive);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await supportLoad();
+  showToast(s === 'resolved' ? 'Ticket resolved' : 'Ticket reopened');
+}
+
+async function supDelete() {
+  if (!confirm('Delete this ticket and its whole conversation permanently?')) return;
+  const { error } = await sb.from('feedback').delete().eq('id', supActive);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  supActive = null;
+  document.getElementById('supWrap').classList.remove('open');
+  await supportLoad();
+  showToast('Ticket deleted', 'error');
+}
+
+// user side: reply inside the widget
+async function fbUserReply(id) {
+  const ta = document.getElementById('fbrep_' + id);
+  const body = ta.value.trim();
+  if (!body) return;
+  const { error } = await sb.from('support_messages').insert({ ticket_id: id, sender_id: currentUser.id, body });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  ta.value = '';
+  await fbRefresh();
+  showToast('Reply sent');
 }
 
 init();
