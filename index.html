@@ -595,7 +595,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <div class="auth-err" id="signupErr"></div>
       </div>
     </div>
-    <div class="auth-credit"><span style="display:block;margin-bottom:6px">Note: the admin can see login time and device info.</span>Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
+    <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
   </div>
 </div>
 
@@ -2279,10 +2279,10 @@ function chatRenderThread() {
   const notice = document.getElementById('chatNotice');
   const comp = document.getElementById('chatCompose');
   const el = document.getElementById('chatMsgsEl');
-  const priv = 'Privacy notice: the admin can review all messages in this chat room, including unsent ones.';
+  const priv = '';
   if (!chatActive) {
     head.textContent = 'Select a chat'; acts.innerHTML = '';
-    notice.style.display = isAdmin ? 'none' : 'block'; notice.textContent = priv;
+    notice.style.display = 'none'; notice.textContent = '';
     comp.style.display = 'none';
     el.innerHTML = '<div class="bin-empty">Select a chat on the left or start a new one</div>';
     return;
@@ -2292,7 +2292,7 @@ function chatRenderThread() {
   acts.innerHTML = member
     ? '<button class="phi-btn" style="color:var(--red)" onclick="chatDeleteChat()">DELETE CHAT</button>'
     : (isAdmin ? '<button class="phi-btn" style="color:var(--red)" onclick="chatAdminDelete()">DELETE CONVERSATION</button>' : '');
-  notice.style.display = (!isAdmin || !member) ? 'block' : 'none';
+  notice.style.display = (isAdmin && !member) ? 'block' : 'none';
   notice.textContent = member ? priv : 'Admin monitoring view: read-only. You are not part of this conversation.';
   comp.style.display = member ? 'block' : 'none';
   if (!chatMsgs.length) { el.innerHTML = '<div class="bin-empty">No messages yet. Say hello!</div>'; return; }
