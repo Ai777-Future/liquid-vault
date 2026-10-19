@@ -455,6 +455,22 @@ html[data-theme="light"] .ic-sun{display:none}
 .tv-badge svg{width:22px;height:22px;display:block;flex-shrink:0}
 .tv-inline{display:inline-flex;align-items:center;gap:6px;vertical-align:middle}
 .tv-inline svg{width:16px;height:16px;display:block}
+
+/* ===== RECYCLE BIN ===== */
+.bin-btn{width:100%;background:transparent;border:1px solid color-mix(in srgb,var(--red) 45%,transparent);color:var(--red);font-family:var(--ui);font-size:13px;font-weight:500;letter-spacing:.03em;padding:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;border-radius:5px}
+.bin-btn:hover{background:color-mix(in srgb,var(--red) 12%,transparent)}
+.bin-count{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--red);color:#fff;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center}
+.bin-note{font-size:12.5px;color:var(--text3);line-height:1.5}
+.bin-list{display:flex;flex-direction:column;gap:10px}
+.bin-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bin-info{flex:1;min-width:200px}
+.bin-name{font-size:14px;font-weight:600;color:var(--text);word-break:break-word}
+.bin-meta{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--text3);margin-top:4px;align-items:center}
+.bin-actions{display:flex;gap:8px}
+.bin-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.btn-danger{background:transparent;border:1px solid var(--red);color:var(--red);font-family:var(--ui);font-size:13px;font-weight:500;letter-spacing:.03em;padding:10px 20px;cursor:pointer;border-radius:5px;transition:all .15s}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-danger:disabled{opacity:.4;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -551,6 +567,7 @@ html[data-theme="light"] .ic-sun{display:none}
         <i class="ti ti-shield"></i> ADMIN VIEW
       </button>
     </div>
+    <div class="sidebar-section" style="padding-top:0"><button class="bin-btn" id="binBtn" onclick="openBin()"><i class="ti ti-trash"></i> RECYCLE BIN <span class="bin-count" id="binCount">0</span></button></div>
     <div class="folder-list" id="folderList"></div>
   </div>
 
@@ -770,6 +787,24 @@ html[data-theme="light"] .ic-sun{display:none}
   </div>
 </div>
 
+<!-- RECYCLE BIN MODAL -->
+<div id="binModal" style="display:none" class="modal-overlay">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--red)">// RECYCLE BIN</div>
+      <button class="modal-close" onclick="closeModal('binModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="bin-note" id="binNote"></div>
+      <div id="binBody"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('binModal')">CLOSE</button>
+      <button class="btn-danger" id="binEmptyBtn" onclick="emptyBin()">EMPTY BIN</button>
+    </div>
+  </div>
+</div>
+
 <!-- PROMPT HISTORY MODAL -->
 <div id="promptHistoryModal" style="display:none" class="modal-overlay">
   <div class="modal" style="max-width:760px">
@@ -862,6 +897,8 @@ async function bootApp(user) {
 
   await loadFolders();
   await loadSections();
+  await purgeExpiredTrash();
+  await loadTrash();
   renderFolders();
   renderSections();
   updateStats();
@@ -913,7 +950,7 @@ async function doSignup() {
 async function doLogout() {
   await sb.auth.signOut();
   currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
-  folders = []; sections = [];
+  folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
   fbStop();
@@ -925,12 +962,12 @@ async function doLogout() {
 //  DATA LOADING
 // ============================================================
 async function loadFolders() {
-  const { data } = await sb.from('folders').select('*').eq('user_id', currentUser.id).order('created_at');
+  const { data } = await sb.from('folders').select('*').eq('user_id', currentUser.id).is('deleted_at', null).order('created_at');
   folders = data || [];
 }
 
 async function loadSections() {
-  const { data } = await sb.from('sections').select('*').eq('user_id', currentUser.id).order('updated_at', { ascending: false });
+  const { data } = await sb.from('sections').select('*').eq('user_id', currentUser.id).is('deleted_at', null).order('updated_at', { ascending: false });
   sections = data || [];
 }
 
@@ -1000,15 +1037,24 @@ async function createFolder(name) {
 async function deleteFolder(id, e) {
   e.stopPropagation();
   const f = folders.find(x => x.id === id);
+  if (!f) return;
   const count = sections.filter(s => s.folder_id === id).length;
-  if (count > 0 && !confirm(`Delete folder "${f.name}" and its ${count} section(s)?`)) return;
-  await sb.from('sections').delete().eq('folder_id', id);
-  await sb.from('folders').delete().eq('id', id);
+  if (!confirm(`Move folder "${f.name}" and its ${count} section(s) to the Recycle Bin?`)) return;
+  const ts = new Date().toISOString();
+  if (count > 0) {
+    const { error: e1 } = await sb.from('sections')
+      .update({ deleted_at: ts, deleted_with_folder: true })
+      .eq('folder_id', id).is('deleted_at', null);
+    if (e1) { showToast('Error: ' + e1.message, 'error'); return; }
+  }
+  const { error } = await sb.from('folders').update({ deleted_at: ts }).eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
   folders = folders.filter(x => x.id !== id);
   sections = sections.filter(s => s.folder_id !== id);
   if (activeFolderId === id) activeFolderId = null;
+  await loadTrash();
   renderFolders(); renderSections(); updateStats();
-  showToast('Folder deleted', 'error');
+  showToast('Folder moved to Recycle Bin', 'warn');
 }
 
 // ============================================================
@@ -1194,13 +1240,18 @@ async function saveSection(){
   closeModal('addModal');
 }
 
-async function deleteSection(id){
-  const s=sections.find(x=>x.id===id);
-  if(!confirm(`Delete "${s.name}"?`))return;
-  await sb.from('sections').delete().eq('id',id);
-  sections=sections.filter(x=>x.id!==id);
-  renderFolders();renderSections();updateStats();
-  showToast('Section deleted','error');
+async function deleteSection(id) {
+  const s = sections.find(x => x.id === id);
+  if (!s) return;
+  if (!confirm(`Move "${s.name}" to the Recycle Bin?`)) return;
+  const { error } = await sb.from('sections')
+    .update({ deleted_at: new Date().toISOString(), deleted_with_folder: false })
+    .eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  sections = sections.filter(x => x.id !== id);
+  await loadTrash();
+  renderFolders(); renderSections(); updateStats();
+  showToast('Section moved to Recycle Bin', 'warn');
 }
 
 // ============================================================
@@ -1273,7 +1324,7 @@ async function setAllMineVisibility(makePublic){
     ?'Make ALL of your own sections public? Everyone will see them in the Public Library.'
     :'Make ALL of your own sections private? Other users will no longer see them in the Public Library.';
   if(!confirm(msg))return;
-  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('user_id',currentUser.id).select('id');
+  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('user_id',currentUser.id).is('deleted_at',null).select('id');
   if(error){showToast('Error: '+error.message,'error');return;}
   sections.forEach(x=>{x.is_public=makePublic;});
   adminSectionsCache.forEach(x=>{if(x.user_id===currentUser.id)x.is_public=makePublic;});
@@ -1288,7 +1339,7 @@ async function setAllLibraryVisibility(makePublic){
     ?"Make EVERY user's sections public? All sections of all users will appear in the Public Library."
     :'Make ALL sections currently in the Public Library private? Nobody except their owners will see them.';
   if(!confirm(msg))return;
-  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('is_public',!makePublic).select('id');
+  const{data,error}=await sb.from('sections').update({is_public:makePublic}).eq('is_public',!makePublic).is('deleted_at',null).select('id');
   if(error){showToast('Error: '+error.message,'error');return;}
   const count=(data||[]).length;
   if(!count){showToast('No sections were changed','warn');return;}
@@ -1315,9 +1366,9 @@ async function loadAdminData(){
   // Load all profiles
   const{data:profiles}=await sb.from('profiles').select('*').order('created_at');
   // Load all sections (admin RLS allows this)
-  const{data:allSections}=await sb.from('sections').select('*').order('updated_at',{ascending:false});
+  const{data:allSections}=await sb.from('sections').select('*').is('deleted_at',null).order('updated_at',{ascending:false});
   // Load all folders
-  const{data:allFolders}=await sb.from('folders').select('*');
+  const{data:allFolders}=await sb.from('folders').select('*').is('deleted_at',null);
 
   adminSectionsCache = allSections||[];
 
@@ -1387,7 +1438,7 @@ async function loadAdminData(){
 // ============================================================
 async function loadPublicSections() {
   const [{ data: secs, error }, { data: profs }] = await Promise.all([
-    sb.from('sections').select('*').eq('is_public', true).order('updated_at', { ascending: false }).limit(300),
+    sb.from('sections').select('*').eq('is_public', true).is('deleted_at', null).order('updated_at', { ascending: false }).limit(300),
     sb.from('profiles').select('id, display_name')
   ]);
   if (error) { showToast('Library error: ' + error.message, 'error'); publicSections = []; return; }
@@ -1471,6 +1522,165 @@ async function togglePublicLibrary() {
 }
 
 // ============================================================
+//  RECYCLE BIN
+// ============================================================
+const TRASH_DAYS = 30;           // items are removed automatically after this many days
+let trashFolders = [], trashSections = [];
+
+async function loadTrash() {
+  const [{ data: f }, { data: s }] = await Promise.all([
+    sb.from('folders').select('*').eq('user_id', currentUser.id).not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+    sb.from('sections').select('*').eq('user_id', currentUser.id).not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+  ]);
+  trashFolders = f || [];
+  trashSections = s || [];
+  updateBinBadge();
+}
+
+async function purgeExpiredTrash() {
+  const cutoff = new Date(Date.now() - TRASH_DAYS * 864e5).toISOString();
+  await sb.from('sections').delete().eq('user_id', currentUser.id).lt('deleted_at', cutoff);
+  const { data: oldFolders } = await sb.from('folders').select('id').eq('user_id', currentUser.id).lt('deleted_at', cutoff);
+  for (const f of (oldFolders || [])) {
+    const { count } = await sb.from('sections').select('id', { count: 'exact', head: true }).eq('folder_id', f.id);
+    if (!count) await sb.from('folders').delete().eq('id', f.id);
+  }
+}
+
+function binVisibleSections() {
+  return trashSections.filter(s => !(s.deleted_with_folder && trashFolders.some(f => f.id === s.folder_id)));
+}
+
+function updateBinBadge() {
+  const n = trashFolders.length + binVisibleSections().length;
+  const el = document.getElementById('binCount');
+  if (!el) return;
+  el.textContent = n;
+  el.style.display = n ? 'flex' : 'none';
+}
+
+async function openBin() {
+  show('binModal');
+  renderBin();
+  await loadTrash();
+  renderBin();
+}
+
+function binDaysLeft(ts) {
+  const used = Math.floor((Date.now() - new Date(ts).getTime()) / 864e5);
+  return Math.max(0, TRASH_DAYS - used);
+}
+
+function renderBin() {
+  const body = document.getElementById('binBody');
+  const secs = binVisibleSections();
+  document.getElementById('binNote').textContent =
+    `Deleted items stay here for ${TRASH_DAYS} days. Restore them any time, or delete them forever.`;
+  document.getElementById('binEmptyBtn').disabled = !(trashFolders.length || secs.length);
+
+  if (!trashFolders.length && !secs.length) {
+    body.innerHTML = '<div class="bin-empty"><i class="ti ti-trash" style="font-size:40px;opacity:.4;display:block;margin-bottom:10px"></i>Recycle Bin is empty</div>';
+    return;
+  }
+
+  const fmt = ts => new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+  const folderRows = trashFolders.map(f => {
+    const n = trashSections.filter(s => s.folder_id === f.id && s.deleted_with_folder).length;
+    return `<div class="bin-item">
+      <div class="bin-info">
+        <div class="bin-name"><i class="ti ti-folder"></i> ${esc(f.name)}</div>
+        <div class="bin-meta"><span class="card-tag tag-template">FOLDER</span><span>${n} section(s) inside</span><span>Deleted ${fmt(f.deleted_at)}</span><span>${binDaysLeft(f.deleted_at)} days left</span></div>
+      </div>
+      <div class="bin-actions">
+        <button class="phi-btn" onclick="restoreFolder('${f.id}')"><i class="ti ti-restore"></i> RESTORE</button>
+        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('folder','${f.id}')"><i class="ti ti-trash-x"></i> DELETE FOREVER</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const sectionRows = secs.map(s => {
+    const tagClass = { section: 'tag-section', header: 'tag-header', snippet: 'tag-snippet', template: 'tag-template' }[s.type] || 'tag-section';
+    const parent = [...folders, ...trashFolders].find(f => f.id === s.folder_id);
+    return `<div class="bin-item">
+      <div class="bin-info">
+        <div class="bin-name">${esc(s.name)}</div>
+        <div class="bin-meta"><span class="card-tag ${tagClass}">${esc(s.type).toUpperCase()}</span>${parent ? `<span>Folder: ${esc(parent.name)}</span>` : ''}<span>Deleted ${fmt(s.deleted_at)}</span><span>${binDaysLeft(s.deleted_at)} days left</span></div>
+        ${s.description ? `<div class="bin-meta">${esc(s.description)}</div>` : ''}
+      </div>
+      <div class="bin-actions">
+        <button class="phi-btn" onclick="restoreSection('${s.id}')"><i class="ti ti-restore"></i> RESTORE</button>
+        <button class="phi-btn" style="color:var(--red)" onclick="deleteForever('section','${s.id}')"><i class="ti ti-trash-x"></i> DELETE FOREVER</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = `<div class="bin-list">${folderRows}${sectionRows}</div>`;
+}
+
+async function refreshAfterBinChange() {
+  await Promise.all([loadFolders(), loadSections(), loadTrash()]);
+  renderFolders(); renderSections(); updateStats(); renderBin();
+}
+
+async function restoreSection(id) {
+  const s = trashSections.find(x => x.id === id);
+  if (!s) return;
+  const patch = { deleted_at: null, deleted_with_folder: false };
+  const parentInBin = trashFolders.find(f => f.id === s.folder_id);
+  const parentLive = folders.find(f => f.id === s.folder_id);
+  if (parentInBin) {
+    const { error: fe } = await sb.from('folders').update({ deleted_at: null }).eq('id', parentInBin.id);
+    if (fe) { showToast('Error: ' + fe.message, 'error'); return; }
+  } else if (!parentLive) {
+    if (!folders.length) { showToast('Create a folder first, then restore', 'error'); return; }
+    patch.folder_id = folders[0].id;
+  }
+  const { error } = await sb.from('sections').update(patch).eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await refreshAfterBinChange();
+  showToast('Section restored');
+}
+
+async function restoreFolder(id) {
+  const { error } = await sb.from('folders').update({ deleted_at: null }).eq('id', id);
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  const { error: e2 } = await sb.from('sections')
+    .update({ deleted_at: null, deleted_with_folder: false })
+    .eq('folder_id', id).eq('deleted_with_folder', true);
+  if (e2) { showToast('Error: ' + e2.message, 'error'); return; }
+  await refreshAfterBinChange();
+  showToast('Folder restored with its sections');
+}
+
+async function deleteForever(kind, id) {
+  const label = kind === 'folder' ? 'this folder and all its sections' : 'this section';
+  if (!confirm(`Permanently delete ${label}? This cannot be undone.`)) return;
+  if (kind === 'folder') {
+    await sb.from('sections').delete().eq('folder_id', id).not('deleted_at', 'is', null);
+    const { error } = await sb.from('folders').delete().eq('id', id);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  } else {
+    const { error } = await sb.from('sections').delete().eq('id', id);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  }
+  await loadTrash(); renderBin();
+  showToast('Deleted permanently', 'error');
+}
+
+async function emptyBin() {
+  const total = trashFolders.length + trashSections.length;
+  if (!total) return;
+  if (!confirm(`Permanently delete everything in the Recycle Bin (${total} item(s))? This cannot be undone.`)) return;
+  const { error: e1 } = await sb.from('sections').delete().eq('user_id', currentUser.id).not('deleted_at', 'is', null);
+  if (e1) { showToast('Error: ' + e1.message, 'error'); return; }
+  const { error: e2 } = await sb.from('folders').delete().eq('user_id', currentUser.id).not('deleted_at', 'is', null);
+  if (e2) { showToast('Error: ' + e2.message, 'error'); return; }
+  await loadTrash(); renderBin();
+  showToast('Recycle Bin emptied', 'error');
+}
+
+// ============================================================
 //  STATS + UTILS
 // ============================================================
 function updateStats(){
@@ -1506,7 +1716,7 @@ function showToast(msg,type='success'){
 }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');}
+  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');}
 });
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
