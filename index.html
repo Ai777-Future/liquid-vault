@@ -718,6 +718,18 @@ html[data-theme="light"] .ic-sun{display:none}
           <button class="btn btn-ghost" onclick="setAllLibraryVisibility(false)">MAKE ALL LIBRARY SECTIONS PRIVATE</button>
           <button class="btn btn-primary" onclick="setAllLibraryVisibility(true)">MAKE ALL USERS' SECTIONS PUBLIC</button>
         </div>
+        <div class="admin-ctrl-label" style="margin-top:16px">SET STATUS: ALL PUBLIC LIBRARY SECTIONS</div>
+        <div class="admin-ctrl-row">
+          <button class="btn btn-ghost" onclick="lvBulkStatus('draft','public')">ALL DRAFT</button>
+          <button class="btn btn-ghost" onclick="lvBulkStatus('tested','public')">ALL TESTED</button>
+          <button class="btn btn-primary" onclick="lvBulkStatus('live','public')">ALL LIVE</button>
+        </div>
+        <div class="admin-ctrl-label" style="margin-top:16px">SET STATUS: EVERY SECTION OF EVERY USER</div>
+        <div class="admin-ctrl-row">
+          <button class="btn btn-ghost" onclick="lvBulkStatus('draft','all')">ALL DRAFT</button>
+          <button class="btn btn-ghost" onclick="lvBulkStatus('tested','all')">ALL TESTED</button>
+          <button class="btn btn-primary" onclick="lvBulkStatus('live','all')">ALL LIVE</button>
+        </div>
       </div>
       <div style="font-size:12px;color:var(--green);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">USER FEEDBACK / PROBLEMS</div>
       <div id="adminFeedbackList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
@@ -1293,7 +1305,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
       <button class="card-btn" onclick="viewSectionById('${s.id}',${isAdminCard})"><i class="ti ti-eye"></i> VIEW</button>
       <button class="card-btn" onclick="copyCodeById('${s.id}',${isAdminCard})"><i class="ti ti-copy"></i> COPY</button><button class="card-btn" onclick="lvDownload('${s.id}')" title="Download .liquid file">.LIQUID</button><button class="card-btn" onclick="lvSendChat('${s.id}')" title="Send in chat">SEND</button>${lvFavBtn(s)}
       ${isOwn?`<button class="card-btn vis" onclick="toggleVisibility('${s.id}')" title="${s.is_public?'Public — click to make private':'Private — click to make public'}">${s.is_public?ICON_GLOBE:ICON_LOCK}</button>`:''}
-      ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
+      ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}${isAdmin&&isAdminCard?`<button class="card-btn" onclick="lvAdminEdit('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
       ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg></button>`:''}
     </div>
   </div>`;
@@ -1381,10 +1393,10 @@ async function saveSection(){
   const code=document.getElementById('secCode').value;
   if(!name){showToast('Section name required!','error');return;}
   if(!(await lvCheckSchema(code,type)))return;
-  const folder_id=document.getElementById('secFolder').value||activeFolderId||(folders[0]?folders[0].id:null);
+  const folder_id=lvAdminTarget?lvAdminTarget.folder_id:(document.getElementById('secFolder').value||activeFolderId||(folders[0]?folders[0].id:null));
   if(!folder_id){showToast('Select or create a folder first!','error');return;}
 
-  const payload={user_id:currentUser.id,folder_id,name,type,description,code,image_data:currentImageData||null,is_public:document.getElementById('secVisibility').value==='public',tags:v('secTags').trim(),status:v('secStatus'),notes:v('secNotes'),updated_at:new Date().toISOString()};
+  const payload={user_id:lvAdminTarget?lvAdminTarget.user_id:currentUser.id,folder_id,name,type,description,code,image_data:currentImageData||null,is_public:document.getElementById('secVisibility').value==='public',tags:v('secTags').trim(),status:v('secStatus'),notes:v('secNotes'),updated_at:new Date().toISOString()};
 
   if(editingId){await lvSnapshot(editingId,code);
     const{error}=await sb.from('sections').update(payload).eq('id',editingId);
@@ -1446,11 +1458,11 @@ async function viewSectionById(id, isAdminCard=false) {
   else{imgG.style.display='none';imgE.src='';}
 
   // Only allow edit button for own sections
-  document.getElementById('editFromViewBtn').style.display = isAdminCard ? 'none' : 'flex';
+  document.getElementById('editFromViewBtn').style.display = (isAdminCard && !isAdmin) ? 'none' : 'flex';
   show('viewModal');
 }
 
-function editFromView(){closeModal('viewModal');if(viewingId&&!adminViewOn)editSection(viewingId);}
+function editFromView(){closeModal('viewModal');if(viewingId)lvAdminEdit(viewingId);}
 function copyCode(){navigator.clipboard.writeText(document.getElementById('viewCode').textContent).then(()=>{showToast('Code copied!');if(viewingSection)lvCount(viewingSection);});}
 
 async function copyCodeById(id, isAdminCard=false){
@@ -2898,7 +2910,7 @@ setInterval(() => {
 // ============================================================
 //  VAULT UPGRADE: versions, tags/status/fav, schema check, import/download, send to chat
 // ============================================================
-let lvFavOnly = false, lvVers = [];
+let lvFavOnly = false, lvVers = [], lvAdminTarget = null;
 document.getElementById('sortSelect').insertAdjacentHTML('afterend',
   '<select class="sort-select" id="statusFilter" onchange="renderSections()"><option value="">ALL STATUS</option><option value="draft">DRAFT</option><option value="tested">TESTED</option><option value="live">LIVE</option></select>' +
   '<button class="btn btn-ghost" id="favBtn" onclick="lvToggleFav()">FAVORITES</button>' +
@@ -2946,9 +2958,10 @@ function lvFillForm(s){
   document.getElementById('secStatus').value = s ? (s.status || 'draft') : 'draft';
   document.getElementById('secNotes').value = s ? (s.notes || '') : '';
   document.getElementById('histBtn').style.display = s ? '' : 'none';
+  document.getElementById('secFolder').parentElement.style.display = lvAdminTarget ? 'none' : '';
 }
-const _lvOpenAdd = openAddModal; openAddModal = function(){ _lvOpenAdd(); lvFillForm(null); };
-const _lvEdit = editSection; editSection = function(id){ _lvEdit(id); lvFillForm(sections.find(x => x.id === id)); };
+const _lvOpenAdd = openAddModal; openAddModal = function(){ lvAdminTarget = null; _lvOpenAdd(); lvFillForm(null); };
+const _lvEdit = editSection; editSection = function(id){ lvAdminTarget = null; _lvEdit(id); lvFillForm(sections.find(x => x.id === id)); };
 
 async function lvCheckSchema(code, type){
   const issues = [];
@@ -2973,7 +2986,7 @@ async function lvCheckSchema(code, type){
 }
 
 async function lvSnapshot(id, newCode){
-  const s = sections.find(x => x.id === id);
+  const s = lvFind(id);
   if (!s || (s.code || '') === (newCode || '')) return;
   await sb.from('section_versions').insert({ section_id: id, user_id: currentUser.id, name: s.name, description: s.description || '', code: s.code || '' });
 }
@@ -3046,6 +3059,51 @@ document.addEventListener('paste', e => {
   const it = [...((e.clipboardData && e.clipboardData.items) || [])].find(i => i.type.startsWith('image/'));
   if (it) { e.preventDefault(); readImageFile(it.getAsFile()); showToast('Image pasted'); }
 });
+
+
+// ============================================================
+//  ADMIN: edit any user's section + bulk status
+// ============================================================
+function lvAdminEdit(id){
+  if (sections.find(x => x.id === id)) return editSection(id);
+  if (!isAdmin) return;
+  const s = lvFind(id); if (!s) return;
+  lvAdminTarget = s; editingId = id;
+  setEl('modalTitle', '// ADMIN EDIT: ' + (s._ownerName || 'user').toUpperCase());
+  document.getElementById('secName').value = s.name;
+  document.getElementById('secType').value = s.type;
+  document.getElementById('secDesc').value = s.description || '';
+  document.getElementById('secVisibility').value = s.is_public ? 'public' : 'private';
+  document.getElementById('secCode').value = s.code || '';
+  resetImageUpload();
+  if (s.image_data) { currentImageData = s.image_data; showImagePreview(s.image_data); }
+  lvFillForm(s);
+  show('addModal');
+}
+const _lvSave = saveSection;
+saveSection = async function(){
+  const wasAdmin = !!lvAdminTarget;
+  await _lvSave();
+  if (wasAdmin && document.getElementById('addModal').style.display === 'none') {
+    lvAdminTarget = null;
+    if (adminViewOn) await loadAdminData();
+    else { await loadPublicSections(); renderSections(); }
+  }
+};
+async function lvBulkStatus(status, scope){
+  if (!isAdmin) return;
+  const label = scope === 'public' ? 'ALL sections in the Public Library' : 'EVERY section of EVERY user';
+  if (!confirm('Set ' + label + ' to ' + status.toUpperCase() + '?')) return;
+  let q = sb.from('sections').update({ status }).is('deleted_at', null).or('status.is.null,status.neq.' + status);
+  if (scope === 'public') q = q.eq('is_public', true);
+  const { data, error } = await q.select('id');
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  const n = (data || []).length;
+  if (!n) { showToast('Nothing to change, all are already ' + status, 'warn'); return; }
+  await loadSections(); await loadPublicSections(); await loadAdminData();
+  renderFolders();
+  showToast(n + ' section(s) set to ' + status.toUpperCase());
+}
 
 
 init();
