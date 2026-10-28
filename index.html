@@ -613,6 +613,7 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="topbar-right">
       <div style="font-size:12px;color:var(--purple);border:1px solid rgba(170,68,255,0.3);padding:3px 10px;letter-spacing:.04em">v3</div>
       <button class="btn btn-primary sup-btn" id="supportBtn" style="display:none" onclick="openSupport()">SUPPORT <span class="bin-count" id="supportBadge">0</span></button>
+      <button class="btn btn-primary sup-btn" id="permBtn" style="display:none" onclick="openPerms()">PERMISSIONS</button>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
       <button class="fb-bell" id="soundBtn" onclick="toggleSound()" aria-label="Notification sound"></button>
       <button class="fb-bell" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
@@ -707,7 +708,7 @@ html[data-theme="light"] .ic-sun{display:none}
     <div class="admin-panel" id="adminPanel" style="display:none">
       <div class="admin-title">ADMIN CONSOLE</div>
       <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
-      <div class="admin-ctrl">
+      <div class="admin-ctrl" id="adminCtrlBox">
         <div class="admin-ctrl-label">MY SECTIONS</div>
         <div class="admin-ctrl-row">
           <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL MY SECTIONS PRIVATE</button>
@@ -991,6 +992,35 @@ html[data-theme="light"] .ic-sun{display:none}
   </div>
 </div>
 
+<!-- PERMISSIONS MODAL (main admin only) -->
+<div id="permModal" style="display:none" class="modal-overlay">
+  <div class="modal chat-modal">
+    <div class="modal-header">
+      <div class="modal-title">// PERMISSIONS</div>
+      <button class="modal-close" onclick="closeModal('permModal')">✕</button>
+    </div>
+    <div class="chat-wrap" id="permWrap">
+      <div class="chat-side">
+        <div class="chat-new"><input class="form-input" id="permSearch" placeholder="search user..." oninput="permRenderList()" /></div>
+        <div class="chat-list" id="permList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-head">
+          <button class="modal-close chat-back" onclick="document.getElementById('permWrap').classList.remove('open')">←</button>
+          <span id="permHeadTitle">Select a user</span>
+        </div>
+        <div class="chat-msgs" id="permBody"></div>
+        <div class="chat-compose" id="permFoot" style="display:none">
+          <div class="chat-compose-row" style="justify-content:flex-end">
+            <button class="btn-cancel" onclick="permSelect(permSel)">RESET</button>
+            <button class="btn-save" onclick="permSave()">SAVE PERMISSIONS</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FEEDBACK CHAT WIDGET -->
 <button class="fb-fab" id="fbFab" onclick="fbToggle()" title="Feedback / Help" aria-label="Feedback">
   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1050,12 +1080,14 @@ async function init() {
 
 async function bootApp(user) {
   currentUser = user;
-  isAdmin = (user.email === ADMIN_EMAIL);
+  isSuper = (user.email === ADMIN_EMAIL);
+  await loadMyPerms();
+  isAdmin = hasAnyPerm();
   const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
   currentProfile = prof;
 
   // Set admin flag in DB if needed
-  if (isAdmin && prof && !prof.is_admin) {
+  if (isSuper && prof && !prof.is_admin) {
     await sb.from('profiles').update({ is_admin: true }).eq('id', user.id);
   }
 
@@ -1063,7 +1095,9 @@ async function bootApp(user) {
   const name = prof?.display_name || user.email.split('@')[0];
   setEl('userAvatar', name.slice(0,2).toUpperCase());
   setEl('userNameDisplay', name.toUpperCase());
-  if (isAdmin) { show('adminBadge'); show('adminViewBtn'); }
+  if (isAdmin) show('adminBadge');
+  if (can('admin_console')) show('adminViewBtn');
+  if (isSuper) show('permBtn');
 
   await loadFolders();
   await loadSections();
@@ -1075,7 +1109,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
-  fbStart();chatStart();presLoadLastSeen().then(presenceStart);notifyStart();
+  fbStart();chatStart();presLoadLastSeen().then(presenceStart);notifyStart();permWatchStart();
 }
 
 // ============================================================
@@ -1121,6 +1155,8 @@ async function doLogout() {
   try{await sb.rpc('touch_last_seen');}catch(e){}
   await sb.auth.signOut();
   currentUser = null; currentProfile = null; isAdmin = false; adminViewOn = false;
+  isSuper = false; myPerms = {}; permWatchStop();
+  ['adminBadge', 'adminViewBtn', 'permBtn'].forEach(id => hide(id));
   folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
@@ -1284,7 +1320,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
   const imgHtml = safeImg
     ? `<img class="card-image" src="${safeImg}" alt="${esc(s.name)}" loading="lazy" />`
     : `<div class="card-image-placeholder"><i class="ti ti-photo-off"></i><span>NO PREVIEW</span></div>`;
-  const canEdit = !isAdminCard || isAdmin;
+  const canEdit = !isAdminCard || can('edit_all_sections');
   const isOwn = !!currentUser && s.user_id === currentUser.id;
   return `<div class="section-card">
     ${imgHtml}
@@ -1305,7 +1341,7 @@ function sectionCard(s, isAdminCard, ownerName='') {
       <button class="card-btn" onclick="viewSectionById('${s.id}',${isAdminCard})"><i class="ti ti-eye"></i> VIEW</button>
       <button class="card-btn" onclick="copyCodeById('${s.id}',${isAdminCard})"><i class="ti ti-copy"></i> COPY</button><button class="card-btn" onclick="lvDownload('${s.id}')" title="Download .liquid file">.LIQUID</button><button class="card-btn" onclick="lvSendChat('${s.id}')" title="Send in chat">SEND</button>${lvFavBtn(s)}
       ${isOwn?`<button class="card-btn vis" onclick="toggleVisibility('${s.id}')" title="${s.is_public?'Public — click to make private':'Private — click to make public'}">${s.is_public?ICON_GLOBE:ICON_LOCK}</button>`:''}
-      ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}${isAdmin&&isAdminCard?`<button class="card-btn" onclick="lvAdminEdit('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
+      ${canEdit&&!isAdminCard?`<button class="card-btn" onclick="editSection('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}${can('edit_all_sections')&&isAdminCard?`<button class="card-btn" onclick="lvAdminEdit('${s.id}')"><i class="ti ti-edit"></i> EDIT</button>`:''}
       ${canEdit&&!isAdminCard?`<button class="card-btn del" onclick="deleteSection('${s.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 17v-6"/></svg></button>`:''}
     </div>
   </div>`;
@@ -1458,7 +1494,7 @@ async function viewSectionById(id, isAdminCard=false) {
   else{imgG.style.display='none';imgE.src='';}
 
   // Only allow edit button for own sections
-  document.getElementById('editFromViewBtn').style.display = (isAdminCard && !isAdmin) ? 'none' : 'flex';
+  document.getElementById('editFromViewBtn').style.display = (isAdminCard && !can('edit_all_sections')) ? 'none' : 'flex';
   show('viewModal');
 }
 
@@ -1475,7 +1511,7 @@ async function copyCodeById(id, isAdminCard=false){
 //  ADMIN VIEW
 // ============================================================
 async function toggleAdminView(){
-  if(!isAdmin)return;
+  if(!can('admin_console')&&!adminViewOn)return;
   adminViewOn=!adminViewOn;
   if (adminViewOn && publicViewOn) exitPublicView();
   document.getElementById('adminViewBtn').classList.toggle('active', adminViewOn);
@@ -1494,7 +1530,7 @@ async function toggleAdminView(){
 }
 
 async function setAllMineVisibility(makePublic){
-  if(!isAdmin)return;
+  if(!can('bulk_actions'))return;
   const msg=makePublic
     ?'Make ALL of your own sections public? Everyone will see them in the Public Library.'
     :'Make ALL of your own sections private? Other users will no longer see them in the Public Library.';
@@ -1509,7 +1545,7 @@ async function setAllMineVisibility(makePublic){
 }
 
 async function setAllLibraryVisibility(makePublic){
-  if(!isAdmin)return;
+  if(!can('bulk_actions'))return;
   const msg=makePublic
     ?"Make EVERY user's sections public? All sections of all users will appear in the Public Library."
     :'Make ALL sections currently in the Public Library private? Nobody except their owners will see them.';
@@ -1605,8 +1641,9 @@ async function loadAdminData(){
     }).join('');
   }
 
-  loadAdminFeedback();
-  loadLoginLogs();
+  document.getElementById('adminCtrlBox').style.display = can('bulk_actions') ? '' : 'none';
+  if (can('support_center')) loadAdminFeedback();
+  if (can('view_login_logs')) loadLoginLogs();
 }
 
 // ============================================================
@@ -1892,7 +1929,7 @@ function showToast(msg,type='success'){
 }
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');closeModal('chatModal');closeModal('supportModal');}
+  if(e.key==='Escape'){closeModal('addModal');closeModal('viewModal');closeModal('binModal');closeModal('chatModal');closeModal('supportModal');closeModal('permModal');}
 });
 document.querySelectorAll('.modal-overlay').forEach(m=>{
   m.addEventListener('click',e=>{if(e.target===m)m.style.display='none';});
@@ -2028,13 +2065,13 @@ async function fbRefresh(){
   const prevUnread=fbUnread();
   const{data}=await sb.from('feedback').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
   myFeedback=data||[];
-  if(!isAdmin&&myFeedback.length){
+  if(!can('support_center')&&myFeedback.length){
     const{data:sm}=await sb.from('support_messages').select('id,sender_id').in('ticket_id',myFeedback.map(f=>f.id));
     const cnt=(sm||[]).filter(x=>x.sender_id!==currentUser.id).length;
     if(lvSupCnt!==null&&cnt>lvSupCnt){showToast('Support replied to your ticket!','warn');lvNotify('Support replied','Admin replied to your ticket');}
     lvSupCnt=cnt;
   }
-  if(isAdmin){
+  if(can('support_center')){
     const{count}=await sb.from('feedback').select('id',{count:'exact',head:true}).eq('status','open');
     adminOpenCount=count||0;
   }
@@ -2044,7 +2081,7 @@ async function fbRefresh(){
 }
 function fbUnread(){return myFeedback.filter(f=>f.admin_reply&&!f.reply_seen).length;}
 function fbBadges(){
-  const u=fbUnread(), total=u+(isAdmin?adminOpenCount:0);
+  const u=fbUnread(), total=u+(can('support_center')?adminOpenCount:0);
   const fab=document.getElementById('fbFabBadge'), bell=document.getElementById('fbBellBadge');
   fab.textContent=total;fab.style.display=total?'flex':'none';
   bell.textContent=u;bell.style.display=u?'flex':'none';
@@ -2170,7 +2207,7 @@ function chatTitle(c) {
 }
 
 async function chatStart() {
-  document.getElementById('chatTabAll').style.display = isAdmin ? '' : 'none';
+  document.getElementById('chatTabAll').style.display = can('view_all_chats') ? '' : 'none';
   const { data } = await sb.from('profiles').select('id,display_name');
   (data || []).forEach(p => chatNames[p.id] = p.display_name || 'user');
   document.getElementById('chatEmoji').innerHTML = CHAT_EMOJI.map(e => `<button onclick="chatAddEmoji('${e}')">${e}</button>`).join('');
@@ -2287,7 +2324,7 @@ async function chatOpenConv(id) {
 
 async function chatLoadArchive() {
   chatArch = {};
-  if (!isAdmin || !chatActive) return;
+  if (!can('view_unsent') || !chatActive) return;
   const { data } = await sb.from('chat_unsent').select('*').eq('conversation_id', chatActive.id);
   (data || []).forEach(a => chatArch[a.message_id] = a);
 }
@@ -2322,7 +2359,7 @@ function chatRenderThread() {
   head.textContent = chatTitle(chatActive);
   acts.innerHTML = member
     ? '<button class="phi-btn" style="color:var(--red)" onclick="chatDeleteChat()">DELETE CHAT</button>'
-    : (isAdmin ? '<button class="phi-btn" style="color:var(--red)" onclick="chatAdminDelete()">DELETE CONVERSATION</button>' : '');
+    : (can('delete_conversations') ? '<button class="phi-btn" style="color:var(--red)" onclick="chatAdminDelete()">DELETE CONVERSATION</button>' : '');
   notice.style.display = (isAdmin && !member) ? 'block' : 'none';
   notice.textContent = member ? priv : 'Admin monitoring view: read-only. You are not part of this conversation.';
   comp.style.display = member ? 'block' : 'none';
@@ -2401,7 +2438,7 @@ async function chatDeleteChat() {
 }
 
 async function chatAdminDelete() {
-  if (!isAdmin || !chatActive) return;
+  if (!can('delete_conversations') || !chatActive) return;
   if (!confirm('Permanently delete this whole conversation for BOTH users? This cannot be undone.')) return;
   const { error } = await sb.from('chat_conversations').delete().eq('id', chatActive.id);
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
@@ -2512,7 +2549,7 @@ function supLast(t) {
 }
 
 async function supportStart() {
-  if (!isAdmin) return;
+  if (!can('support_center')) return;
   document.getElementById('supportBtn').style.display = '';
   await supportLoad();
   if (supChan) sb.removeChannel(supChan);
@@ -2532,7 +2569,7 @@ function supportStop() {
 }
 
 async function supportLoad() {
-  if (!isAdmin || !currentUser) return;
+  if (!can('support_center') || !currentUser) return;
   const [{ data: t }, { data: m }] = await Promise.all([
     sb.from('feedback').select('*').order('created_at', { ascending: false }).limit(300),
     sb.from('support_messages').select('*').order('created_at', { ascending: true }).limit(3000)
@@ -2789,7 +2826,7 @@ function presSendTyping(){
 }
 
 async function loadLoginLogs(){
-  if (!isAdmin) return;
+  if (!can('view_login_logs')) return;
   const { data, error } = await sb.from('login_logs').select('*').order('created_at', { ascending: false }).limit(100);
   const body = document.getElementById('loginLogsBody');
   if (!body) return;
@@ -2888,7 +2925,7 @@ function toggleSound() {
 function notifyStart() {
   lvRenderSoundBtn();
   if (lvNotifChan) { sb.removeChannel(lvNotifChan); lvNotifChan = null; }
-  if (isAdmin) return;
+  if (can('support_center')) return;
   lvNotifChan = sb.channel('notify-' + currentUser.id)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, () => fbRefresh())
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'feedback' }, () => fbRefresh())
@@ -2902,7 +2939,7 @@ function notifyStop() {
 setInterval(() => {
   if (!currentUser) { document.title = LV_TITLE; return; }
   let n = Object.values(chatUnreadMap).reduce((a, b) => a + b, 0) + fbUnread();
-  if (isAdmin) n += parseInt((document.getElementById('supportBadge') || {}).textContent) || 0;
+  if (can('support_center')) n += parseInt((document.getElementById('supportBadge') || {}).textContent) || 0;
   document.title = n ? '(' + n + ') ' + LV_TITLE : LV_TITLE;
 }, 2000);
 
@@ -3066,7 +3103,7 @@ document.addEventListener('paste', e => {
 // ============================================================
 function lvAdminEdit(id){
   if (sections.find(x => x.id === id)) return editSection(id);
-  if (!isAdmin) return;
+  if (!can('edit_all_sections')) return;
   const s = lvFind(id); if (!s) return;
   lvAdminTarget = s; editingId = id;
   setEl('modalTitle', '// ADMIN EDIT: ' + (s._ownerName || 'user').toUpperCase());
@@ -3091,7 +3128,7 @@ saveSection = async function(){
   }
 };
 async function lvBulkStatus(status, scope){
-  if (!isAdmin) return;
+  if (!can('bulk_actions')) return;
   const label = scope === 'public' ? 'ALL sections in the Public Library' : 'EVERY section of EVERY user';
   if (!confirm('Set ' + label + ' to ' + status.toUpperCase() + '?')) return;
   let q = sb.from('sections').update({ status }).is('deleted_at', null).or('status.is.null,status.neq.' + status);
@@ -3103,6 +3140,191 @@ async function lvBulkStatus(status, scope){
   await loadSections(); await loadPublicSections(); await loadAdminData();
   renderFolders();
   showToast(n + ' section(s) set to ' + status.toUpperCase());
+}
+
+
+// ============================================================
+//  PERMISSIONS (delegated admin abilities)
+// ============================================================
+const PERM_LIST = [
+  { k: 'admin_console',        t: 'Admin Console',          d: 'Open the Admin Console: user list and stats' },
+  { k: 'view_all_sections',    t: 'View all sections',      d: "See every user's sections and folders" },
+  { k: 'edit_all_sections',    t: 'Edit any section',       d: 'Edit sections that belong to other users' },
+  { k: 'bulk_actions',         t: 'Bulk actions',           d: 'Bulk status and visibility changes' },
+  { k: 'view_all_chats',       t: 'Monitor all chats',      d: 'Read-only view of every conversation' },
+  { k: 'delete_conversations', t: 'Delete conversations',   d: 'Delete a whole conversation for both users' },
+  { k: 'view_unsent',          t: 'See unsent messages',    d: 'See the originals of unsent messages' },
+  { k: 'support_center',       t: 'Support Center',         d: 'View, reply to, resolve and delete tickets' },
+  { k: 'view_login_logs',      t: 'Login activity',         d: 'See device and login logs' },
+  { k: 'view_prompts',         t: 'User prompts',           d: 'See the prompt history of all users' }
+];
+// permission -> permissions it needs in order to be usable
+const PERM_DEPS = {
+  edit_all_sections: ['view_all_sections'],
+  bulk_actions: ['admin_console', 'view_all_sections'],
+  view_login_logs: ['admin_console'],
+  view_prompts: ['admin_console'],
+  view_unsent: ['view_all_chats'],
+  delete_conversations: ['view_all_chats']
+};
+const PERM_PRESETS = {
+  full:      { full_admin: true },
+  moderator: { admin_console: true, view_all_sections: true, view_all_chats: true, support_center: true },
+  editor:    { view_all_sections: true, edit_all_sections: true },
+  support:   { support_center: true },
+  none:      {}
+};
+
+let isSuper = false, myPerms = {}, permProfiles = [], permRows = {}, permSel = null, permDraft = {}, permTimer = null;
+
+const can = k => isSuper || !!myPerms.full_admin || !!myPerms[k];
+const hasAnyPerm = () => isSuper || Object.values(myPerms).some(Boolean);
+
+async function loadMyPerms() {
+  if (isSuper) { myPerms = {}; return; }
+  const { data, error } = await sb.from('user_permissions').select('perms').eq('user_id', currentUser.id).maybeSingle();
+  if (error) { console.log('perm load error:', error.message); return; }
+  myPerms = (data && data.perms) || {};
+}
+
+// re-check the signed-in user's own permissions every minute, so changes apply without a reload
+function permWatchStart() { clearInterval(permTimer); permTimer = setInterval(permWatchTick, 60000); }
+function permWatchStop()  { clearInterval(permTimer); }
+async function permWatchTick() {
+  if (!currentUser || isSuper) return;
+  const before = JSON.stringify(myPerms);
+  await loadMyPerms();
+  if (JSON.stringify(myPerms) === before) return;
+  isAdmin = hasAnyPerm();
+  applyPermUI();
+  showToast('Your permissions were updated', 'warn');
+}
+
+function applyPermUI() {
+  isAdmin ? show('adminBadge') : hide('adminBadge');
+  can('admin_console') ? show('adminViewBtn') : hide('adminViewBtn');
+  if (adminViewOn && !can('admin_console')) toggleAdminView();
+  document.getElementById('chatTabAll').style.display = can('view_all_chats') ? '' : 'none';
+  if (!can('view_all_chats') && chatTabSel === 'all') chatSetTab('mine');
+  if (can('support_center')) { if (!supChan) supportStart(); } else supportStop();
+  fbBadges();
+  renderSections();
+}
+
+// ---------- Permissions tab (main admin only) ----------
+async function openPerms() {
+  if (!isSuper) return;
+  document.getElementById('permModal').style.display = 'flex';
+  await permLoad();
+  permRenderList();
+  permRenderBody();
+}
+
+async function permLoad() {
+  const [{ data: p }, { data: r }] = await Promise.all([
+    sb.from('profiles').select('id,display_name,email').order('display_name'),
+    sb.from('user_permissions').select('*')
+  ]);
+  permProfiles = p || [];
+  permRows = {};
+  (r || []).forEach(x => permRows[x.user_id] = x);
+}
+
+function permLabel(p) {
+  if (p.email === ADMIN_EMAIL) return 'MAIN ADMIN';
+  const pr = (permRows[p.id] || {}).perms || {};
+  if (pr.full_admin) return 'FULL ADMIN';
+  const n = PERM_LIST.filter(x => pr[x.k]).length;
+  return n ? n + ' PERMISSION' + (n > 1 ? 'S' : '') : 'USER';
+}
+
+function permRenderList() {
+  const q = v('permSearch').toLowerCase();
+  const list = permProfiles.filter(p => !q || (p.display_name || '').toLowerCase().includes(q) || (p.email || '').toLowerCase().includes(q));
+  document.getElementById('permList').innerHTML = list.length ? list.map(p => {
+    const lbl = permLabel(p);
+    const hot = lbl !== 'USER';
+    return `<div class="chat-row${permSel === p.id ? ' active' : ''}" onclick="permSelect('${p.id}')">
+      <div class="chat-row-top"><span class="chat-row-name">${esc(p.display_name || p.email || 'user')}</span><span class="vis-tag ${hot ? 'vis-public' : 'vis-private'}">${esc(lbl)}</span></div>
+      <div class="chat-row-prev">${esc(p.email || '')}</div>
+    </div>`;
+  }).join('') : '<div class="bin-empty">No users found</div>';
+}
+
+function permSelect(id) {
+  if (!id) return;
+  permSel = id;
+  permDraft = { ...(((permRows[id] || {}).perms) || {}) };
+  document.getElementById('permWrap').classList.add('open');
+  permRenderList();
+  permRenderBody();
+}
+
+function permRenderBody() {
+  const p = permProfiles.find(x => x.id === permSel);
+  const body = document.getElementById('permBody'), foot = document.getElementById('permFoot');
+  if (!p) {
+    setEl('permHeadTitle', 'Select a user');
+    foot.style.display = 'none';
+    body.innerHTML = '<div class="bin-empty">Select a user on the left to manage their permissions</div>';
+    return;
+  }
+  setEl('permHeadTitle', (p.display_name || p.email || 'user') + (p.email ? ' · ' + p.email : ''));
+  if (p.email === ADMIN_EMAIL) {
+    foot.style.display = 'none';
+    body.innerHTML = '<div class="bin-empty">The main admin always has every permission.</div>';
+    return;
+  }
+  foot.style.display = 'block';
+  const full = !!permDraft.full_admin;
+  const row = (k, title, desc, checked, disabled) => `<label class="fb-item" style="display:flex;gap:12px;align-items:flex-start;cursor:${disabled ? 'default' : 'pointer'};${disabled ? 'opacity:.6' : ''}">
+    <input type="checkbox" style="margin-top:3px" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''} onchange="permToggle('${k}',this.checked)">
+    <span><b>${esc(title)}</b><br><span class="p-sub">${esc(desc)}</span></span></label>`;
+  body.innerHTML =
+    `<div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="p-sub" style="align-self:center">PRESETS:</span>
+      <button class="phi-btn" onclick="permPreset('full')">FULL ADMIN</button>
+      <button class="phi-btn" onclick="permPreset('moderator')">MODERATOR</button>
+      <button class="phi-btn" onclick="permPreset('editor')">SECTION EDITOR</button>
+      <button class="phi-btn" onclick="permPreset('support')">SUPPORT AGENT</button>
+      <button class="phi-btn" style="color:var(--red)" onclick="permPreset('none')">REMOVE ALL</button>
+    </div>` +
+    row('full_admin', 'Full admin', 'Every permission below, including any added in future', full, false) +
+    PERM_LIST.map(x => row(x.k, x.t, x.d, full || !!permDraft[x.k], full)).join('');
+}
+
+function permToggle(k, on) {
+  if (on) {
+    permDraft[k] = true;
+    (PERM_DEPS[k] || []).forEach(d => permDraft[d] = true);
+  } else {
+    delete permDraft[k];
+    Object.keys(PERM_DEPS).forEach(x => { if (PERM_DEPS[x].includes(k)) delete permDraft[x]; });
+  }
+  permRenderBody();
+}
+
+function permPreset(name) {
+  permDraft = { ...PERM_PRESETS[name] };
+  permRenderBody();
+}
+
+async function permSave() {
+  const uid = permSel;
+  if (!isSuper || !uid) return;
+  const perms = {};
+  Object.keys(permDraft).forEach(k => { if (permDraft[k]) perms[k] = true; });
+  let error;
+  if (!Object.keys(perms).length) {
+    ({ error } = await sb.from('user_permissions').delete().eq('user_id', uid));
+  } else {
+    ({ error } = await sb.from('user_permissions').upsert({ user_id: uid, perms, updated_by: currentUser.id, updated_at: new Date().toISOString() }));
+  }
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await permLoad();
+  permRenderList();
+  permRenderBody();
+  showToast('Permissions saved');
 }
 
 
