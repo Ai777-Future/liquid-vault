@@ -800,6 +800,12 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
 .auth-link:hover{text-decoration:underline}
 .auth-note{font-size:13.5px;color:var(--text2);line-height:1.55;margin-bottom:16px}
 .auth-err.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 8%,transparent)}
+
+/* ===== CHANGE PASSWORD (profile) ===== */
+.prof-pass{border-top:1px solid var(--border);padding-top:14px}
+.prof-pass-form{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.prof-msg{font-size:13px;line-height:1.4;min-height:0}
+.prof-msg:empty{display:none}
 </style>
 </head>
 <body>
@@ -1203,6 +1209,16 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
       <div class="form-row">
         <div class="form-group"><label class="form-label">SECTIONS</label><input class="form-input" id="profSections" readonly style="cursor:default" /></div>
         <div class="form-group"><label class="form-label">FOLDERS</label><input class="form-input" id="profFolders" readonly style="cursor:default" /></div>
+      </div>
+      <div class="prof-pass" id="profPassBox">
+        <button type="button" class="phi-btn" id="profPassToggle" onclick="lvTogglePass()">CHANGE PASSWORD</button>
+        <div class="prof-pass-form" id="profPassForm" style="display:none">
+          <div class="form-group"><label class="form-label">CURRENT PASSWORD</label><input class="form-input" id="curPass" type="password" autocomplete="current-password" /></div>
+          <div class="form-group"><label class="form-label">NEW PASSWORD</label><input class="form-input" id="chgPass" type="password" placeholder="min 6 characters" autocomplete="new-password" /></div>
+          <div class="form-group"><label class="form-label">CONFIRM NEW PASSWORD</label><input class="form-input" id="chgPass2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter')saveNewPassword()" /></div>
+          <div class="prof-msg" id="profPassMsg"></div>
+          <button type="button" class="btn-save" id="profPassBtn" onclick="saveNewPassword()">UPDATE PASSWORD</button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -4132,6 +4148,44 @@ function lvAfterInit(){
   if (!lvAuthMsg) return;
   if (document.getElementById('authScreen').style.display !== 'none') { lvAuthView('login'); showAuthErr('loginErr', lvAuthMsg); }
   try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+// ============================================================
+//  PROFILE: change password (own profile only)
+// ============================================================
+const _lvOP = openProfile;
+openProfile = function(uid){
+  _lvOP(uid);
+  const self = !uid || (currentUser && uid === currentUser.id);
+  document.getElementById('profPassBox').style.display = self ? '' : 'none';
+  document.getElementById('profPassForm').style.display = 'none';
+  ['curPass', 'chgPass', 'chgPass2'].forEach(id => { document.getElementById(id).value = ''; });
+  setEl('profPassMsg', '');
+};
+function lvTogglePass(){
+  const f = document.getElementById('profPassForm');
+  const open = f.style.display === 'none';
+  f.style.display = open ? 'flex' : 'none';
+  if (open) setTimeout(() => { if (!mIsMobile()) document.getElementById('curPass').focus(); }, 50);
+}
+async function saveNewPassword(){
+  const cur = v('curPass'), p1 = v('chgPass'), p2 = v('chgPass2');
+  const msg = (t, ok) => { const e = document.getElementById('profPassMsg'); e.textContent = t; e.style.color = ok ? 'var(--green)' : 'var(--red)'; };
+  if (!cur) { msg('Enter your current password'); return; }
+  if (p1.length < 6) { msg('New password must be at least 6 characters'); return; }
+  if (p1 !== p2) { msg('New passwords do not match'); return; }
+  if (p1 === cur) { msg('New password must be different from the current one'); return; }
+  const btn = document.getElementById('profPassBtn');
+  btn.disabled = true; msg('');
+  const chk = await sb.auth.signInWithPassword({ email: currentUser.email, password: cur });
+  if (chk.error) { btn.disabled = false; msg('Current password is incorrect'); return; }
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  btn.disabled = false;
+  if (error) { msg(error.message); return; }
+  ['curPass', 'chgPass', 'chgPass2'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('profPassForm').style.display = 'none';
+  setEl('profPassMsg', '');
+  showToast('Password changed');
 }
 
 init().then(lvAfterInit);
