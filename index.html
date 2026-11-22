@@ -806,6 +806,71 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
 .prof-pass-form{display:flex;flex-direction:column;gap:12px;margin-top:14px}
 .prof-msg{font-size:13px;line-height:1.4;min-height:0}
 .prof-msg:empty{display:none}
+
+/* ===== ADMIN TOOLS v2 ===== */
+.lv-ann-box{flex:0 0 auto;display:flex;flex-direction:column}
+.lv-ann-box:empty{display:none}
+.lv-ann{display:flex;align-items:center;gap:12px;padding:10px 20px;font-size:13.5px;line-height:1.4;border-bottom:1px solid var(--border);color:var(--text);background:color-mix(in srgb,var(--green) 12%,var(--bg2))}
+.lv-ann-warning{background:color-mix(in srgb,var(--amber) 16%,var(--bg2))}
+.lv-ann-critical{background:color-mix(in srgb,var(--red) 14%,var(--bg2))}
+.lv-ann-tag{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:4px;border:1px solid currentColor;color:var(--green)}
+.lv-ann-warning .lv-ann-tag{color:var(--amber)}
+.lv-ann-critical .lv-ann-tag{color:var(--red)}
+.lv-ann-msg{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.lv-ann-x{flex:0 0 auto;background:none;border:0;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;display:flex}
+.lv-ann-x:hover{color:var(--text);background:var(--hover)}
+
+.lv-screen{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+.lv-screen-box{width:100%;max-width:440px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:32px 28px;text-align:center}
+.lv-screen-title{font-size:22px;font-weight:700;letter-spacing:.05em;color:var(--red);margin-bottom:12px}
+.lv-screen-title.calm{color:var(--green)}
+.lv-screen-text{font-size:14.5px;line-height:1.6;color:var(--text2);margin-bottom:16px;overflow-wrap:anywhere}
+.lv-screen-reason{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:18px;text-align:left;font-size:14px;color:var(--text);overflow-wrap:anywhere}
+.lv-screen-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.lv-screen-btns .btn{justify-content:center}
+
+.lv-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.lv-toolbar .form-input{flex:1 1 220px;min-width:0}
+.lv-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lv-sec-head{font-size:12px;letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.lv-tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--text2);white-space:nowrap}
+.lv-tag.red{color:var(--red);border-color:color-mix(in srgb,var(--red) 45%,transparent)}
+.lv-tag.amber{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,transparent)}
+.lv-tag.blue{color:var(--green);border-color:color-mix(in srgb,var(--green) 45%,transparent)}
+.status-blocked{color:var(--red);border-color:color-mix(in srgb,var(--red) 45%,transparent);background:color-mix(in srgb,var(--red) 8%,transparent);border-radius:4px}
+.lv-user-acts{display:flex;gap:6px;flex-wrap:wrap}
+.lv-user-acts .phi-btn.danger{color:var(--red)}
+.lv-user-acts .phi-btn.danger:hover{border-color:var(--red);color:var(--red)}
+#adminPanel textarea.form-input{resize:vertical;min-height:72px;font-family:var(--ui)}
+.lv-ann-row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.lv-ann-row-main{min-width:0;flex:1 1 auto}
+.lv-ann-row-msg{margin:6px 0 4px;color:var(--text);overflow-wrap:anywhere}
+.lv-ann-row-act{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
+
+.lv-charts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.lv-chart{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:var(--shadow);min-width:0}
+.lv-chart-title{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--text3);margin-bottom:12px}
+.lv-bars{display:flex;align-items:flex-end;gap:4px;height:150px}
+.lv-bar-col{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px}
+.lv-bar-val{font-size:10.5px;color:var(--text2);height:13px;line-height:13px}
+.lv-bar-track{flex:1 1 auto;width:100%;display:flex;align-items:flex-end;min-height:0}
+.lv-bar{width:100%;background:var(--green);border-radius:3px 3px 0 0;opacity:.85}
+.lv-bar-col:hover .lv-bar{opacity:1}
+.lv-bar-lbl{font-size:10.5px;color:var(--text3);height:13px;line-height:13px}
+.lv-top-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+.lv-top-row:last-child{border-bottom:0}
+.lv-top-row:hover .lv-top-name{color:var(--green)}
+.lv-top-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lv-top-bar{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.lv-top-bar>div{height:100%;background:var(--cyan);border-radius:3px}
+.lv-top-n{font-weight:600;color:var(--text2);min-width:24px;text-align:right}
+@media(max-width:1100px){.lv-charts{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){
+  .lv-ann{padding:10px 14px}
+  .lv-ann-row{flex-direction:column}
+  .lv-ann-row-act{justify-content:flex-start}
+  .lv-user-acts{flex-wrap:nowrap}
+}
 </style>
 </head>
 <body>
@@ -817,6 +882,28 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   <div class="loading-logo">LIQUID.VAULT</div>
   <div class="loading-bar"><div class="loading-fill"></div></div>
   <div class="loading-text">INITIALIZING...</div>
+</div>
+
+<!-- BLOCKED ACCOUNT -->
+<div class="lv-screen" id="blockedScreen">
+  <div class="lv-screen-box">
+    <div class="lv-screen-title">ACCOUNT BLOCKED</div>
+    <div class="lv-screen-text">An administrator has blocked this account, so you can no longer use LIQUID.VAULT. If you think this is a mistake, please contact the admin.</div>
+    <div class="lv-screen-reason"><span class="p-sub">REASON</span><div id="blockedReason"></div></div>
+    <div class="lv-screen-btns"><button class="btn btn-ghost" onclick="lvBlockedLogout()">LOGOUT</button></div>
+  </div>
+</div>
+
+<!-- MAINTENANCE MODE -->
+<div class="lv-screen" id="maintScreen">
+  <div class="lv-screen-box">
+    <div class="lv-screen-title calm">BACK SOON</div>
+    <div class="lv-screen-text" id="maintMsg"></div>
+    <div class="lv-screen-btns">
+      <button class="btn btn-primary" onclick="lvBroadcastPoll()">CHECK AGAIN</button>
+      <button class="btn btn-ghost" onclick="doLogout()">LOGOUT</button>
+    </div>
+  </div>
 </div>
 
 <!-- AUTH SCREEN -->
@@ -937,6 +1024,7 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   </div>
 
   <div class="main">
+    <div class="lv-ann-box" id="lvAnnBox"></div>
     <div class="main-header">
       <div class="folder-title">
         <button class="btn btn-ghost view-back" id="viewBackBtn" style="display:none" onclick="lvViewBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> BACK</button>
@@ -1046,6 +1134,42 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         <div class="admin-stat"><span class="admin-stat-val" id="adStatSections">0</span><span class="admin-stat-label">SECTIONS</span></div>
         <div class="admin-stat"><span class="admin-stat-val" id="adStatToday">0</span><span class="admin-stat-label">TODAY</span></div>
       </div>
+      <div id="adAnalytics">
+        <div class="lv-sec-head" style="color:var(--green)">ANALYTICS</div>
+        <div class="admin-stats">
+          <div class="admin-stat"><span class="admin-stat-val" id="anOnline">0</span><span class="admin-stat-label">ONLINE NOW</span></div>
+          <div class="admin-stat"><span class="admin-stat-val" id="anUsers7">0</span><span class="admin-stat-label">NEW USERS (7 DAYS)</span></div>
+          <div class="admin-stat"><span class="admin-stat-val" id="anSections7">0</span><span class="admin-stat-label">NEW SECTIONS (7 DAYS)</span></div>
+          <div class="admin-stat"><span class="admin-stat-val" id="anCopies">0</span><span class="admin-stat-label">TOTAL COPIES</span></div>
+        </div>
+        <div class="lv-charts">
+          <div class="lv-chart"><div class="lv-chart-title">NEW USERS, LAST 14 DAYS</div><div id="anUsersChart"></div></div>
+          <div class="lv-chart"><div class="lv-chart-title">NEW SECTIONS, LAST 14 DAYS</div><div id="anSectionsChart"></div></div>
+          <div class="lv-chart"><div class="lv-chart-title">MOST COPIED SECTIONS</div><div id="anTop"></div></div>
+        </div>
+      </div>
+      <div id="adBroadcastBox" style="display:none">
+        <div class="lv-sec-head" style="color:var(--amber)">ANNOUNCEMENTS AND MAINTENANCE</div>
+        <div class="admin-ctrl">
+          <div class="admin-ctrl-group">
+            <div class="admin-ctrl-label">NEW ANNOUNCEMENT</div>
+            <div class="admin-ctrl-desc">Shown at the top of the app for every user until it expires or you turn it off. Users can dismiss it.</div>
+            <textarea class="form-input" id="annText" maxlength="300" rows="3" placeholder="Write the message..."></textarea>
+            <div class="lv-row">
+              <select class="sort-select" id="annLevel"><option value="info">INFO</option><option value="warning">WARNING</option><option value="critical">CRITICAL</option></select>
+              <select class="sort-select" id="annExpiry"><option value="0">NO EXPIRY</option><option value="1">EXPIRES IN 1 HOUR</option><option value="6">EXPIRES IN 6 HOURS</option><option value="24">EXPIRES IN 24 HOURS</option><option value="168">EXPIRES IN 7 DAYS</option></select>
+            </div>
+            <div class="admin-ctrl-row" style="grid-template-columns:minmax(0,1fr)"><button class="btn btn-primary" onclick="lvAnnPost()">POST ANNOUNCEMENT</button></div>
+          </div>
+          <div class="admin-ctrl-group">
+            <div class="admin-ctrl-label">MAINTENANCE MODE</div>
+            <div class="admin-ctrl-desc" id="maintState">OFF: the app is running normally.</div>
+            <input class="form-input" id="maintInput" maxlength="200" placeholder="Message for users (optional)" />
+            <div class="admin-ctrl-row" style="grid-template-columns:minmax(0,1fr)"><button class="btn btn-ghost" id="maintBtn" onclick="lvMaintToggle()">TURN MAINTENANCE ON</button></div>
+          </div>
+        </div>
+        <div id="annList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
+      </div>
       <div style="font-size:12px;color:var(--cyan);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">LOGIN ACTIVITY (LATEST 100)</div>
       <div style="overflow-x:auto">
       <table class="logs-table">
@@ -1053,10 +1177,44 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         <tbody id="loginLogsBody"></tbody>
       </table>
       </div>
-      <div style="font-size:12px;color:var(--text3);letter-spacing:.04em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">REGISTERED USERS</div>
+<div id="adAuditBox" style="display:none">
+        <div class="lv-sec-head" style="color:var(--pink)">AUDIT LOG (LATEST 200)</div>
+        <div class="lv-toolbar">
+          <input class="form-input" id="auditSearch" placeholder="search actor, target or details..." oninput="lvAuditRender()" />
+          <select class="sort-select" id="auditFilter" onchange="lvAuditRender()">
+            <option value="all">ALL ACTIONS</option>
+            <option value="names">DISPLAY NAMES</option>
+            <option value="users">BLOCKS AND RESET LINKS</option>
+            <option value="perms">PERMISSIONS</option>
+            <option value="bulk">BULK CHANGES</option>
+            <option value="sections">SECTIONS</option>
+            <option value="broadcast">ANNOUNCEMENTS AND MAINTENANCE</option>
+            <option value="support">SUPPORT AND CHATS</option>
+          </select>
+          <button class="phi-btn" onclick="lvAuditLoad()">REFRESH</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="logs-table">
+            <thead><tr><th>TIME</th><th>ACTOR</th><th>ACTION</th><th>TARGET</th><th>DETAILS</th></tr></thead>
+            <tbody id="auditBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="lv-sec-head" style="color:var(--text3)">REGISTERED USERS <span id="adUsersCount" class="p-sub"></span></div>
+      <div class="lv-toolbar">
+        <input class="form-input" id="adUserSearch" placeholder="search name or email..." oninput="lvRenderUsers()" />
+        <select class="sort-select" id="adUserSort" onchange="lvRenderUsers()">
+          <option value="newest">NEWEST JOINED</option>
+          <option value="oldest">OLDEST JOINED</option>
+          <option value="name">NAME A-Z</option>
+          <option value="sections">MOST SECTIONS</option>
+          <option value="seen">RECENTLY SEEN</option>
+          <option value="blocked">BLOCKED FIRST</option>
+        </select>
+      </div>
       <table class="users-table" id="usersTable">
         <thead><tr>
-          <th>USER</th><th>EMAIL</th><th>SECTIONS</th><th>FOLDERS</th><th>JOINED</th><th>ROLE</th><th>PROFILE</th>
+          <th>USER</th><th>EMAIL</th><th>SECTIONS</th><th>FOLDERS</th><th>JOINED</th><th>LAST SEEN</th><th>STATUS</th><th>ACTIONS</th>
         </tr></thead>
         <tbody id="usersTableBody"></tbody>
       </table>
@@ -1487,6 +1645,7 @@ async function bootApp(user) {
   isAdmin = hasAnyPerm();
   const { data: prof } = await sb.from('profiles').select('*').eq('id', user.id).single();
   currentProfile = prof;
+  if (prof && prof.is_blocked && !isSuper) { lvShowBlocked(prof.blocked_reason); return; }
 
   // Set admin flag in DB if needed
   if (isSuper && prof && !prof.is_admin) {
@@ -1511,7 +1670,7 @@ async function bootApp(user) {
 
   hide('loadingScreen'); hide('authScreen');
   document.getElementById('mainApp').style.display = 'grid';
-  fbStart();chatStart();presLoadLastSeen().then(presenceStart);notifyStart();permWatchStart();
+  fbStart();chatStart();presLoadLastSeen().then(presenceStart);notifyStart();permWatchStart();lvBroadcastPoll();
 }
 
 // ============================================================
@@ -1562,7 +1721,7 @@ async function doLogout() {
   folders = []; sections = []; trashFolders = []; trashSections = [];
   publicSections = []; publicViewOn = false; publicOwnerId = null;
   document.getElementById('publicLibBtn').classList.remove('active');
-  fbStop();chatStop();presenceStop();notifyStop();
+  fbStop();chatStop();presenceStop();notifyStop();lvBroadcastReset();
   document.getElementById('mainApp').style.display = 'none';
   show('authScreen');
 }
@@ -1948,6 +2107,7 @@ async function setAllMineVisibility(makePublic){
   adminSectionsCache.forEach(x=>{if(x.user_id===currentUser.id)x.is_public=makePublic;});
   if(makePublic) await loadPublicSections();
   else publicSections=publicSections.filter(x=>x.user_id!==currentUser.id);
+  lvAudit('bulk_visibility',null,null,(data||[]).length+' of your own section(s) set to '+(makePublic?'public':'private'));
   showToast((data||[]).length+' section(s) set to '+(makePublic?'public':'private'));
 }
 
@@ -1965,6 +2125,7 @@ async function setAllLibraryVisibility(makePublic){
   await loadPublicSections();
   await loadAdminData();
   renderFolders();updateStats();
+  lvAudit('bulk_visibility',null,null,count+' section(s) of all users set to '+(makePublic?'public':'private'));
   showToast(count+' section(s) set to '+(makePublic?'public':'private'));
 }
 
@@ -2005,23 +2166,10 @@ async function loadAdminData(){
   setEl('adStatSections', (allSections||[]).length);
   setEl('adStatToday', todayCount);
 
-  // Users table
-  const tbody=document.getElementById('usersTableBody');
-  tbody.innerHTML=(profiles||[]).map(p=>{
-    const uSections=(allSections||[]).filter(s=>s.user_id===p.id).length;
-    const uFolders=(allFolders||[]).filter(f=>f.user_id===p.id).length;
-    const joined=new Date(p.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'});
-    const isAdm=p.email===ADMIN_EMAIL;
-    return`<tr>
-      <td>${esc(p.display_name||'--')}</td>
-      <td style="color:var(--text2)">${esc(p.email||'--')}</td>
-      <td style="color:var(--cyan)">${uSections}</td>
-      <td>${uFolders}</td>
-      <td style="color:var(--text3)">${joined}</td>
-      <td><span class="user-status ${isAdm?'status-admin':'status-user'}">${isAdm?'ADMIN':'USER'}</span></td>
-      <td><button class="phi-btn" onclick="openProfile('${p.id}')">${can('edit_user_names')?'EDIT NAME':'VIEW'}</button></td>
-    </tr>`;
-  }).join('');
+  (profiles||[]).forEach(p=>{ if(p.last_seen) chatLastSeen[p.id]=p.last_seen; });
+  lvRenderUsers();
+  lvRenderAnalytics();
+  lvApplyAdminBoxes();
 
   // Sections grid
   const grid=document.getElementById('adminSectionsGrid');
@@ -2054,6 +2202,8 @@ async function loadAdminData(){
   document.getElementById('adminCtrlBox').style.display = can('bulk_actions') ? '' : 'none';
   if (can('support_center')) loadAdminFeedback();
   if (can('view_login_logs')) loadLoginLogs();
+  if (can('broadcast')) { lvAnnAdminLoad(); lvMaintFill(); }
+  if (can('view_audit')) lvAuditLoad();
 }
 
 // ============================================================
@@ -2597,6 +2747,7 @@ async function fbAdminDelete(id){
   if(!confirm('Delete this feedback?'))return;
   const{error}=await sb.from('feedback').delete().eq('id',id);
   if(error){showToast('Error: '+error.message,'error');return;}
+  lvAudit('ticket_deleted',null,null,'Feedback item '+fbTicketId(id));
   loadAdminFeedback();
 }
 
@@ -2856,6 +3007,7 @@ async function chatAdminDelete() {
   if (!confirm('Permanently delete this whole conversation for BOTH users? This cannot be undone.')) return;
   const { error } = await sb.from('chat_conversations').delete().eq('id', chatActive.id);
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  lvAudit('conversation_deleted', null, null, chatTitle(chatActive));
   chatActive = null; chatMsgs = []; chatBack();
   await chatRefresh(); chatRenderThread();
   showToast('Conversation deleted', 'error');
@@ -3093,6 +3245,7 @@ async function supDelete() {
   if (!confirm('Delete this ticket and its whole conversation permanently?')) return;
   const { error } = await sb.from('feedback').delete().eq('id', supActive);
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  lvAudit('ticket_deleted', null, null, 'Support ticket ' + fbTicketId(supActive));
   supActive = null;
   document.getElementById('supWrap').classList.remove('open');
   await supportLoad();
@@ -3216,6 +3369,7 @@ function presOther(c){
 }
 
 function presRefreshUI(){
+  lvPresAdminSync();
   const sub = document.getElementById('chatHeadSub');
   if (sub) {
     const other = presOther(chatActive);
@@ -3537,9 +3691,12 @@ function lvAdminEdit(id){
 const _lvSave = saveSection;
 saveSection = async function(){
   const wasAdmin = !!lvAdminTarget;
+  const tgt = lvAdminTarget;
+  const secNm = wasAdmin ? v('secName').trim() : '';
   await _lvSave();
   if (wasAdmin && document.getElementById('addModal').style.display === 'none') {
     lvAdminTarget = null;
+    lvAudit('section_edited_by_admin', tgt.user_id, tgt._ownerName, secNm);
     if (adminViewOn) await loadAdminData();
     else { await loadPublicSections(); renderSections(); }
   }
@@ -3556,6 +3713,7 @@ async function lvBulkStatus(status, scope){
   if (!n) { showToast('Nothing to change, all are already ' + status, 'warn'); return; }
   await loadSections(); await loadPublicSections(); await loadAdminData();
   renderFolders();
+  lvAudit('bulk_status', null, null, n + ' section(s) set to ' + status + ' (' + (scope === 'public' ? 'public library' : 'every user') + ')');
   showToast(n + ' section(s) set to ' + status.toUpperCase());
 }
 
@@ -3574,7 +3732,10 @@ const PERM_LIST = [
   { k: 'support_center',       t: 'Support Center',         d: 'View, reply to, resolve and delete tickets' },
   { k: 'view_login_logs',      t: 'Login activity',         d: 'See device and login logs' },
   { k: 'view_prompts',         t: 'User prompts',           d: 'See the prompt history of all users' },
-  { k: 'edit_user_names',      t: 'Edit display names',     d: 'Change the display name of any user at any time' }
+  { k: 'edit_user_names',      t: 'Edit display names',     d: 'Change the display name of any user at any time' },
+  { k: 'manage_users',         t: 'Manage users',           d: 'Block and unblock users, send password reset links' },
+  { k: 'view_audit',           t: 'Audit log',              d: 'See who did what in the admin tools' },
+  { k: 'broadcast',            t: 'Announcements',          d: 'Post announcements and switch maintenance mode on or off' }
 ];
 // permission -> permissions it needs in order to be usable
 const PERM_DEPS = {
@@ -3584,7 +3745,10 @@ const PERM_DEPS = {
   view_prompts: ['admin_console'],
   edit_user_names: ['admin_console'],
   view_unsent: ['view_all_chats'],
-  delete_conversations: ['view_all_chats']
+  delete_conversations: ['view_all_chats'],
+  manage_users: ['admin_console'],
+  view_audit: ['admin_console'],
+  broadcast: ['admin_console']
 };
 const PERM_PRESETS = {
   full:      { full_admin: true },
@@ -3610,7 +3774,10 @@ async function loadMyPerms() {
 function permWatchStart() { clearInterval(permTimer); permTimer = setInterval(permWatchTick, 60000); }
 function permWatchStop()  { clearInterval(permTimer); }
 async function permWatchTick() {
-  if (!currentUser || isSuper) return;
+  if (!currentUser) return;
+  if (!isSuper && await lvCheckBlocked()) return;
+  lvBroadcastPoll();
+  if (isSuper) return;
   const before = JSON.stringify(myPerms);
   await loadMyPerms();
   if (JSON.stringify(myPerms) === before) return;
@@ -3626,6 +3793,8 @@ function applyPermUI() {
   document.getElementById('chatTabAll').style.display = can('view_all_chats') ? '' : 'none';
   if (!can('view_all_chats') && chatTabSel === 'all') chatSetTab('mine');
   if (can('support_center')) { if (!supChan) supportStart(); } else supportStop();
+  lvApplyAdminBoxes();
+  lvMaintRender();
   fbBadges();
   renderSections();
 }
@@ -3733,6 +3902,7 @@ async function permSave() {
   if (!isSuper || !uid) return;
   const perms = {};
   Object.keys(permDraft).forEach(k => { if (permDraft[k]) perms[k] = true; });
+  const oldPerms = { ...(((permRows[uid] || {}).perms) || {}) };
   let error;
   if (!Object.keys(perms).length) {
     ({ error } = await sb.from('user_permissions').delete().eq('user_id', uid));
@@ -3743,6 +3913,7 @@ async function permSave() {
   await permLoad();
   permRenderList();
   permRenderBody();
+  lvAudit('permissions_changed', uid, (permProfiles.find(x => x.id === uid) || {}).display_name, lvPermDiff(oldPerms, perms));
   showToast('Permissions saved');
 }
 
@@ -4186,6 +4357,458 @@ async function saveNewPassword(){
   document.getElementById('profPassForm').style.display = 'none';
   setEl('profPassMsg', '');
   showToast('Password changed');
+}
+
+// ============================================================
+//  ADMIN TOOLS v2: block users, audit log, announcements, maintenance mode,
+//  better users table, analytics.
+//  Needs admin_tools.sql to be run once in the Supabase SQL Editor.
+// ============================================================
+const LV_SQL_HINT = 'Run admin_tools.sql in the Supabase SQL Editor first.';
+function lvDbErr(e){
+  const m = (e && e.message) || '';
+  if (e && (e.code === '42P01' || e.code === 'PGRST202' || e.code === 'PGRST205' || /schema cache|does not exist|could not find/i.test(m))) return LV_SQL_HINT;
+  return m || 'Something went wrong';
+}
+const lvIsUuid = x => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(x || '');
+function lvFmtTime(ts, withSec){
+  const o = { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
+  if (withSec) o.second = '2-digit';
+  return ts ? new Date(ts).toLocaleString('en-IN', o) : '--';
+}
+function lvLvlCls(l){ return l === 'critical' ? 'red' : (l === 'warning' ? 'amber' : 'blue'); }
+
+// show or hide the admin boxes that depend on a permission
+function lvApplyAdminBoxes(){
+  const set = (id, on) => { const el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
+  set('adBroadcastBox', can('broadcast'));
+  set('adAuditBox', can('view_audit'));
+}
+
+// ---------- Audit log ----------
+const LV_AUDIT_LABELS = {
+  display_name_changed: 'Display name changed',
+  user_blocked: 'User blocked',
+  user_unblocked: 'User unblocked',
+  reset_link_sent: 'Reset link sent',
+  permissions_changed: 'Permissions changed',
+  bulk_status: 'Bulk status change',
+  bulk_visibility: 'Bulk visibility change',
+  section_deleted: 'Section deleted',
+  section_edited_by_admin: 'Section edited by admin',
+  announcement_posted: 'Announcement posted',
+  announcement_toggled: 'Announcement switched',
+  announcement_removed: 'Announcement deleted',
+  maintenance_on: 'Maintenance turned on',
+  maintenance_off: 'Maintenance turned off',
+  ticket_deleted: 'Ticket deleted',
+  conversation_deleted: 'Conversation deleted'
+};
+const LV_AUDIT_GROUPS = {
+  names: ['display_name_changed'],
+  users: ['user_blocked', 'user_unblocked', 'reset_link_sent'],
+  perms: ['permissions_changed'],
+  bulk: ['bulk_status', 'bulk_visibility'],
+  sections: ['section_deleted', 'section_edited_by_admin'],
+  broadcast: ['announcement_posted', 'announcement_toggled', 'announcement_removed', 'maintenance_on', 'maintenance_off'],
+  support: ['ticket_deleted', 'conversation_deleted']
+};
+const LV_AUDIT_RED = ['user_blocked', 'section_deleted', 'ticket_deleted', 'conversation_deleted', 'maintenance_on'];
+let lvAuditRows = [];
+
+// Writes one entry. Never throws and never blocks the action that called it.
+async function lvAudit(action, targetId, targetName, details){
+  try {
+    if (!currentUser || !hasAnyPerm()) return;
+    await sb.from('audit_logs').insert({
+      actor_id: currentUser.id,
+      actor_name: (currentProfile && currentProfile.display_name) || (currentUser.email || '').split('@')[0],
+      action,
+      target_id: lvIsUuid(targetId) ? targetId : null,
+      target_name: targetName ? String(targetName).slice(0, 120) : null,
+      details: details ? String(details).slice(0, 500) : null
+    });
+    if (adminViewOn && can('view_audit')) lvAuditLoad();
+  } catch (e) {}
+}
+
+function lvPermDiff(oldP, newP){
+  const title = k => k === 'full_admin' ? 'Full admin' : ((PERM_LIST.find(x => x.k === k) || {}).t || k);
+  const keys = ['full_admin'].concat(PERM_LIST.map(x => x.k));
+  const added = keys.filter(k => newP[k] && !oldP[k]).map(title);
+  const removed = keys.filter(k => oldP[k] && !newP[k]).map(title);
+  const parts = [];
+  if (added.length) parts.push('Added: ' + added.join(', '));
+  if (removed.length) parts.push('Removed: ' + removed.join(', '));
+  return parts.join(' | ') || 'No change';
+}
+
+async function lvAuditLoad(){
+  if (!can('view_audit')) return;
+  const { data, error } = await sb.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(200);
+  const body = document.getElementById('auditBody');
+  if (!body) return;
+  if (error) {
+    lvAuditRows = [];
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">' + esc(lvDbErr(error)) + '</td></tr>';
+    return;
+  }
+  lvAuditRows = data || [];
+  lvAuditRender();
+}
+
+function lvAuditRender(){
+  const body = document.getElementById('auditBody');
+  if (!body) return;
+  const q = v('auditSearch').trim().toLowerCase(), g = v('auditFilter');
+  const rows = lvAuditRows.filter(r => {
+    if (g !== 'all' && !(LV_AUDIT_GROUPS[g] || []).includes(r.action)) return false;
+    if (!q) return true;
+    return [r.actor_name, r.target_name, r.details, LV_AUDIT_LABELS[r.action] || r.action].join(' ').toLowerCase().includes(q);
+  });
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">' + (lvAuditRows.length ? 'No matching entries' : 'No activity recorded yet') + '</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(r => {
+    const label = LV_AUDIT_LABELS[r.action] || r.action;
+    return `<tr>
+      <td style="white-space:nowrap">${lvFmtTime(r.created_at, true)}</td>
+      <td style="color:var(--pink)">${esc(r.actor_name || chatNm(r.actor_id))}</td>
+      <td><span class="lv-tag ${LV_AUDIT_RED.includes(r.action) ? 'red' : ''}">${esc(label)}</span></td>
+      <td>${esc(r.target_name || '--')}</td>
+      <td style="color:var(--text2);min-width:180px">${esc(r.details || '')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ---------- Users table: search, sort, last seen, block, reset link ----------
+let lvPresSig = '';
+function lvPresAdminSync(){
+  if (!adminViewOn) return;
+  const sig = Object.keys(presState).sort().join(',');
+  if (sig === lvPresSig) return;
+  lvPresSig = sig;
+  lvOnlineStat();
+  lvRenderUsers();
+}
+
+function lvRenderUsers(){
+  const body = document.getElementById('usersTableBody');
+  if (!body) return;
+  const profiles = window.lvAdminProfiles || [];
+  const secs = adminSectionsCache || [], fols = window.lvAdminFolders || [];
+  const sc = {}, fc = {};
+  secs.forEach(x => { sc[x.user_id] = (sc[x.user_id] || 0) + 1; });
+  fols.forEach(x => { fc[x.user_id] = (fc[x.user_id] || 0) + 1; });
+  const q = (document.getElementById('adUserSearch').value || '').trim().toLowerCase();
+  const sort = document.getElementById('adUserSort').value;
+  const seen = p => isOnline(p.id) ? 9e15 : (chatLastSeen[p.id] ? new Date(chatLastSeen[p.id]).getTime() : 0);
+  const sorters = {
+    newest:   (a, b) => new Date(b.created_at) - new Date(a.created_at),
+    oldest:   (a, b) => new Date(a.created_at) - new Date(b.created_at),
+    name:     (a, b) => (a.display_name || a.email || '').localeCompare(b.display_name || b.email || ''),
+    sections: (a, b) => (sc[b.id] || 0) - (sc[a.id] || 0),
+    seen:     (a, b) => seen(b) - seen(a),
+    blocked:  (a, b) => (b.is_blocked ? 1 : 0) - (a.is_blocked ? 1 : 0)
+  };
+  const list = profiles
+    .filter(p => !q || (p.display_name || '').toLowerCase().includes(q) || (p.email || '').toLowerCase().includes(q))
+    .sort(sorters[sort] || sorters.newest);
+  setEl('adUsersCount', '(' + list.length + (list.length !== profiles.length ? ' of ' + profiles.length : '') + ')');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">No users found</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(p => {
+    const isMain = p.email === ADMIN_EMAIL, isSelf = !!currentUser && p.id === currentUser.id;
+    const on = isOnline(p.id);
+    const joined = new Date(p.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+    const seenTxt = on ? 'Online' : (chatLastSeen[p.id] ? lastSeenText(p.id).replace('last seen ', '') : 'Never');
+    const status = p.is_blocked
+      ? `<span class="user-status status-blocked"${p.blocked_reason ? ' title="' + esc(p.blocked_reason) + '"' : ''}>BLOCKED</span>`
+      : `<span class="user-status ${isMain ? 'status-admin' : 'status-user'}">${isMain ? 'ADMIN' : 'USER'}</span>`;
+    const canMod = can('manage_users') && !isMain && !isSelf;
+    const acts = `<div class="lv-user-acts">
+      <button class="phi-btn" onclick="openProfile('${p.id}')">${can('edit_user_names') ? 'EDIT NAME' : 'VIEW'}</button>
+      ${canMod ? `<button class="phi-btn${p.is_blocked ? '' : ' danger'}" onclick="lvBlockUser('${p.id}')">${p.is_blocked ? 'UNBLOCK' : 'BLOCK'}</button>` : ''}
+      ${canMod && p.email ? `<button class="phi-btn" onclick="lvSendReset('${p.id}')">RESET LINK</button>` : ''}
+    </div>`;
+    return `<tr>
+      <td><span class="pdot${on ? ' on' : ''}"></span>${esc(p.display_name || '--')}</td>
+      <td style="color:var(--text2)">${esc(p.email || '--')}</td>
+      <td style="color:var(--cyan)">${sc[p.id] || 0}</td>
+      <td>${fc[p.id] || 0}</td>
+      <td style="color:var(--text3)">${joined}</td>
+      <td style="color:${on ? '#22c55e' : 'var(--text3)'};white-space:nowrap">${esc(seenTxt)}</td>
+      <td>${status}</td>
+      <td>${acts}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function lvBlockUser(id){
+  if (!can('manage_users')) return;
+  const p = (window.lvAdminProfiles || []).find(x => x.id === id);
+  if (!p) return;
+  const nm = p.display_name || p.email || 'this user';
+  if (p.is_blocked) {
+    if (!confirm('Unblock ' + nm + '? They will be able to use the app again.')) return;
+    await lvSetBlocked(p, false, null);
+  } else {
+    const reason = prompt('Block ' + nm + '?\n\nOptional reason (the user will see it):', '');
+    if (reason === null) return;
+    await lvSetBlocked(p, true, reason.trim().slice(0, 200));
+  }
+}
+
+async function lvSetBlocked(p, block, reason){
+  const { error } = await sb.rpc('admin_set_blocked', { target_id: p.id, block, reason: reason || null });
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  p.is_blocked = block;
+  p.blocked_reason = block ? (reason || null) : null;
+  p.blocked_at = block ? new Date().toISOString() : null;
+  lvRenderUsers();
+  if (can('view_audit')) lvAuditLoad();
+  showToast(block ? 'User blocked' : 'User unblocked', block ? 'warn' : 'success');
+}
+
+async function lvSendReset(id){
+  if (!can('manage_users')) return;
+  const p = (window.lvAdminProfiles || []).find(x => x.id === id);
+  if (!p || !p.email) return;
+  if (!confirm('Send a password reset link to ' + p.email + '?')) return;
+  const { error } = await sb.auth.resetPasswordForEmail(p.email, { redirectTo: location.origin + location.pathname });
+  if (error) { showToast(error.message, 'error'); return; }
+  lvAudit('reset_link_sent', p.id, p.display_name || p.email, p.email);
+  showToast('Reset link sent to ' + p.email);
+}
+
+// ---------- Blocked account (signed-in user) ----------
+let lvBlockedShown = false;
+function lvShowBlocked(reason){
+  lvBlockedShown = true;
+  fbStop(); chatStop(); presenceStop(); notifyStop(); permWatchStop(); supportStop();
+  document.getElementById('mainApp').style.display = 'none';
+  document.querySelectorAll('.modal-overlay').forEach(m => { m.style.display = 'none'; });
+  hide('loadingScreen'); hide('authScreen'); hide('maintScreen');
+  setEl('blockedReason', reason || 'No reason was given.');
+  document.getElementById('blockedScreen').style.display = 'flex';
+}
+async function lvCheckBlocked(){
+  if (!currentUser || isSuper) return false;
+  const { data } = await sb.from('profiles').select('is_blocked,blocked_reason').eq('id', currentUser.id).maybeSingle();
+  if (data && data.is_blocked) { lvShowBlocked(data.blocked_reason); return true; }
+  return false;
+}
+function lvBlockedLogout(){
+  hide('blockedScreen');
+  lvBlockedShown = false;
+  doLogout();
+}
+
+// ---------- Announcements ----------
+let lvAnnList = [], lvAnnAdminRows = [];
+const LV_ANN_LABEL = { info: 'INFO', warning: 'NOTICE', critical: 'IMPORTANT' };
+function lvAnnDismissed(){
+  try { return JSON.parse(localStorage.getItem('lv-ann-dismissed') || '[]'); } catch (e) { return []; }
+}
+function lvAnnDismiss(id){
+  try {
+    const d = lvAnnDismissed();
+    if (!d.includes(id)) d.push(id);
+    localStorage.setItem('lv-ann-dismissed', JSON.stringify(d.slice(-50)));
+  } catch (e) {}
+  lvAnnRender();
+}
+async function lvAnnLoad(){
+  const { data, error } = await sb.from('announcements').select('*').eq('active', true).order('created_at', { ascending: false }).limit(5);
+  if (error) return;
+  const now = Date.now();
+  lvAnnList = (data || []).filter(a => !a.expires_at || new Date(a.expires_at).getTime() > now);
+  lvAnnRender();
+}
+function lvAnnRender(){
+  const box = document.getElementById('lvAnnBox');
+  if (!box) return;
+  const dis = lvAnnDismissed();
+  const x = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  box.innerHTML = lvAnnList.filter(a => !dis.includes(a.id)).slice(0, 3).map(a => {
+    const lvl = LV_ANN_LABEL[a.level] ? a.level : 'info';
+    return `<div class="lv-ann lv-ann-${lvl}" role="status">
+      <span class="lv-ann-tag">${LV_ANN_LABEL[lvl]}</span>
+      <span class="lv-ann-msg">${esc(a.message)}</span>
+      <button class="lv-ann-x" onclick="lvAnnDismiss('${a.id}')" aria-label="Dismiss announcement" title="Dismiss">${x}</button>
+    </div>`;
+  }).join('');
+}
+
+async function lvAnnPost(){
+  if (!can('broadcast')) return;
+  const message = v('annText').trim();
+  if (message.length < 3) { showToast('Write the announcement first', 'error'); return; }
+  const hrs = parseInt(v('annExpiry'), 10) || 0;
+  const { error } = await sb.from('announcements').insert({
+    message,
+    level: v('annLevel'),
+    active: true,
+    expires_at: hrs ? new Date(Date.now() + hrs * 3600000).toISOString() : null
+  });
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  document.getElementById('annText').value = '';
+  lvAudit('announcement_posted', null, null, message.slice(0, 200));
+  await Promise.all([lvAnnAdminLoad(), lvAnnLoad()]);
+  showToast('Announcement posted');
+}
+
+async function lvAnnAdminLoad(){
+  if (!can('broadcast')) return;
+  const box = document.getElementById('annList');
+  if (!box) return;
+  const { data, error } = await sb.from('announcements').select('*').order('created_at', { ascending: false }).limit(15);
+  if (error) { box.innerHTML = '<div class="p-sub">' + esc(lvDbErr(error)) + '</div>'; return; }
+  lvAnnAdminRows = data || [];
+  const now = Date.now();
+  box.innerHTML = lvAnnAdminRows.length ? lvAnnAdminRows.map(a => {
+    const expired = a.expires_at && new Date(a.expires_at).getTime() <= now;
+    const state = !a.active ? 'OFF' : (expired ? 'EXPIRED' : 'LIVE');
+    return `<div class="fb-item lv-ann-row">
+      <div class="lv-ann-row-main">
+        <span class="lv-tag ${state === 'LIVE' ? 'blue' : ''}">${state}</span>
+        <span class="lv-tag ${lvLvlCls(a.level)}">${esc((a.level || 'info').toUpperCase())}</span>
+        <div class="lv-ann-row-msg">${esc(a.message)}</div>
+        <div class="p-sub">${lvFmtTime(a.created_at)}${a.expires_at ? ', expires ' + lvFmtTime(a.expires_at) : ''}</div>
+      </div>
+      <div class="lv-ann-row-act">
+        <button class="phi-btn" onclick="lvAnnToggle('${a.id}',${!a.active})">${a.active ? 'TURN OFF' : 'TURN ON'}</button>
+        <button class="phi-btn danger" style="color:var(--red)" onclick="lvAnnDelete('${a.id}')">DELETE</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="p-sub">No announcements yet</div>';
+}
+
+async function lvAnnToggle(id, active){
+  if (!can('broadcast')) return;
+  const a = lvAnnAdminRows.find(x => x.id === id);
+  const { error } = await sb.from('announcements').update({ active }).eq('id', id);
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  lvAudit('announcement_toggled', null, null, (active ? 'Turned on: ' : 'Turned off: ') + (a ? a.message.slice(0, 160) : id));
+  await Promise.all([lvAnnAdminLoad(), lvAnnLoad()]);
+}
+
+async function lvAnnDelete(id){
+  if (!can('broadcast')) return;
+  if (!confirm('Delete this announcement permanently?')) return;
+  const a = lvAnnAdminRows.find(x => x.id === id);
+  const { error } = await sb.from('announcements').delete().eq('id', id);
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  lvAudit('announcement_removed', null, null, a ? a.message.slice(0, 200) : id);
+  await Promise.all([lvAnnAdminLoad(), lvAnnLoad()]);
+  showToast('Announcement deleted', 'warn');
+}
+
+// ---------- Maintenance mode ----------
+// Note: this is a screen for regular users, not a security lock. Admins are never locked out.
+let lvMaint = { on: false, message: '' };
+async function lvMaintLoad(){
+  const { data, error } = await sb.from('app_settings').select('value').eq('key', 'maintenance').maybeSingle();
+  if (error || !data) return;   // on a read error keep the previous state, never lock people out by accident
+  const val = data.value || {};
+  lvMaint = { on: !!val.on, message: String(val.message || '') };
+}
+function lvMaintRender(){
+  const scr = document.getElementById('maintScreen');
+  if (!scr) return;
+  const lock = lvMaint.on && !!currentUser && !hasAnyPerm() && !lvBlockedShown;
+  if (lock) {
+    setEl('maintMsg', lvMaint.message || 'We are updating LIQUID.VAULT. Please check back in a few minutes.');
+    scr.style.display = 'flex';
+  } else {
+    scr.style.display = 'none';
+  }
+}
+function lvMaintFill(){
+  const st = document.getElementById('maintState');
+  if (!st) return;
+  st.textContent = lvMaint.on ? 'ON: regular users see a "back soon" screen. Admins are not affected.' : 'OFF: the app is running normally.';
+  st.style.color = lvMaint.on ? 'var(--red)' : '';
+  const b = document.getElementById('maintBtn');
+  b.textContent = lvMaint.on ? 'TURN MAINTENANCE OFF' : 'TURN MAINTENANCE ON';
+  b.className = lvMaint.on ? 'btn btn-primary' : 'btn btn-ghost';
+  const inp = document.getElementById('maintInput');
+  if (document.activeElement !== inp) inp.value = lvMaint.message;
+}
+async function lvMaintToggle(){
+  if (!can('broadcast')) return;
+  const next = !lvMaint.on;
+  if (!confirm(next ? 'Turn maintenance mode ON? Regular users will see a "back soon" screen until you turn it off. Admins are not affected.' : 'Turn maintenance mode OFF?')) return;
+  const message = v('maintInput').trim().slice(0, 200);
+  const { error } = await sb.from('app_settings').upsert({ key: 'maintenance', value: { on: next, message }, updated_by: currentUser.id, updated_at: new Date().toISOString() });
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  lvMaint = { on: next, message };
+  lvMaintFill();
+  lvMaintRender();
+  lvAudit(next ? 'maintenance_on' : 'maintenance_off', null, null, message || null);
+  showToast(next ? 'Maintenance mode is ON' : 'Maintenance mode is OFF', next ? 'warn' : 'success');
+}
+
+async function lvBroadcastPoll(){
+  if (!currentUser) return;
+  await Promise.all([lvAnnLoad(), lvMaintLoad()]);
+  lvMaintRender();
+  if (adminViewOn && can('broadcast')) lvMaintFill();
+}
+function lvBroadcastReset(){
+  lvAnnList = []; lvAnnAdminRows = [];
+  lvMaint = { on: false, message: '' };
+  lvBlockedShown = false; lvPresSig = ''; lvAuditRows = [];
+  const box = document.getElementById('lvAnnBox');
+  if (box) box.innerHTML = '';
+  hide('maintScreen'); hide('blockedScreen');
+}
+
+// ---------- Analytics ----------
+function lvDayKey(d){ return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function lvDaily(list, days){
+  const out = [], map = {};
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    const o = { d, n: 0 };
+    out.push(o); map[lvDayKey(d)] = o;
+  }
+  list.forEach(x => { const o = map[lvDayKey(new Date(x.created_at))]; if (o) o.n++; });
+  return out;
+}
+function lvBars(series){
+  const max = Math.max(1, ...series.map(x => x.n));
+  return '<div class="lv-bars">' + series.map(x => {
+    const h = x.n ? Math.max(4, Math.round(x.n / max * 100)) : 0;
+    const tip = x.d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) + ': ' + x.n;
+    return `<div class="lv-bar-col" title="${esc(tip)}"><span class="lv-bar-val">${x.n || ''}</span><div class="lv-bar-track"><div class="lv-bar" style="height:${h}%"></div></div><span class="lv-bar-lbl">${x.d.getDate()}</span></div>`;
+  }).join('') + '</div>';
+}
+function lvOnlineStat(){
+  const el = document.getElementById('anOnline');
+  if (el) el.textContent = Object.keys(presState).length;
+}
+function lvRenderAnalytics(){
+  if (!document.getElementById('adAnalytics')) return;
+  const profiles = window.lvAdminProfiles || [], secs = adminSectionsCache || [];
+  const u = lvDaily(profiles, 14), sd = lvDaily(secs, 14);
+  const last7 = a => a.slice(-7).reduce((t, x) => t + x.n, 0);
+  setEl('anUsers7', last7(u));
+  setEl('anSections7', last7(sd));
+  setEl('anCopies', secs.reduce((t, x) => t + (x.copy_count || 0), 0));
+  document.getElementById('anUsersChart').innerHTML = lvBars(u);
+  document.getElementById('anSectionsChart').innerHTML = lvBars(sd);
+  const top = secs.filter(x => (x.copy_count || 0) > 0).sort((a, b) => (b.copy_count || 0) - (a.copy_count || 0)).slice(0, 5);
+  const mx = top.length ? top[0].copy_count : 1;
+  document.getElementById('anTop').innerHTML = top.length ? top.map(x => `<div class="lv-top-row" onclick="viewSectionById('${x.id}',true)" title="Open section">
+      <div class="lv-top-name">${esc(x.name)}<span class="p-sub"> ${esc(x._ownerName || '')}</span></div>
+      <div class="lv-top-bar"><div style="width:${Math.max(6, Math.round(x.copy_count / mx * 100))}%"></div></div>
+      <div class="lv-top-n">${x.copy_count}</div>
+    </div>`).join('') : '<div class="p-sub" style="padding:10px 0">No copies recorded yet</div>';
+  lvOnlineStat();
 }
 
 init().then(lvAfterInit);
