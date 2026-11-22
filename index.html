@@ -794,6 +794,12 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   .m-credit{flex:0 0 auto}
 }
 .auth-screen{min-height:100vh;min-height:100dvh}
+
+/* ===== FORGOT / RESET PASSWORD ===== */
+.auth-link{display:block;width:100%;margin-top:12px;padding:8px;background:none;border:0;color:var(--green);font-family:var(--ui);font-size:13px;font-weight:500;text-align:center;cursor:pointer}
+.auth-link:hover{text-decoration:underline}
+.auth-note{font-size:13.5px;color:var(--text2);line-height:1.55;margin-bottom:16px}
+.auth-err.ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 8%,transparent)}
 </style>
 </head>
 <body>
@@ -830,6 +836,7 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
           <input class="auth-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
         </div>
         <button class="auth-btn" onclick="doLogin()" id="loginBtn">ENTER VAULT</button>
+        <button type="button" class="auth-link" onclick="lvAuthView('forgot')">Forgot password?</button>
         <div class="auth-err" id="loginErr"></div>
       </div>
       <div id="signupForm" style="display:none">
@@ -847,6 +854,29 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         </div>
         <button class="auth-btn" onclick="doSignup()" id="signupBtn">CREATE ACCOUNT</button>
         <div class="auth-err" id="signupErr"></div>
+      </div>
+      <div id="forgotForm" style="display:none">
+        <div class="auth-note">Enter the email of your account. We will send you a link to reset your password.</div>
+        <div class="auth-field">
+          <div class="auth-label">EMAIL</div>
+          <input class="auth-input" id="forgotEmail" type="email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')doForgot()" />
+        </div>
+        <button class="auth-btn" onclick="doForgot()" id="forgotBtn">SEND RESET LINK</button>
+        <div class="auth-err" id="forgotErr"></div>
+        <button type="button" class="auth-link" onclick="lvAuthView('login')">&larr; Back to login</button>
+      </div>
+      <div id="newpassForm" style="display:none">
+        <div class="auth-note">Choose a new password for your account.</div>
+        <div class="auth-field">
+          <div class="auth-label">NEW PASSWORD</div>
+          <input class="auth-input" id="newPass" type="password" placeholder="min 6 characters" autocomplete="new-password" />
+        </div>
+        <div class="auth-field">
+          <div class="auth-label">CONFIRM PASSWORD</div>
+          <input class="auth-input" id="newPass2" type="password" placeholder="repeat the password" autocomplete="new-password" onkeydown="if(event.key==='Enter')doNewPass()" />
+        </div>
+        <button class="auth-btn" onclick="doNewPass()" id="newPassBtn">UPDATE PASSWORD</button>
+        <div class="auth-err" id="newPassErr"></div>
       </div>
     </div>
     <div class="auth-credit">Developed and managed by <strong>Sandeep Singh</strong><br><span class="tv-inline" style="margin-top:6px">Part of <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvga" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvga)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg> <strong>Toolverse</strong></span></div>
@@ -1400,6 +1430,12 @@ const ADMIN_EMAIL   = 'aifuture7777@gmail.com';   // e.g. 'you@gmail.com'
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Password recovery: the e-mail link opens this page with a temporary recovery session.
+let lvRecovery = /type=recovery/.test(location.hash + location.search);
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'PASSWORD_RECOVERY') { lvRecovery = true; lvShowReset(); }
+});
+
 let currentUser   = null;
 let currentProfile= null;
 let isAdmin       = false;
@@ -1420,10 +1456,11 @@ let publicOwnerId = null;
 // ============================================================
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
+  if (session && !lvRecovery) {
     await bootApp(session.user);
   } else {
     hide('loadingScreen'); show('authScreen');
+    if (lvRecovery) lvAuthView('newpass');
   }
 }
 
@@ -4016,7 +4053,88 @@ async function saveProfileName(){
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal('profileModal'); });
 
-init();
+// ============================================================
+//  AUTH: forgot password + set new password
+// ============================================================
+let lvAuthMsg = '';
+(function(){
+  const q = new URLSearchParams((location.hash || '').replace(/^#/, '') + '&' + (location.search || '').replace(/^\?/, ''));
+  const d = q.get('error_description');
+  if (d) lvAuthMsg = d.replace(/\+/g, ' ');
+})();
+
+const _lvSAT = switchAuthTab;
+function lvAuthView(view){
+  const isTab = view === 'login' || view === 'signup';
+  document.querySelector('.auth-tabs').style.display = isTab ? '' : 'none';
+  ['forgotForm', 'newpassForm'].forEach(id => { document.getElementById(id).style.display = (id === view + 'Form') ? 'block' : 'none'; });
+  if (isTab) _lvSAT(view);
+  else { document.getElementById('loginForm').style.display = 'none'; document.getElementById('signupForm').style.display = 'none'; }
+  document.querySelectorAll('.auth-err').forEach(e => { e.style.display = 'none'; e.classList.remove('ok'); });
+  const sub = document.querySelector('.auth-sub');
+  if (sub) sub.textContent = view === 'forgot' ? 'RESET YOUR PASSWORD' : (view === 'newpass' ? 'SET A NEW PASSWORD' : 'SHOPIFY SECTION MANAGER v2');
+  if (view === 'forgot') {
+    const fe = document.getElementById('forgotEmail'), le = document.getElementById('loginEmail');
+    if (fe && !fe.value && le) fe.value = le.value;
+  }
+}
+switchAuthTab = function(t){ lvAuthView(t); };
+
+function lvShowReset(){
+  hide('loadingScreen');
+  document.getElementById('mainApp').style.display = 'none';
+  show('authScreen');
+  lvAuthView('newpass');
+}
+
+let lvForgotTimer = null;
+async function doForgot(){
+  const email = v('forgotEmail').trim();
+  const el = document.getElementById('forgotErr');
+  el.classList.remove('ok');
+  if (!email) { showAuthErr('forgotErr', 'Enter your email'); return; }
+  setBtn('forgotBtn', true, 'SENDING...');
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+  if (error) { setBtn('forgotBtn', false, 'SEND RESET LINK'); showAuthErr('forgotErr', error.message); return; }
+  el.classList.add('ok');
+  el.textContent = 'If an account exists for this email, a reset link has been sent. Check your inbox and spam folder.';
+  el.style.display = 'block';
+  let left = 60;
+  clearInterval(lvForgotTimer);
+  setBtn('forgotBtn', true, 'RESEND IN ' + left + 's');
+  lvForgotTimer = setInterval(() => {
+    left--;
+    if (left <= 0) { clearInterval(lvForgotTimer); setBtn('forgotBtn', false, 'SEND RESET LINK'); }
+    else setBtn('forgotBtn', true, 'RESEND IN ' + left + 's');
+  }, 1000);
+}
+
+async function doNewPass(){
+  const p1 = v('newPass'), p2 = v('newPass2');
+  if (p1.length < 6) { showAuthErr('newPassErr', 'Password must be at least 6 characters'); return; }
+  if (p1 !== p2) { showAuthErr('newPassErr', 'Passwords do not match'); return; }
+  setBtn('newPassBtn', true, 'UPDATING...');
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  setBtn('newPassBtn', false, 'UPDATE PASSWORD');
+  if (error) { showAuthErr('newPassErr', error.message); return; }
+  lvRecovery = false;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  document.getElementById('newPass').value = ''; document.getElementById('newPass2').value = '';
+  showToast('Password updated');
+  if (currentUser) { hide('authScreen'); document.getElementById('mainApp').style.display = 'grid'; return; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await bootApp(session.user);
+  else lvAuthView('login');
+}
+
+// shows the reason when a reset link is expired or invalid
+function lvAfterInit(){
+  if (!lvAuthMsg) return;
+  if (document.getElementById('authScreen').style.display !== 'none') { lvAuthView('login'); showAuthErr('loginErr', lvAuthMsg); }
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+init().then(lvAfterInit);
 </script>
 </body>
 </html>
