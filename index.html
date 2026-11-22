@@ -772,6 +772,17 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   .logo-mark{width:30px;height:30px}
   .logo-text{font-size:12.5px;letter-spacing:.08em;line-height:1;white-space:nowrap;text-align:center}
 }
+
+/* ===== ADMIN BULK CONTROLS: aligned grid ===== */
+.admin-ctrl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}
+.admin-ctrl-group{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px}
+.admin-ctrl-group .admin-ctrl-label{margin:0}
+.admin-ctrl-desc{font-size:12.5px;color:var(--text3);line-height:1.4;min-height:18px}
+.admin-ctrl-group .admin-ctrl-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:auto;padding-top:4px}
+.admin-ctrl-group .admin-ctrl-row.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.admin-ctrl-group .admin-ctrl-row .btn{justify-content:center;text-align:center;min-height:44px;padding:8px 10px;white-space:normal;line-height:1.25}
+@media(max-width:1100px){.admin-ctrl{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:420px){.admin-ctrl-group .admin-ctrl-row.cols-3 .btn{font-size:11.5px;padding:8px 4px}}
 </style>
 </head>
 <body>
@@ -945,27 +956,39 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
       <div class="admin-title">ADMIN CONSOLE</div>
       <div class="admin-subtitle">ALL USERS · ALL SECTIONS · FULL CONTROL</div>
       <div class="admin-ctrl" id="adminCtrlBox">
-        <div class="admin-ctrl-label">MY SECTIONS</div>
-        <div class="admin-ctrl-row">
-          <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL MY SECTIONS PRIVATE</button>
-          <button class="btn btn-primary" onclick="setAllMineVisibility(true)">MAKE ALL MY SECTIONS PUBLIC</button>
+        <div class="admin-ctrl-group">
+          <div class="admin-ctrl-label">MY SECTIONS</div>
+          <div class="admin-ctrl-desc">Visibility of the sections you own.</div>
+          <div class="admin-ctrl-row">
+            <button class="btn btn-ghost" onclick="setAllMineVisibility(false)">MAKE ALL PRIVATE</button>
+            <button class="btn btn-primary" onclick="setAllMineVisibility(true)">MAKE ALL PUBLIC</button>
+          </div>
         </div>
-        <div class="admin-ctrl-label" style="margin-top:16px">PUBLIC LIBRARY (ALL USERS)</div>
-        <div class="admin-ctrl-row">
-          <button class="btn btn-ghost" onclick="setAllLibraryVisibility(false)">MAKE ALL LIBRARY SECTIONS PRIVATE</button>
-          <button class="btn btn-primary" onclick="setAllLibraryVisibility(true)">MAKE ALL USERS' SECTIONS PUBLIC</button>
+        <div class="admin-ctrl-group">
+          <div class="admin-ctrl-label">PUBLIC LIBRARY (ALL USERS)</div>
+          <div class="admin-ctrl-desc">Visibility of sections across every user.</div>
+          <div class="admin-ctrl-row">
+            <button class="btn btn-ghost" onclick="setAllLibraryVisibility(false)">MAKE LIBRARY PRIVATE</button>
+            <button class="btn btn-primary" onclick="setAllLibraryVisibility(true)">MAKE ALL USERS' PUBLIC</button>
+          </div>
         </div>
-        <div class="admin-ctrl-label" style="margin-top:16px">SET STATUS: ALL PUBLIC LIBRARY SECTIONS</div>
-        <div class="admin-ctrl-row">
-          <button class="btn btn-ghost" onclick="lvBulkStatus('draft','public')">ALL DRAFT</button>
-          <button class="btn btn-ghost" onclick="lvBulkStatus('tested','public')">ALL TESTED</button>
-          <button class="btn btn-primary" onclick="lvBulkStatus('live','public')">ALL LIVE</button>
+        <div class="admin-ctrl-group">
+          <div class="admin-ctrl-label">SET STATUS: PUBLIC LIBRARY</div>
+          <div class="admin-ctrl-desc">Applies to all sections in the public library.</div>
+          <div class="admin-ctrl-row cols-3">
+            <button class="btn btn-ghost" onclick="lvBulkStatus('draft','public')">ALL DRAFT</button>
+            <button class="btn btn-ghost" onclick="lvBulkStatus('tested','public')">ALL TESTED</button>
+            <button class="btn btn-primary" onclick="lvBulkStatus('live','public')">ALL LIVE</button>
+          </div>
         </div>
-        <div class="admin-ctrl-label" style="margin-top:16px">SET STATUS: EVERY SECTION OF EVERY USER</div>
-        <div class="admin-ctrl-row">
-          <button class="btn btn-ghost" onclick="lvBulkStatus('draft','all')">ALL DRAFT</button>
-          <button class="btn btn-ghost" onclick="lvBulkStatus('tested','all')">ALL TESTED</button>
-          <button class="btn btn-primary" onclick="lvBulkStatus('live','all')">ALL LIVE</button>
+        <div class="admin-ctrl-group">
+          <div class="admin-ctrl-label">SET STATUS: EVERY USER</div>
+          <div class="admin-ctrl-desc">Applies to every section of every user.</div>
+          <div class="admin-ctrl-row cols-3">
+            <button class="btn btn-ghost" onclick="lvBulkStatus('draft','all')">ALL DRAFT</button>
+            <button class="btn btn-ghost" onclick="lvBulkStatus('tested','all')">ALL TESTED</button>
+            <button class="btn btn-primary" onclick="lvBulkStatus('live','all')">ALL LIVE</button>
+          </div>
         </div>
       </div>
       <div style="font-size:12px;color:var(--green);letter-spacing:.04em;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">USER FEEDBACK / PROBLEMS</div>
