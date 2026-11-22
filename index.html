@@ -542,10 +542,9 @@ html[data-theme="light"] .ic-sun{display:none}
 .logs-table td{font-size:13px;padding:10px 14px;border-bottom:1px solid var(--border)}
 .card-actions{flex-wrap:wrap}.card-btn.fav{flex:0 0 44px;font-size:15px}.card-btn.fav.on{color:var(--amber);border-color:var(--amber)}
 
-/* ===== MOBILE RESPONSIVE v1 ===== */
+/* ===== MOBILE APP LAYOUT v2 ===== */
 html,body{max-width:100%;overflow-x:hidden}
-.menu-btn{display:none}
-.side-overlay{display:none}
+.menu-btn,.bottom-nav,.m-sheet,.side-overlay,.filter-toggle,.folder-chips{display:none}
 
 /* ---- Tablet ---- */
 @media(max-width:1024px){
@@ -553,71 +552,112 @@ html,body{max-width:100%;overflow-x:hidden}
   .main{min-width:0}
   .sections-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
   #adminSectionsGrid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr)) !important}
-  .topbar{flex-wrap:wrap;gap:10px}
-  .topbar-right{flex-wrap:wrap;gap:8px}
   .admin-stats{grid-template-columns:repeat(2,1fr)}
   .users-table,.prompts-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 
-/* ---- Phone / small tablet ---- */
+/* ---- Phone: app layout ---- */
 @media(max-width:860px){
-  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr auto;min-height:100dvh}
+  body{-webkit-tap-highlight-color:transparent}
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;min-height:100dvh;padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+  .app-footer{display:none}
+  .fb-fab{display:none !important}
 
-  /* top bar */
-  .topbar{position:sticky;top:0;z-index:60;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));gap:10px}
-  .menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;cursor:pointer}
+  /* top bar: logo + notification bell only */
+  .topbar{position:sticky;top:0;z-index:60;flex-wrap:nowrap;gap:10px;padding:8px 14px;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+  .menu-btn{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:10px;cursor:pointer}
   .logo{flex:1;min-width:0;gap:10px}
-  .logo-mark{width:34px;height:34px}
-  .logo-text{font-size:17px}
-  .logo-sub{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .topbar-right{order:3;width:100%;gap:8px}
-  .topbar-right>div:first-child{display:none}
-  .user-name{display:none}
-  .user-chip{padding:4px;margin-right:auto}
-  .theme-btn,.fb-bell{width:40px;height:40px}
-  .topbar-right .btn{height:40px;padding:0 12px;font-size:12px;justify-content:center}
-  .logout-btn{height:40px;padding:0 12px}
+  .logo-mark{width:32px;height:32px}
+  .logo-text{font-size:16px}
+  .logo-sub{display:none}
+  .topbar-right{width:auto;margin-left:auto;gap:8px}
+  #supportBtn,#permBtn,#soundBtn,#themeBtn,.tb-chat,.user-chip,#adminBadge,.logout-btn,.topbar-right>div:first-child{display:none !important}
+  .fb-bell{width:40px;height:40px;border-radius:10px}
 
-  /* sidebar -> slide-in drawer */
+  /* drawer (folders + extras) */
   .sidebar{position:fixed;top:0;left:0;bottom:0;height:100dvh;width:min(86vw,320px);z-index:1100;transform:translateX(-105%);transition:transform .25s ease;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   body.side-open .sidebar{transform:none;box-shadow:0 0 40px rgba(0,0,0,.45)}
-  .side-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1090;opacity:0;pointer-events:none;transition:opacity .25s}
-  body.side-open .side-overlay{opacity:1;pointer-events:auto}
-  body.side-open{overflow:hidden}
   .folder-item{padding:12px}
   .folder-del{opacity:1}
-  .new-folder-btn,.public-lib-btn,.admin-view-btn,.bin-btn{min-height:42px}
+  .new-folder-btn,.public-lib-btn,.admin-view-btn,.bin-btn{min-height:44px}
 
-  /* main area */
+  /* overlay for drawer / sheets */
+  .side-overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1070;opacity:0;pointer-events:none;transition:opacity .25s}
+  body.side-open .side-overlay,body.ai-open .side-overlay,body.more-open .side-overlay{opacity:1;pointer-events:auto}
+  body.side-open,body.ai-open,body.more-open{overflow:hidden}
+  body.side-open #addSectionBtn,body.ai-open #addSectionBtn,body.more-open #addSectionBtn{display:none !important}
+
+  /* header: just the title; Add = floating button */
   .main{overflow:visible;min-width:0}
-  .main-header{flex-wrap:wrap;gap:12px;padding:12px 14px}
-  .folder-title{flex:1 1 100%;min-width:0}
-  .folder-title>div{min-width:0}
-  .folder-title-text{font-size:17px;overflow-wrap:anywhere}
-  .folder-path{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .header-actions{width:100%;gap:8px}
-  .header-actions .btn{flex:1;justify-content:center;padding:11px 12px}
-  .stats-strip{flex-wrap:wrap;gap:6px 16px;padding:10px 14px 6px}
-  .search-bar{flex-wrap:wrap;gap:8px;padding:6px 14px 12px}
-  .search-wrap{flex:1 1 100%}
-  .search-bar .sort-select{flex:1 1 calc(50% - 4px);min-width:0}
-  .search-bar .btn{flex:1 1 calc(50% - 4px);justify-content:center;padding:10px 12px}
+  .main-header{padding:8px 14px 2px;background:var(--bg);border:0}
+  .folder-title i{display:none}
+  .folder-title-text{font-size:20px;font-weight:700;overflow-wrap:anywhere}
+  .folder-path{font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .folder-title,.folder-title>div{min-width:0}
+  .header-actions{display:contents}
+  .header-actions .btn-ghost{display:none}
+  #addSectionBtn{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:850;height:48px;padding:0 20px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:13px;justify-content:center}
+  .stats-strip{display:none}
 
-  /* AI prompt bar */
-  .prompt-bar{flex-direction:column;align-items:stretch;gap:10px;margin:0 14px 8px;padding:12px}
+  /* folder chips */
+  .folder-chips{display:flex;gap:8px;overflow-x:auto;padding:8px 14px 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:var(--bg)}
+  .folder-chips::-webkit-scrollbar{display:none}
+  .fchip{flex:0 0 auto;display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--text2);font:500 13px var(--ui);cursor:pointer;white-space:nowrap}
+  .fchip small{opacity:.7;font-size:11.5px}
+  .fchip.on{background:var(--btn);border-color:var(--btn);color:#fff}
+
+  /* search + collapsible filters */
+  .search-bar{display:flex;flex-wrap:wrap;gap:8px;padding:8px 14px 10px;background:var(--bg)}
+  .search-wrap{flex:1 1 0;min-width:0}
+  .search-input{min-height:44px;border-radius:10px}
+  .filter-toggle{display:flex;flex:0 0 44px;height:44px;align-items:center;justify-content:center;background:var(--input);border:1px solid var(--border);color:var(--text2);border-radius:10px;cursor:pointer}
+  .search-bar.fopen .filter-toggle{color:var(--green);border-color:var(--green)}
+  .search-bar>.sort-select,.search-bar>.btn{display:none}
+  .search-bar.fopen>.sort-select{display:block;flex:1 1 calc(50% - 4px);min-width:0}
+  .search-bar.fopen>.btn{display:flex;flex:1 1 calc(50% - 4px);justify-content:center;padding:10px 12px}
+
+  /* AI prompt = bottom sheet */
+  .prompt-bar{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:1080;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:10px;border:0;border-top:1px solid var(--border);border-radius:18px 18px 0 0;padding:12px 16px calc(16px + env(safe-area-inset-bottom,0px));transform:translateY(105%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+  body.ai-open .prompt-bar{transform:none;visibility:visible;transition:transform .28s ease}
+  .prompt-bar::before{content:'';width:40px;height:4px;border-radius:2px;background:var(--border);align-self:center}
+  .prompt-bar-label{font-size:13px}
   .prompt-input-wrap{min-width:0;width:100%}
   .prompt-selects{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .prompt-select{width:100%;min-width:0}
-  .prompt-btn,.prompt-history-btn{justify-content:center;width:100%;padding:12px}
+  .prompt-btn,.prompt-history-btn{justify-content:center;width:100%;padding:12px;min-height:46px}
 
   /* cards */
-  .sections-grid{grid-template-columns:minmax(0,1fr);padding:10px 14px 24px;gap:12px;overflow:visible}
+  .sections-grid{grid-template-columns:minmax(0,1fr);padding:6px 14px 24px;gap:14px;overflow:visible}
   #adminSectionsGrid{grid-template-columns:minmax(0,1fr) !important}
-  .card-actions{padding:10px 12px;gap:6px}
-  .card-btn{flex:1 1 auto;min-height:38px;padding:8px 10px}
-  .card-btn.del,.card-btn.vis,.card-btn.fav{flex:0 0 44px;padding:8px 0}
+  .card-image{height:150px}
+  .card-image-placeholder{height:84px}
+  .card-header{padding:12px 14px 6px;border-bottom:0}
+  .card-body{padding:2px 14px 12px}
+  .card-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
   .card-meta{gap:8px 12px}
+  .card-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 12px}
+  .card-btn{min-height:40px;padding:6px 2px;font-size:11.5px;flex:none;width:auto}
+  .card-btn.del,.card-btn.vis,.card-btn.fav{flex:none;padding:6px 0}
   .pub-folder{padding:14px}
+
+  /* bottom navigation */
+  .bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--bg2);border-top:1px solid var(--border);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 20px rgba(0,0,0,.12)}
+  .bottom-nav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:52px;background:none;border:0;color:var(--text3);font:600 10.5px var(--ui);letter-spacing:.02em;cursor:pointer;border-radius:10px}
+  .bottom-nav button.on{color:var(--green);background:var(--sel)}
+  .nav-badge{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--red);color:#fff;font:700 10px/16px var(--ui);text-align:center;display:none;font-style:normal}
+
+  /* More sheet */
+  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:0;z-index:1080;background:var(--bg2);border-radius:18px 18px 0 0;padding:10px 16px calc(16px + env(safe-area-inset-bottom,0px));max-height:85dvh;overflow-y:auto;transform:translateY(105%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s;box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+  body.more-open .m-sheet{transform:none;visibility:visible;transition:transform .28s ease}
+  .m-grab{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 12px}
+  .m-user{display:flex;align-items:center;gap:12px;padding:4px 2px 14px;border-bottom:1px solid var(--border);margin-bottom:4px}
+  .m-user .user-avatar{width:42px;height:42px;font-size:15px}
+  .m-user b{display:block;font-size:15px;color:var(--text)}
+  .m-user span.m-role{font-size:11.5px;color:var(--text3);letter-spacing:.04em}
+  .m-item{display:flex;align-items:center;gap:14px;width:100%;min-height:50px;padding:0 4px;background:none;border:0;border-bottom:1px solid var(--border);color:var(--text);font:500 15px var(--ui);text-align:left;cursor:pointer}
+  .m-item svg{flex:0 0 22px;color:var(--text2)}
+  .m-item.danger,.m-item.danger svg{color:var(--red)}
+  .m-credit{text-align:center;font-size:11.5px;color:var(--text3);padding-top:14px;line-height:1.6}
 
   /* admin console */
   .admin-panel{overflow:visible;padding:14px}
@@ -629,7 +669,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .admin-ctrl-row .btn{flex:1 1 140px;justify-content:center;white-space:normal;text-align:center}
   .users-table,.prompts-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
 
-  /* modals -> full screen sheets */
+  /* modals -> full screen */
   .modal-overlay{padding:0;align-items:stretch}
   .modal{max-width:100% !important;width:100%;max-height:none;height:100dvh;border-radius:0;border-left:0;border-right:0}
   .modal-header{padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
@@ -644,26 +684,43 @@ html,body{max-width:100%;overflow-x:hidden}
   .view-modal .code-view{max-height:45vh}
   .view-image-full{max-height:200px}
   .img-preview{max-height:180px}
-
-  /* recycle bin / history lists */
   .bin-info{flex:1 1 100%;min-width:0}
   .bin-actions{width:100%}
   .bin-actions .phi-btn{flex:1;justify-content:center;min-height:38px}
   .phi-btn{min-height:34px}
 
-  /* chat + support + permissions */
+  /* ===== CHAT ROOM (one pane at a time, like a messenger) ===== */
   .chat-modal{height:100dvh !important;max-height:100dvh !important}
-  .chat-wrap{grid-template-rows:minmax(0,1fr)}
-  .chat-head{padding:10px 12px;flex-wrap:wrap}
+  .chat-wrap{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+  .chat-wrap .chat-main{display:none}
+  .chat-wrap.open .chat-side{display:none}
+  .chat-wrap.open .chat-main{display:flex}
+  .chat-back{display:flex}
+  .chat-modal:has(.chat-wrap.open) .modal-header{display:none}
+  .chat-new{padding:10px 12px;gap:8px}
+  .chat-new select{flex:1;min-width:0}
+  .chat-list{padding:0}
+  .chat-row{padding:13px 14px;border-radius:0;border-bottom:1px solid var(--border);margin:0}
+  .chat-row-name{font-size:15px}
+  #chatModal .chat-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"back title act" "back sub act";column-gap:10px;row-gap:0;align-items:center;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+  #chatModal .chat-back{grid-area:back}
+  #chatHeadTitle{grid-area:title;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+  #chatHeadSub{grid-area:sub;margin-left:0 !important;font-size:12px}
+  #chatHeadActions{grid-area:act;margin-left:0}
+  #supportModal .chat-head,#permModal .chat-head{flex-wrap:wrap;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+  #supportModal .chat-head-actions{width:100%;margin-left:0;flex-wrap:wrap}
   .chat-msgs{padding:12px}
-  .chat-compose{padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
-  .chat-compose-row .card-btn{min-height:42px}
+  .chat-msg{max-width:86%}
+  .chat-compose{padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
+  .chat-compose-row{gap:6px;align-items:flex-end}
+  .chat-compose textarea{min-height:44px;border-radius:22px;padding:11px 14px}
+  .chat-compose-row .card-btn{flex:0 0 44px;width:44px;height:44px;min-height:44px;padding:0;border-radius:50%}
+  #chatSendBtn{height:44px;border-radius:22px;padding:0 16px}
   .chat-emoji{grid-template-columns:repeat(8,1fr)}
   .chat-code{max-height:200px}
 
-  /* feedback widget + toast */
-  .fb-fab{right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:52px;height:52px}
-  .fb-panel{left:10px;right:10px;width:auto;max-width:none;bottom:calc(76px + env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 110px)}
+  /* help panel as bottom sheet + toast above nav */
+  .fb-panel{left:0;right:0;bottom:0;width:100%;max-width:none;max-height:88dvh;border-radius:18px 18px 0 0;z-index:1080;padding-bottom:env(safe-area-inset-bottom,0px)}
   .toast{left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));justify-content:center}
 
   /* auth */
@@ -672,25 +729,16 @@ html,body{max-width:100%;overflow-x:hidden}
   .auth-body{padding:20px 18px}
   .auth-logo{font-size:24px}
 
-  /* footer */
-  .app-footer{flex-direction:column;align-items:flex-start;gap:6px;padding:12px 14px calc(72px + env(safe-area-inset-bottom,0px))}
-
-  /* 16px inputs = iOS zoom nahi karega */
+  /* 16px inputs: iPhone zoom nahi karega */
   .form-input,.form-select,.auth-input,.search-input,.prompt-input,.prompt-select,.sort-select,.folder-input,.code-area{font-size:16px}
-  input.form-input,input.auth-input,input.search-input,input.prompt-input,select.form-select,select.sort-select,select.prompt-select,.folder-input{min-height:44px}
+  input.form-input,input.auth-input,input.prompt-input,select.form-select,select.sort-select,select.prompt-select,.folder-input{min-height:44px}
   .auth-btn,.btn-save,.btn-cancel{min-height:44px}
 }
 
-/* ---- Small phones ---- */
 @media(max-width:420px){
-  .logo-sub{display:none}
   .card-title{font-size:15px}
   .chat-emoji{grid-template-columns:repeat(7,1fr)}
-  .header-actions .btn{font-size:12px;padding:10px 8px}
-  .topbar-right .btn{padding:0 10px}
 }
-
-/* ---- Touch devices: hover-only things ko visible rakho ---- */
 @media(hover:none){
   .folder-del{opacity:1}
   .section-card:hover,.pub-folder:hover,.fb-fab:hover{transform:none}
@@ -757,7 +805,7 @@ html,body{max-width:100%;overflow-x:hidden}
 <!-- MAIN APP -->
 <div class="app" id="mainApp" style="display:none">
   <div class="topbar">
-    <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" aria-label="Open menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" aria-label="Folders"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     <div class="logo">
       <div class="logo-mark"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="LIQUID.VAULT logo"><defs><linearGradient id="lvgt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#lvgt)"/><path d="M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z" fill="#fff"/><path d="M24 40a8 8 0 0 0 5 7" fill="none" stroke="#2f6bff" stroke-width="2" stroke-linecap="round" opacity=".35"/><circle cx="32" cy="38" r="4.6" fill="#2f6bff"/><rect x="30" y="40" width="4" height="9" rx="2" fill="#2f6bff"/></svg></div>
       <div>
@@ -771,7 +819,7 @@ html,body{max-width:100%;overflow-x:hidden}
       <button class="btn btn-primary sup-btn" id="permBtn" style="display:none" onclick="openPerms()">PERMISSIONS</button>
       <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Switch light / dark mode" aria-label="Toggle theme"><svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><svg class="ic-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
       <button class="fb-bell" id="soundBtn" onclick="toggleSound()" aria-label="Notification sound"></button>
-      <button class="fb-bell" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
+      <button class="fb-bell tb-chat" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
       <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
       <div class="user-chip">
         <div class="user-avatar" id="userAvatar">--</div>
@@ -814,6 +862,7 @@ html,body{max-width:100%;overflow-x:hidden}
         <button class="btn btn-primary" id="addSectionBtn" onclick="openAddModal()"><i class="ti ti-plus"></i> ADD SECTION</button>
       </div>
     </div>
+    <div class="folder-chips" id="folderChips"></div>
     <div class="stats-strip">
       <div class="stat"><i class="ti ti-database"></i><span class="stat-val" id="statTotal">0</span> SECTIONS</div>
       <div class="stat"><i class="ti ti-folder"></i><span class="stat-val" id="statFolders">0</span> FOLDERS</div>
@@ -824,6 +873,7 @@ html,body{max-width:100%;overflow-x:hidden}
         
         <input class="search-input" id="searchInput" placeholder="search sections..." oninput="renderSections()" />
       </div>
+      <button class="filter-toggle" id="filterToggle" onclick="toggleFilters()" aria-label="Filters"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
       <select class="sort-select" id="sortSelect" onchange="renderSections()">
         <option value="newest">NEWEST</option>
         <option value="oldest">OLDEST</option>
@@ -927,9 +977,31 @@ html,body{max-width:100%;overflow-x:hidden}
     <span class="tv-badge"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Toolverse logo"><defs><linearGradient id="tvgf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#2dd4bf"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#tvgf)"/><path d="M17 19h30v8H36v20h-8V27H17z" fill="#fff"/><ellipse cx="32" cy="34" rx="25" ry="9" transform="rotate(-24 32 34)" fill="none" stroke="#fff" stroke-width="2.6" opacity=".7"/><circle cx="52" cy="23" r="3.6" fill="#fff"/></svg><span>LIQUID.VAULT is a part of <strong>Toolverse</strong></span></span>
     <span>LIQUID.VAULT v3</span>
   </footer>
-</div>
+  <div class="side-overlay" id="sideOverlay" onclick="mCloseSheets()"></div>
+  <nav class="bottom-nav" id="bottomNav">
+    <button data-tab="vault" onclick="mTab('vault')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Vault</span></button>
+    <button data-tab="lib" onclick="mTab('lib')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Library</span></button>
+    <button data-tab="ai" onclick="mTab('ai')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span>AI</span></button>
+    <button data-tab="chat" onclick="mTab('chat')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span>Chat</span><i class="nav-badge" id="navChatBadge"></i></button>
+    <button data-tab="more" onclick="mTab('more')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>More</span><i class="nav-badge" id="navMoreBadge"></i></button>
+  </nav>
+  <div class="m-sheet" id="moreSheet">
+    <div class="m-grab"></div>
+    <div class="m-user"><div class="user-avatar" id="mAvatar">--</div><div><b id="mName">--</b><span class="m-role" id="mRole"></span></div></div>
+    <button class="m-item" data-need="adminViewBtn" onclick="mAct('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>Admin console</span></button>
+    <button class="m-item" data-need="supportBtn" onclick="mAct('support')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg><span>Support center</span></button>
+    <button class="m-item" data-need="permBtn" onclick="mAct('perm')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Permissions</span></button>
+    <button class="m-item" onclick="mAct('help')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Feedback &amp; help</span></button>
+    <button class="m-item" onclick="mAct('history')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>AI prompt history</span></button>
+    <button class="m-item" onclick="mAct('bin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span>Recycle bin</span></button>
+    <button class="m-item" onclick="mAct('export')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg><span>Export backup</span></button>
+    <button class="m-item" onclick="mAct('theme')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg><span>Switch light / dark</span></button>
+    <button class="m-item" onclick="mAct('sound')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg><span>Notification sound</span></button>
+    <button class="m-item danger" onclick="mAct('logout')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Logout</span></button>
+    <div class="m-credit">Developed and managed by <b>Sandeep Singh</b><br>LIQUID.VAULT is a part of <b>Toolverse</b> &middot; v3</div>
+  </div>
 
-<div class="side-overlay" id="sideOverlay" onclick="closeSidebar()"></div>
+</div>
 
 <!-- ADD/EDIT MODAL -->
 <div id="addModal" style="display:none" class="modal-overlay">
@@ -3486,19 +3558,119 @@ async function permSave() {
 
 
 // ============================================================
-//  MOBILE: sidebar drawer
+//  MOBILE APP SHELL (bottom tabs, sheets, chips, filters)
 // ============================================================
-function toggleSidebar(){document.body.classList.toggle('side-open');}
-function closeSidebar(){document.body.classList.remove('side-open');}
-// capture phase: list re-render hone se pehle hi detect ho jaye
-document.addEventListener('click',function(e){
-  if(!document.body.classList.contains('side-open'))return;
-  const t=e.target;
-  if(!t||!t.closest||t.closest('.folder-del'))return;
-  if(t.closest('.sidebar .folder-item,.sidebar .public-lib-btn,.sidebar .admin-view-btn,.sidebar .bin-btn'))setTimeout(closeSidebar,60);
-},true);
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSidebar();});
-window.addEventListener('resize',function(){if(window.innerWidth>860)closeSidebar();});
+const M_B = document.body;
+const mIsMobile = () => window.innerWidth <= 860;
+
+function mCloseSheets(){ M_B.classList.remove('side-open','ai-open','more-open'); mSync(); }
+function toggleSidebar(){ const o = M_B.classList.contains('side-open'); mCloseSheets(); if(!o) M_B.classList.add('side-open'); }
+function closeSidebar(){ M_B.classList.remove('side-open'); }
+
+function mCurrent(){
+  if (M_B.classList.contains('more-open')) return 'more';
+  if (M_B.classList.contains('ai-open')) return 'ai';
+  if (publicViewOn) return 'lib';
+  return 'vault';
+}
+function mBadgeNum(id){ const e = document.getElementById(id); return e && e.style.display === 'flex' ? (parseInt(e.textContent) || 0) : 0; }
+function mSetBadge(id, n){ const e = document.getElementById(id); if(!e) return; e.textContent = n > 99 ? '99+' : n; e.style.display = n ? 'block' : 'none'; }
+function mSync(){
+  const cur = mCurrent();
+  document.querySelectorAll('#bottomNav button').forEach(b => b.classList.toggle('on', b.dataset.tab === cur));
+  const ch = document.getElementById('folderChips');
+  if (ch) ch.style.display = (publicViewOn || adminViewOn) ? 'none' : '';
+  mSetBadge('navChatBadge', mBadgeNum('chatBadge'));
+  mSetBadge('navMoreBadge', mBadgeNum('fbBellBadge') + mBadgeNum('supportBadge'));
+}
+setInterval(mSync, 1000);
+
+async function mTab(t){
+  const wasAI = M_B.classList.contains('ai-open'), wasMore = M_B.classList.contains('more-open');
+  mCloseSheets();
+  if (t === 'vault'){
+    if (adminViewOn) await toggleAdminView();
+    if (publicViewOn) await togglePublicLibrary();
+    window.scrollTo(0, 0);
+  } else if (t === 'lib'){
+    if (adminViewOn) await toggleAdminView();
+    if (!publicViewOn) await togglePublicLibrary();
+    else if (publicOwnerId) closePublicOwner();
+    window.scrollTo(0, 0);
+  } else if (t === 'ai'){
+    if (!wasAI){ M_B.classList.add('ai-open'); setTimeout(() => { const i = document.getElementById('promptInput'); if(i) i.focus(); }, 320); }
+  } else if (t === 'chat'){
+    openChat();
+  } else if (t === 'more'){
+    if (!wasMore) mOpenMore();
+  }
+  mSync();
+}
+
+function mOpenMore(){
+  setEl('mName', document.getElementById('userNameDisplay').textContent);
+  setEl('mAvatar', document.getElementById('userAvatar').textContent);
+  setEl('mRole', isSuper ? 'MAIN ADMIN' : (isAdmin ? 'ADMIN' : 'USER'));
+  document.querySelectorAll('#moreSheet [data-need]').forEach(b => {
+    const el = document.getElementById(b.dataset.need);
+    b.style.display = (el && el.style.display !== 'none') ? '' : 'none';
+  });
+  M_B.classList.add('more-open');
+  mSync();
+}
+
+function mAct(a){
+  mCloseSheets();
+  setTimeout(() => {
+    if (a === 'admin'){ if (!adminViewOn) toggleAdminView(); }
+    else if (a === 'support') openSupport();
+    else if (a === 'perm') openPerms();
+    else if (a === 'help') fbOpen('new');
+    else if (a === 'history') openPromptHistory();
+    else if (a === 'bin') openBin();
+    else if (a === 'export') exportData();
+    else if (a === 'theme') toggleTheme();
+    else if (a === 'sound') toggleSound();
+    else if (a === 'logout') doLogout();
+    mSync();
+  }, 90);
+}
+
+// folder chips
+function mChips(){
+  const el = document.getElementById('folderChips');
+  if (!el) return;
+  if (mIsMobile() && document.getElementById('headerTitle').textContent === 'SELECT A FOLDER' && !activeFolderId){
+    setEl('headerTitle', 'ALL SECTIONS'); setEl('headerPath', 'vault://all/');
+  }
+  el.innerHTML = '<button class="fchip' + (activeFolderId ? '' : ' on') + '" onclick="mChipAll()">All <small>' + sections.length + '</small></button>' +
+    folders.map(f => '<button class="fchip' + (activeFolderId === f.id ? ' on' : '') + '" onclick="selectFolder(\'' + f.id + '\')">' + esc(f.name) + ' <small>' + sections.filter(s => s.folder_id === f.id).length + '</small></button>').join('') +
+    '<button class="fchip" onclick="mNewFolder()">+ Folder</button>';
+  mSync();
+}
+function mChipAll(){ if (activeFolderId) selectFolder(activeFolderId); }
+function mNewFolder(){ const n = prompt('Folder name'); if (n && n.trim()) createFolder(n.trim()); }
+const _mRF = renderFolders; renderFolders = function(){ _mRF(); mChips(); };
+
+// filters
+function toggleFilters(){ document.querySelector('.search-bar').classList.toggle('fopen'); }
+
+// AI sheet behaviour
+const _mSP = sendPromptToClaude;
+sendPromptToClaude = async function(){ await _mSP(); if (document.getElementById('promptInput').value === '') mCloseSheets(); };
+const _mOH = openPromptHistory;
+openPromptHistory = function(){ mCloseSheets(); return _mOH(); };
+const _mRU = reUsePrompt;
+reUsePrompt = function(){ _mRU.apply(null, arguments); if (mIsMobile()) { M_B.classList.add('ai-open'); mSync(); } };
+
+document.addEventListener('click', function(e){
+  if (!M_B.classList.contains('side-open')) return;
+  const t = e.target;
+  if (!t || !t.closest || t.closest('.folder-del')) return;
+  if (t.closest('.sidebar .folder-item,.sidebar .public-lib-btn,.sidebar .admin-view-btn,.sidebar .bin-btn')) setTimeout(mCloseSheets, 60);
+}, true);
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') mCloseSheets(); });
+window.addEventListener('resize', function(){ if (!mIsMobile()) mCloseSheets(); });
 
 init();
 </script>
