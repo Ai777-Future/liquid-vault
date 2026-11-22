@@ -758,6 +758,20 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   .modal-back{height:40px}
   .modal-header .modal-close{display:none}
 }
+
+/* ===== PROFILE ===== */
+.prof-head{display:flex;align-items:center;gap:14px}
+.prof-avatar{width:64px;height:64px;font-size:22px;flex:0 0 64px}
+.prof-name{font-size:18px;font-weight:600;margin-bottom:6px;word-break:break-word;color:var(--text)}
+.user-chip{cursor:pointer}
+
+/* ===== MOBILE: centered logo (icon on top, name below) ===== */
+@media(max-width:860px){
+  .topbar{min-height:64px}
+  .logo{position:absolute;left:50%;top:calc(50% + env(safe-area-inset-top,0px) / 2);transform:translate(-50%,-50%);flex:none;flex-direction:column;align-items:center;justify-content:center;gap:3px;max-width:calc(100% - 200px);min-width:0;text-align:center}
+  .logo-mark{width:30px;height:30px}
+  .logo-text{font-size:12.5px;letter-spacing:.08em;line-height:1;white-space:nowrap;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -837,7 +851,7 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
       <button class="fb-bell" id="soundBtn" onclick="toggleSound()" aria-label="Notification sound"></button>
       <button class="fb-bell tb-chat" onclick="openChat()" title="Chat room" aria-label="Chat room"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.6-.8L3 21l1.9-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><span class="fb-badge" id="chatBadge"></span></button>
       <button class="fb-bell" onclick="fbOpen('mine')" title="Notifications" aria-label="Notifications"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="fb-badge" id="fbBellBadge"></span></button>
-      <div class="user-chip">
+      <div class="user-chip" onclick="openProfile()" title="My profile">
         <div class="user-avatar" id="userAvatar">--</div>
         <span class="user-name" id="userNameDisplay">--</span>
       </div>
@@ -972,7 +986,7 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
       <div style="font-size:12px;color:var(--text3);letter-spacing:.04em;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border)">REGISTERED USERS</div>
       <table class="users-table" id="usersTable">
         <thead><tr>
-          <th>USER</th><th>EMAIL</th><th>SECTIONS</th><th>FOLDERS</th><th>JOINED</th><th>ROLE</th>
+          <th>USER</th><th>EMAIL</th><th>SECTIONS</th><th>FOLDERS</th><th>JOINED</th><th>ROLE</th><th>PROFILE</th>
         </tr></thead>
         <tbody id="usersTableBody"></tbody>
       </table>
@@ -1004,7 +1018,8 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
   </nav>
   <div class="m-sheet" id="moreSheet">
     <div class="m-grab"></div>
-    <div class="m-user"><div class="user-avatar" id="mAvatar">--</div><div><b id="mName">--</b><span class="m-role" id="mRole"></span></div></div>
+    <div class="m-user" onclick="mAct('profile')"><div class="user-avatar" id="mAvatar">--</div><div><b id="mName">--</b><span class="m-role" id="mRole"></span></div></div>
+    <button class="m-item" onclick="mAct('profile')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>My profile</span></button>
     <button class="m-item" data-need="adminViewBtn" onclick="mAct('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>Admin console</span></button>
     <button class="m-item" data-need="supportBtn" onclick="mAct('support')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg><span>Support center</span></button>
     <button class="m-item" data-need="permBtn" onclick="mAct('perm')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Permissions</span></button>
@@ -1086,6 +1101,46 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal('addModal')">CANCEL</button>
       <button class="btn-cancel" id="histBtn" onclick="openVersions()" style="margin-right:auto">HISTORY</button><button class="btn-save" onclick="saveSection()"><i class="ti ti-device-floppy"></i> SAVE SECTION</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal" style="display:none" class="modal-overlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="profTitle">// MY PROFILE</div>
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="prof-head">
+        <div class="user-avatar prof-avatar" id="profAvatar">--</div>
+        <div>
+          <div class="prof-name" id="profNameShow">--</div>
+          <span class="admin-badge" id="profRole" style="display:inline-block">USER</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">DISPLAY NAME</label>
+        <input class="form-input" id="profName" maxlength="40" placeholder="your name" autocomplete="off" onkeydown="if(event.key==='Enter')saveProfileName()" />
+        <div class="p-sub" id="profHint"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">EMAIL</label>
+        <input class="form-input" id="profEmail" readonly style="cursor:default" />
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">MEMBER SINCE</label><input class="form-input" id="profJoined" readonly style="cursor:default" /></div>
+        <div class="form-group"><label class="form-label">ROLE</label><input class="form-input" id="profRoleIn" readonly style="cursor:default" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">SECTIONS</label><input class="form-input" id="profSections" readonly style="cursor:default" /></div>
+        <div class="form-group"><label class="form-label">FOLDERS</label><input class="form-input" id="profFolders" readonly style="cursor:default" /></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('profileModal')">CLOSE</button>
+      <button class="btn-save" id="profSaveBtn" onclick="saveProfileName()">SAVE NAME</button>
     </div>
   </div>
 </div>
@@ -1844,6 +1899,8 @@ async function loadAdminData(){
   const{data:allFolders}=await sb.from('folders').select('*').is('deleted_at',null);
 
   adminSectionsCache = allSections||[];
+  window.lvAdminProfiles = profiles||[];
+  window.lvAdminFolders = allFolders||[];
 
   // Attach owner names to sections
   const profileMap={};
@@ -1872,6 +1929,7 @@ async function loadAdminData(){
       <td>${uFolders}</td>
       <td style="color:var(--text3)">${joined}</td>
       <td><span class="user-status ${isAdm?'status-admin':'status-user'}">${isAdm?'ADMIN':'USER'}</span></td>
+      <td><button class="phi-btn" onclick="openProfile('${p.id}')">${can('edit_user_names')?'EDIT NAME':'VIEW'}</button></td>
     </tr>`;
   }).join('');
 
@@ -3421,7 +3479,8 @@ const PERM_LIST = [
   { k: 'view_unsent',          t: 'See unsent messages',    d: 'See the originals of unsent messages' },
   { k: 'support_center',       t: 'Support Center',         d: 'View, reply to, resolve and delete tickets' },
   { k: 'view_login_logs',      t: 'Login activity',         d: 'See device and login logs' },
-  { k: 'view_prompts',         t: 'User prompts',           d: 'See the prompt history of all users' }
+  { k: 'view_prompts',         t: 'User prompts',           d: 'See the prompt history of all users' },
+  { k: 'edit_user_names',      t: 'Edit display names',     d: 'Change the display name of any user at any time' }
 ];
 // permission -> permissions it needs in order to be usable
 const PERM_DEPS = {
@@ -3429,6 +3488,7 @@ const PERM_DEPS = {
   bulk_actions: ['admin_console', 'view_all_sections'],
   view_login_logs: ['admin_console'],
   view_prompts: ['admin_console'],
+  edit_user_names: ['admin_console'],
   view_unsent: ['view_all_chats'],
   delete_conversations: ['view_all_chats']
 };
@@ -3658,7 +3718,8 @@ function mOpenMore(){
 function mAct(a){
   mCloseSheets();
   setTimeout(() => {
-    if (a === 'admin'){ if (!adminViewOn) toggleAdminView(); }
+    if (a === 'profile') openProfile();
+    else if (a === 'admin'){ if (!adminViewOn) toggleAdminView(); }
     else if (a === 'support') openSupport();
     else if (a === 'perm') openPerms();
     else if (a === 'help') fbOpen('new');
@@ -3807,6 +3868,100 @@ toggleAdminView = async function(){ await _lvTA.apply(this, arguments); lvSyncVi
 togglePublicLibrary = async function(){ await _lvTP.apply(this, arguments); lvSyncViews(); };
 const _lvLO = doLogout;
 doLogout = async function(){ await _lvLO.apply(this, arguments); LVH.stack = []; document.body.classList.remove('search-on', 'admin-on'); };
+
+// ============================================================
+//  PROFILE: view own info, edit display name (admins with permission can edit any user)
+// ============================================================
+let profTarget = null, profOld = '';
+
+function lvFmtDate(ts){
+  return ts ? new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '--';
+}
+
+function openProfile(uid){
+  if (!currentUser) return;
+  const self = !uid || uid === currentUser.id;
+  let p, secN, folN, role;
+  if (self) {
+    p = currentProfile || { id: currentUser.id, email: currentUser.email, display_name: '' };
+    secN = sections.length; folN = folders.length;
+    role = isSuper ? 'MAIN ADMIN' : (isAdmin ? 'ADMIN' : 'USER');
+  } else {
+    p = (window.lvAdminProfiles || []).find(x => x.id === uid);
+    if (!p) return;
+    secN = (adminSectionsCache || []).filter(x => x.user_id === uid).length;
+    folN = (window.lvAdminFolders || []).filter(x => x.user_id === uid).length;
+    role = p.email === ADMIN_EMAIL ? 'MAIN ADMIN' : 'USER';
+  }
+  profTarget = self ? currentUser.id : p.id;
+  const name = p.display_name || (p.email || currentUser.email || '').split('@')[0];
+  profOld = name;
+  const canEdit = self || can('edit_user_names');
+  setEl('profTitle', self ? '// MY PROFILE' : '// USER PROFILE');
+  setEl('profAvatar', name.slice(0, 2).toUpperCase());
+  setEl('profNameShow', name);
+  setEl('profRole', role);
+  document.getElementById('profName').value = name;
+  document.getElementById('profName').readOnly = !canEdit;
+  document.getElementById('profEmail').value = p.email || (self ? currentUser.email : '') || '--';
+  document.getElementById('profJoined').value = lvFmtDate(p.created_at || (self ? currentUser.created_at : null));
+  document.getElementById('profRoleIn').value = role;
+  document.getElementById('profSections').value = secN;
+  document.getElementById('profFolders').value = folN;
+  setEl('profHint', canEdit ? '2 to 40 characters. Other users will see this name.' : 'You do not have permission to edit this name.');
+  document.getElementById('profSaveBtn').style.display = canEdit ? '' : 'none';
+  document.getElementById('profileModal').style.display = 'flex';
+  if (canEdit) setTimeout(() => { const i = document.getElementById('profName'); if (i && !mIsMobile()) i.select(); }, 50);
+}
+
+// Uses the SQL functions when they exist, otherwise falls back to a direct table update.
+async function lvSetName(uid, name, self){
+  const r = await (self
+    ? sb.rpc('set_my_display_name', { new_name: name })
+    : sb.rpc('admin_set_display_name', { target_id: uid, new_name: name }));
+  if (!r.error) return null;
+  const missing = r.error.code === 'PGRST202' || /function|schema cache/i.test(r.error.message || '');
+  if (!missing) return r.error.message;
+  const d = await sb.from('profiles').update({ display_name: name }).eq('id', uid).select('id');
+  if (d.error) return d.error.message;
+  if (!d.data || !d.data.length) return 'Not saved. Run the display name SQL in the Supabase SQL Editor.';
+  return null;
+}
+
+function lvApplyName(uid, name){
+  chatNames[uid] = name;
+  if (currentProfile && uid === currentUser.id) {
+    currentProfile.display_name = name;
+    setEl('userAvatar', name.slice(0, 2).toUpperCase());
+    setEl('userNameDisplay', name.toUpperCase());
+    try { sb.auth.updateUser({ data: { display_name: name } }); } catch (e) {}
+  }
+  [publicSections, adminSectionsCache].forEach(list => list.forEach(x => { if (x.user_id === uid) x._ownerName = name; }));
+  (permProfiles || []).forEach(x => { if (x.id === uid) x.display_name = name; });
+  (window.lvAdminProfiles || []).forEach(x => { if (x.id === uid) x.display_name = name; });
+  updateStats();
+  if (chatIsOpen()) chatRenderList();
+  if (adminViewOn) loadAdminData(); else renderSections();
+}
+
+async function saveProfileName(){
+  if (!profTarget) return;
+  const name = v('profName').trim().replace(/\s+/g, ' ');
+  if (name.length < 2 || name.length > 40) { showToast('Name must be 2 to 40 characters', 'error'); return; }
+  if (name === profOld) { showToast('Name is unchanged', 'warn'); return; }
+  const btn = document.getElementById('profSaveBtn');
+  btn.disabled = true;
+  const err = await lvSetName(profTarget, name, profTarget === currentUser.id);
+  btn.disabled = false;
+  if (err) { showToast(err, 'error'); return; }
+  lvApplyName(profTarget, name);
+  profOld = name;
+  setEl('profNameShow', name);
+  setEl('profAvatar', name.slice(0, 2).toUpperCase());
+  showToast('Display name updated');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal('profileModal'); });
 
 init();
 </script>
