@@ -888,8 +888,13 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
 <div class="lv-screen" id="blockedScreen">
   <div class="lv-screen-box">
     <div class="lv-screen-title">ACCOUNT BLOCKED</div>
-    <div class="lv-screen-text">An administrator has blocked this account, so you can no longer use LIQUID.VAULT. If you think this is a mistake, please contact the admin.</div>
+    <div class="lv-screen-text">An administrator has blocked this account, so you can no longer use LIQUID.VAULT. If you think this is a mistake, you can send an appeal below.</div>
     <div class="lv-screen-reason"><span class="p-sub">REASON</span><div id="blockedReason"></div></div>
+    <div id="appealStatus" class="lv-screen-text" style="display:none"></div>
+    <div id="appealForm" style="text-align:left;margin-bottom:16px">
+      <textarea class="form-input" id="appealText" maxlength="500" rows="4" placeholder="Explain why your account should be unblocked (10 to 500 characters)..." style="width:100%"></textarea>
+      <button class="btn btn-primary" id="appealBtn" style="width:100%;justify-content:center;margin-top:10px" onclick="lvAppealSend()">SEND APPEAL</button>
+    </div>
     <div class="lv-screen-btns"><button class="btn btn-ghost" onclick="lvBlockedLogout()">LOGOUT</button></div>
   </div>
 </div>
@@ -1177,7 +1182,11 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         <tbody id="loginLogsBody"></tbody>
       </table>
       </div>
-<div id="adAuditBox" style="display:none">
+<div id="adAppealsBox" style="display:none">
+        <div class="lv-sec-head" style="color:var(--red)">BLOCK APPEALS <span id="appealCount" class="p-sub"></span></div>
+        <div id="appealList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
+      </div>
+      <div id="adAuditBox" style="display:none">
         <div class="lv-sec-head" style="color:var(--pink)">AUDIT LOG (LATEST 200)</div>
         <div class="lv-toolbar">
           <input class="form-input" id="auditSearch" placeholder="search actor, target or details..." oninput="lvAuditRender()" />
@@ -2204,6 +2213,7 @@ async function loadAdminData(){
   if (can('view_login_logs')) loadLoginLogs();
   if (can('broadcast')) { lvAnnAdminLoad(); lvMaintFill(); }
   if (can('view_audit')) lvAuditLoad();
+  if (can('manage_users')) lvAppealsLoad();
 }
 
 // ============================================================
@@ -4383,6 +4393,7 @@ function lvApplyAdminBoxes(){
   const set = (id, on) => { const el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
   set('adBroadcastBox', can('broadcast'));
   set('adAuditBox', can('view_audit'));
+  set('adAppealsBox', can('manage_users'));
 }
 
 // ---------- Audit log ----------
@@ -4390,6 +4401,8 @@ const LV_AUDIT_LABELS = {
   display_name_changed: 'Display name changed',
   user_blocked: 'User blocked',
   user_unblocked: 'User unblocked',
+  appeal_submitted: 'Appeal submitted',
+  appeal_ignored: 'Appeal ignored',
   reset_link_sent: 'Reset link sent',
   permissions_changed: 'Permissions changed',
   bulk_status: 'Bulk status change',
@@ -4406,7 +4419,7 @@ const LV_AUDIT_LABELS = {
 };
 const LV_AUDIT_GROUPS = {
   names: ['display_name_changed'],
-  users: ['user_blocked', 'user_unblocked', 'reset_link_sent'],
+  users: ['user_blocked', 'user_unblocked', 'reset_link_sent', 'appeal_submitted', 'appeal_ignored'],
   perms: ['permissions_changed'],
   bulk: ['bulk_status', 'bulk_visibility'],
   sections: ['section_deleted', 'section_edited_by_admin'],
@@ -4570,6 +4583,7 @@ async function lvSetBlocked(p, block, reason){
   p.blocked_at = block ? new Date().toISOString() : null;
   lvRenderUsers();
   if (can('view_audit')) lvAuditLoad();
+  if (can('manage_users')) lvAppealsLoad();
   showToast(block ? 'User blocked' : 'User unblocked', block ? 'warn' : 'success');
 }
 
@@ -4594,6 +4608,7 @@ function lvShowBlocked(reason){
   hide('loadingScreen'); hide('authScreen'); hide('maintScreen');
   setEl('blockedReason', reason || 'No reason was given.');
   document.getElementById('blockedScreen').style.display = 'flex';
+  lvAppealState();
 }
 async function lvCheckBlocked(){
   if (!currentUser || isSuper) return false;
@@ -4605,6 +4620,97 @@ function lvBlockedLogout(){
   hide('blockedScreen');
   lvBlockedShown = false;
   doLogout();
+}
+
+// ---------- Block appeals ----------
+// User side (blocked screen)
+async function lvAppealState(){
+  const form = document.getElementById('appealForm'), st = document.getElementById('appealStatus');
+  if (!form || !st || !currentUser) return;
+  form.style.display = ''; st.style.display = 'none';
+  const { data, error } = await sb.from('block_appeals').select('status,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(1);
+  if (error || !data || !data.length) return;
+  const a = data[0];
+  if (a.status === 'pending') {
+    form.style.display = 'none';
+    st.style.display = '';
+    st.textContent = 'Your appeal was sent on ' + lvFmtTime(a.created_at) + ' and is waiting for review. Please check back later.';
+  } else if (a.status === 'ignored') {
+    st.style.display = '';
+    st.textContent = 'Your last appeal was reviewed and not approved. You can send a new one once 24 hours have passed.';
+  }
+}
+async function lvAppealSend(){
+  const msg = v('appealText').trim();
+  if (msg.length < 10) { showToast('Please write at least 10 characters', 'error'); return; }
+  setBtn('appealBtn', true, 'SENDING...');
+  const { error } = await sb.from('block_appeals').insert({ user_id: currentUser.id, message: msg });
+  setBtn('appealBtn', false, 'SEND APPEAL');
+  if (error) {
+    let m = lvDbErr(error);
+    if (error.code === '42501') m = 'You can send only one appeal every 24 hours.';
+    else if (error.code === '23505') m = 'You already have an appeal waiting for review.';
+    showToast(m, 'error');
+    return;
+  }
+  document.getElementById('appealText').value = '';
+  showToast('Appeal sent');
+  lvAppealState();
+}
+
+// Admin side
+let lvAppeals = [], lvAppealPending = null;
+async function lvAppealsLoad(){
+  if (!can('manage_users')) return;
+  const box = document.getElementById('appealList');
+  if (!box) return;
+  const { data, error } = await sb.from('block_appeals').select('*').order('created_at', { ascending: false }).limit(30);
+  if (error) { box.innerHTML = '<div class="p-sub">' + esc(lvDbErr(error)) + '</div>'; return; }
+  lvAppeals = data || [];
+  lvAppealPending = lvAppeals.filter(a => a.status === 'pending').length;
+  setEl('appealCount', '(' + lvAppealPending + ' pending)');
+  const nameOf = id => { const p = (window.lvAdminProfiles || []).find(x => x.id === id); return p ? (p.display_name || p.email || 'user') : chatNm(id); };
+  box.innerHTML = lvAppeals.length ? lvAppeals.map(a => {
+    const p = (window.lvAdminProfiles || []).find(x => x.id === a.user_id);
+    const stillBlocked = !p || p.is_blocked;
+    const tag = a.status === 'pending' ? '<span class="lv-tag amber">PENDING</span>' : (a.status === 'approved' ? '<span class="lv-tag blue">APPROVED</span>' : '<span class="lv-tag">IGNORED</span>');
+    const acts = a.status === 'pending'
+      ? `<button class="phi-btn" onclick="lvAppealApprove('${a.id}')">UNBLOCK USER</button><button class="phi-btn" onclick="lvAppealIgnore('${a.id}')">IGNORE</button>`
+      : '';
+    return `<div class="fb-item lv-ann-row">
+      <div class="lv-ann-row-main">
+        ${tag} <b>${esc(nameOf(a.user_id))}</b>${stillBlocked ? '' : ' <span class="p-sub">(currently unblocked)</span>'}
+        <div class="lv-ann-row-msg">${esc(a.message)}</div>
+        <div class="p-sub">${lvFmtTime(a.created_at)}</div>
+      </div>
+      <div class="lv-ann-row-act">${acts}</div>
+    </div>`;
+  }).join('') : '<div class="p-sub">No appeals yet</div>';
+}
+async function lvAppealsPoll(){
+  const before = lvAppealPending;
+  await lvAppealsLoad();
+  if (before !== null && lvAppealPending > before) showToast('New block appeal received', 'warn');
+}
+async function lvAppealApprove(id){
+  if (!can('manage_users')) return;
+  const a = lvAppeals.find(x => x.id === id);
+  const p = a && (window.lvAdminProfiles || []).find(x => x.id === a.user_id);
+  if (!a || !p) { showToast('User not found, reload the console', 'error'); return; }
+  if (!confirm('Unblock ' + (p.display_name || p.email) + ' and approve this appeal?')) return;
+  await lvSetBlocked(p, false, null);
+}
+async function lvAppealIgnore(id){
+  if (!can('manage_users')) return;
+  const a = lvAppeals.find(x => x.id === id);
+  if (!a) return;
+  if (!confirm('Ignore this appeal? The user stays blocked and can appeal again after 24 hours.')) return;
+  const { error } = await sb.from('block_appeals').update({ status: 'ignored', handled_by: currentUser.id, handled_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  const p = (window.lvAdminProfiles || []).find(x => x.id === a.user_id);
+  lvAudit('appeal_ignored', a.user_id, p ? (p.display_name || p.email) : null, a.message.slice(0, 200));
+  await lvAppealsLoad();
+  showToast('Appeal ignored', 'warn');
 }
 
 // ---------- Announcements ----------
@@ -4757,6 +4863,7 @@ async function lvBroadcastPoll(){
   await Promise.all([lvAnnLoad(), lvMaintLoad()]);
   lvMaintRender();
   if (adminViewOn && can('broadcast')) lvMaintFill();
+  if (can('manage_users')) lvAppealsPoll();
 }
 function lvBroadcastReset(){
   lvAnnList = []; lvAnnAdminRows = [];
