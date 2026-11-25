@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#1f5eff" />
 
 <!-- ============================================================
-  LIQUID.VAULT v3 — Prompt Generator Edition + Public Library + Feedback Chat
+  LIQUID.VAULT v3 — Prompt Generator Edition + Public Library + Feedback Chat + Chat v3 (groups, reactions, images)
   
   SETUP (change these 3 values):
   1. Line ~40 → set your SUPABASE_URL
@@ -525,6 +525,98 @@ html[data-theme="light"] .ic-sun{display:none}
 .chat-emoji button{background:none;border:none;font-size:20px;cursor:pointer;border-radius:4px;padding:3px}
 .chat-emoji button:hover{background:var(--hover)}
 .chat-head-actions{margin-left:auto;display:flex;gap:6px}
+/* ===== CHAT v3 (reply, edit, reactions, search, groups, images, cards) ===== */
+.chat-main{position:relative}
+.chat-new .form-select{flex:1;min-width:0}
+.chat-sidesearch{padding:8px 10px;border-bottom:1px solid var(--border)}
+.chat-sidesearch input{width:100%}
+.chat-msgs-wrap{position:relative;flex:1;display:flex;flex-direction:column;min-height:0}
+.chat-msgs-wrap .chat-msgs{flex:1;min-height:0}
+.chat-main.drag::after{content:'Drop an image or a code file to attach it';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--bg) 88%,transparent);border:2px dashed var(--border2);color:var(--text);font-size:15px;z-index:20;pointer-events:none}
+.chat-who{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.chat-msg.mine .chat-who{justify-content:flex-end}
+.chat-edited{color:var(--text3);font-style:italic}
+.chat-more{background:none;border:none;color:var(--text2);cursor:pointer;font-size:17px;line-height:1;padding:0 5px;border-radius:4px;font-family:var(--ui);opacity:0;transition:opacity .12s}
+.chat-msg:hover .chat-more,.chat-more:focus{opacity:1}
+.chat-more:hover{background:var(--hover)}
+@media(hover:none){.chat-more{opacity:.75}}
+.chat-day{display:flex;justify-content:center;margin:6px 0}
+.chat-day span{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:999px;padding:2px 12px}
+.chat-newline{display:flex;align-items:center;gap:10px;color:var(--red);font-size:11px;font-weight:600;letter-spacing:.06em}
+.chat-newline::before,.chat-newline::after{content:'';flex:1;height:1px;background:color-mix(in srgb,var(--red) 55%,transparent)}
+.chat-older{display:flex;justify-content:center}
+.chat-quote{border-left:3px solid var(--btn);background:var(--hover);border-radius:4px;padding:5px 8px;margin-bottom:6px;cursor:pointer;display:flex;flex-direction:column;font-size:12px;max-width:100%;min-width:0}
+.chat-quote b{color:var(--green);font-weight:600}
+.chat-quote span{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes chatflash{0%,60%{box-shadow:0 0 0 2px var(--btn)}100%{box-shadow:0 0 0 0 transparent}}
+.chat-msg.chat-flash .chat-bubble{animation:chatflash 1.8s ease}
+.chat-reacts{display:flex;flex-wrap:wrap;gap:4px;margin-top:1px}
+.chat-react{background:var(--bg3);border:1px solid var(--border);border-radius:999px;padding:1px 8px;font-size:12.5px;cursor:pointer;color:var(--text);font-family:var(--ui)}
+.chat-react.mine{background:var(--sel);border-color:var(--border2)}
+.chat-react:disabled{cursor:default}
+.chat-menu{position:fixed;z-index:3000;background:var(--bg2);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow),0 8px 30px rgba(0,0,0,.35);min-width:190px;max-width:260px;padding:6px;display:none}
+.chat-menu-react{display:flex;gap:2px;padding:4px 4px 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.chat-menu-react button{background:none;border:none;font-size:20px;cursor:pointer;padding:3px 5px;border-radius:6px}
+.chat-menu-react button:hover{background:var(--hover)}
+.chat-menu-it{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);font-family:var(--ui);font-size:13.5px;padding:8px 10px;border-radius:6px;cursor:pointer}
+.chat-menu-it:hover{background:var(--hover)}
+.chat-menu-it.danger{color:var(--red)}
+.chat-cb{margin:6px 0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg);max-width:100%}
+.chat-cb-head{display:flex;justify-content:space-between;align-items:center;padding:3px 8px;background:var(--bg3);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--code)}
+.chat-cb-copy{background:none;border:none;color:var(--text2);font-family:var(--ui);font-size:11.5px;cursor:pointer;padding:3px 6px;border-radius:4px}
+.chat-cb-copy:hover{background:var(--hover);color:var(--text)}
+.chat-cb-pre{margin:0;padding:10px;overflow:auto;max-height:340px;font-family:var(--code);font-size:12.5px;line-height:1.5;white-space:pre;color:var(--text)}
+.chat-ic{font-family:var(--code);font-size:12.5px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0 4px}
+.hl-c{color:var(--text3);font-style:italic}
+.hl-s{color:var(--cyan)}
+.hl-k{color:var(--pink)}
+.hl-n{color:var(--amber)}
+.hl-t{color:var(--purple)}
+.hl-l{color:var(--green)}
+.chat-img{display:block;max-width:100%;max-height:300px;min-width:120px;min-height:60px;border-radius:8px;cursor:zoom-in;background:var(--bg3);object-fit:contain}
+.chat-text+.chat-img,.chat-quote+.chat-img{margin-top:8px}
+.chat-lightbox{position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+.chat-lightbox img{max-width:100%;max-height:100%;border-radius:6px}
+.chat-card{display:flex;flex-direction:column;border:1px solid var(--border2);border-radius:10px;overflow:hidden;background:var(--bg3);min-width:240px;max-width:100%}
+.chat-text+.chat-card{margin-top:8px}
+.chat-card-thumb{width:100%;max-height:170px;object-fit:cover;display:block;background:var(--bg4)}
+.chat-card-body{padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.chat-card-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chat-card-desc{font-size:12.5px;color:var(--text2)}
+.chat-card-prev{margin:0;max-height:110px;overflow:hidden;font-family:var(--code);font-size:11.5px;white-space:pre;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+.chat-banner{display:flex;align-items:center;gap:10px;padding:6px 10px;margin-bottom:8px;border-left:3px solid var(--btn);background:var(--bg3);border-radius:6px;font-size:12.5px}
+.chat-banner>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.chat-banner b{color:var(--green);font-weight:600}
+.chat-banner span{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-attach-chip{flex-wrap:wrap}
+.chat-chip-thumb{width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
+.chat-tools{display:flex;gap:8px;align-items:flex-end}
+.chat-tolatest{position:absolute;right:16px;bottom:14px;z-index:5;display:none;align-items:center;gap:6px;background:var(--btn);color:#fff;border:none;border-radius:999px;padding:8px 14px;font-size:13px;cursor:pointer;box-shadow:var(--shadow);font-family:var(--ui)}
+.chat-search{display:none;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.chat-search input{flex:1;min-width:0}
+.chat-search-res{display:none;position:absolute;inset:0;z-index:6;overflow-y:auto;background:var(--bg);padding:10px}
+.chat-sr{padding:9px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;background:var(--card)}
+.chat-sr:hover{background:var(--hover)}
+.chat-sr-top{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text3);gap:8px}
+.chat-sr-snip{font-size:13px;margin-top:3px;word-break:break-word}
+.chat-sr mark{background:color-mix(in srgb,var(--amber) 35%,transparent);color:inherit;border-radius:2px}
+.chat-sr-head{font-size:11px;letter-spacing:.06em;color:var(--text3);padding:8px 6px 4px}
+.chat-gbody{padding:16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.chat-gusers{max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+.chat-guser{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:14px;cursor:pointer}
+.chat-guser:last-child{border-bottom:0}
+.chat-guser:hover{background:var(--hover)}
+.chat-gm{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:14px}
+.chat-gm:last-child{border-bottom:0}
+.chat-gm .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-row-mute{font-size:11px;margin-left:4px}
+@media(max-width:860px){
+  .chat-compose-row{flex-wrap:wrap}
+  .chat-tools{order:-1;width:100%}
+  .chat-more{opacity:.75}
+  .chat-tolatest{right:12px}
+  .chat-card{min-width:0;width:100%}
+}
 .sup-tag-wait{color:var(--amber);border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent)}
 .sup-thread{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .sup-btn{display:flex;align-items:center;gap:6px}
@@ -1186,6 +1278,10 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         <div class="lv-sec-head" style="color:var(--red)">BLOCK APPEALS <span id="appealCount" class="p-sub"></span></div>
         <div id="appealList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
       </div>
+      <div id="adReportsBox" style="display:none">
+        <div class="lv-sec-head" style="color:var(--amber)">CHAT REPORTS <span id="reportCount" class="p-sub"></span></div>
+        <div id="reportList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px"></div>
+      </div>
       <div id="adAuditBox" style="display:none">
         <div class="lv-sec-head" style="color:var(--pink)">AUDIT LOG (LATEST 200)</div>
         <div class="lv-toolbar">
@@ -1499,24 +1595,75 @@ body.admin-on .search-bar,body.admin-on #searchBtn{display:none !important}
         <div class="chat-new" id="chatNew">
           <select class="form-select" id="chatUserSel"></select>
           <button class="btn-save" onclick="chatStartWith()">CHAT</button>
+          <button class="btn-save" onclick="chatGroupOpen()" title="Create a group chat">+ GROUP</button>
         </div>
+        <div class="chat-sidesearch"><input class="form-input" id="chatSideSearch" placeholder="Search chats and messages..." oninput="chatSideSearchInput()" /></div>
         <div class="chat-list" id="chatList"></div>
       </div>
-      <div class="chat-main">
+      <div class="chat-main" id="chatMain">
         <div class="chat-head"><button class="modal-close chat-back" onclick="chatBack()">←</button><span id="chatHeadTitle">Select a chat</span><span class="p-sub" id="chatHeadSub" style="margin-left:8px"></span><div class="chat-head-actions" id="chatHeadActions"></div></div>
+        <div class="chat-search" id="chatSearchBar"><input class="form-input" id="chatSearchIn" placeholder="Search in this chat (messages, code, file names)..." oninput="chatSearchInput()" /><button class="phi-btn" onclick="chatCloseSearch()">CLOSE</button></div>
         <div class="chat-notice" id="chatNotice"></div>
-        <div class="chat-msgs" id="chatMsgsEl"></div>
+        <div class="chat-msgs-wrap">
+          <div class="chat-msgs" id="chatMsgsEl" onscroll="chatOnScroll()"></div>
+          <div class="chat-search-res" id="chatSearchRes"></div>
+          <button class="chat-tolatest" id="chatToLatest" onclick="chatGoLatest()" title="Scroll to the latest message">↓ <span id="chatToLatestN"></span></button>
+        </div>
         <div class="chat-compose" id="chatCompose" style="display:none">
           <div class="chat-emoji" id="chatEmoji"></div>
-          <div class="chat-attach-chip" id="chatAttachChip"></div>
+          <div class="chat-banner" id="chatBanner" style="display:none"></div>
+          <div class="chat-attach-chip" id="chatAttachChip" style="display:none"></div>
           <div class="chat-compose-row">
-            <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Attach a code file (max 300 KB)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" hidden onchange="chatPickFile(event)" accept=".liquid,.js,.css,.json,.html,.txt,.md,.scss,.ts,.jsx,.tsx,.xml,.yml,.yaml,text/*" /></label>
-            <button class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Emoji" onclick="chatToggleEmoji()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg></button>
-            <textarea class="form-input" id="chatInput" rows="1" placeholder="Type a message... (Enter to send, Shift+Enter for new line)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}"></textarea>
+            <div class="chat-tools">
+              <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Attach a code file (max 300 KB)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><input type="file" hidden onchange="chatPickFile(event)" accept=".liquid,.js,.css,.json,.html,.txt,.md,.scss,.ts,.jsx,.tsx,.xml,.yml,.yaml,text/*" /></label>
+              <label class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Send an image (PNG, JPG, WEBP, GIF, max 3 MB)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg><input type="file" hidden onchange="chatPickImageEv(event)" accept="image/png,image/jpeg,image/webp,image/gif" /></label>
+              <button class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Insert a code block" onclick="chatInsertCode()">&lt;/&gt;</button>
+              <button class="card-btn" style="flex:0 0 auto;padding:10px 12px" title="Emoji" onclick="chatToggleEmoji()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg></button>
+            </div>
+            <textarea class="form-input" id="chatInput" rows="1" placeholder="Type a message... (Enter to send, Shift+Enter for new line, ``` for code)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend();}" oninput="chatAutoGrow()"></textarea>
             <button class="btn-save" id="chatSendBtn" onclick="chatSend()" style="display:flex;align-items:center;gap:6px">SEND <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></button>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP CHAT MODAL (create + manage) -->
+<div id="chatGroupModal" style="display:none" class="modal-overlay">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title" id="chatGroupTitle">// NEW GROUP</div>
+      <button class="modal-close" onclick="closeModal('chatGroupModal')">✕</button>
+    </div>
+    <div class="chat-gbody" id="chatGroupBody"></div>
+  </div>
+</div>
+
+<!-- REPORT MESSAGE MODAL -->
+<div id="chatReportModal" style="display:none" class="modal-overlay">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div class="modal-title">// REPORT MESSAGE</div>
+      <button class="modal-close" onclick="closeModal('chatReportModal')">✕</button>
+    </div>
+    <div class="chat-gbody">
+      <div class="p-sub" id="chatReportSnip" style="word-break:break-word"></div>
+      <div>
+        <label class="form-label">REASON</label>
+        <select class="form-select" id="chatReportReason" style="width:100%;margin-top:6px">
+          <option>Spam</option>
+          <option>Harassment or abuse</option>
+          <option>Inappropriate content</option>
+          <option>Harmful or unsafe link or code</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">DETAILS (OPTIONAL)</label>
+        <textarea class="form-input" id="chatReportDetails" maxlength="300" rows="3" placeholder="Tell the admins what happened (max 300 characters)" style="width:100%;margin-top:6px"></textarea>
+      </div>
+      <button class="btn-save" id="chatReportBtn" onclick="chatReportSend()">SEND REPORT</button>
     </div>
   </div>
 </div>
@@ -2213,7 +2360,7 @@ async function loadAdminData(){
   if (can('view_login_logs')) loadLoginLogs();
   if (can('broadcast')) { lvAnnAdminLoad(); lvMaintFill(); }
   if (can('view_audit')) lvAuditLoad();
-  if (can('manage_users')) lvAppealsLoad();
+  if (can('manage_users')) { lvAppealsLoad(); lvReportsLoad(); }
 }
 
 // ============================================================
@@ -2762,35 +2909,153 @@ async function fbAdminDelete(id){
 }
 
 // ============================================================
-//  CHAT ROOM v2 (1-to-1, code files, emoji, unsend, delete chat, admin monitoring)
+//  CHAT ROOM v3
+//  1-to-1 + group chats, reply, edit, reactions, search, date lines, new-messages line,
+//  code blocks, section cards (save to vault), images (Supabase Storage), paste / drag-drop,
+//  report, block, per-chat mute, pagination.
+//  Needs the chat upgrade SQL (run once in Supabase) before it is used.
 // ============================================================
 const CHAT_MAX = 300 * 1024;
+const CHAT_IMG_MAX = 3 * 1024 * 1024;
+const CHAT_PAGE = 40;
 const CHAT_EMOJI = '😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 😉 😍 🥰 😘 😎 🤩 🥳 😏 😌 🤔 🤨 😐 😑 🙄 😬 😴 😢 😭 😤 😡 🤯 😱 😳 🥺 🤗 🤝 🙏 👍 👎 👏 🙌 💪 👌 ✌️ 🤞 👋 🔥 ✨ 💯 ✅ ❌ ⚠️ ❤️ 💙 💚 💛 🧡 💜 🖤 🎉 🎊 🚀 ⭐ 💡 📌 📎 💻 🛠️ 🐞 📦 🛒 🎨 ⏰ ☕ 🍕 👀 💬'.split(' ');
-let chatConvs = [], chatNames = {}, chatUnreadMap = {}, chatActive = null, chatMsgs = [], chatArch = {};
-let chatTabSel = 'mine', chatChan = null, chatTimer = null, chatAttach = null;
+const CHAT_QUICK = ['👍', '❤️', '😂', '🎉', '🙏', '👀'];
+const CHAT_SEND_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>';
 
+let chatConvs = [], chatGroups = [], chatMembers = {}, chatNames = {}, chatUnreadMap = {};
+let chatActive = null, chatMsgs = [], chatArch = {}, chatHist = {}, chatReacts = {}, chatReplyCache = {};
+let chatBlocked = new Set(), chatMuted = new Set(), chatSavedCards = new Set();
+let chatTabSel = 'mine', chatChan = null, chatTimer = null;
+let chatAttach = null, chatImage = null, chatCard = null, chatReply = null, chatEditing = null;
+let chatHasOlder = false, chatAtLatest = true, chatLoadingMore = false, chatNewFromId = null, chatNewWhileUp = 0;
+let chatStick = false, chatSending = false, chatOpenTok = 0, chatImgCache = {}, chatBound = false;
+let chatSideQ = '', chatSideTimer = null, chatSearchTimer = null, chatRefreshTimer = null;
+let chatMenuItems = [], chatMenuMid = null;
+
+// ---------- small helpers ----------
+const chatMe = () => currentUser.id;
 const chatMember = c => c.user_a === currentUser.id || c.user_b === currentUser.id;
 const chatSide = c => c.user_a === currentUser.id ? 'a' : 'b';
 const chatHidden = c => chatMember(c) && !!c['hidden_' + chatSide(c)];
 const chatCleared = c => chatMember(c) ? c['cleared_' + chatSide(c)] : null;
+const chatGMember = g => (chatMembers[g.id] || []).some(x => x.user_id === currentUser.id);
+const chatIsMember = c => !!c && (c._kind === 'group' ? chatGMember(c) : chatMember(c));
+const chatTable = c => (c || chatActive)._kind === 'group' ? 'chat_group_messages' : 'chat_messages';
 const chatNm = id => chatNames[id] || 'user';
 const chatTime = ts => new Date(ts).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const chatClock = ts => new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 const chatIsOpen = () => document.getElementById('chatModal').style.display === 'flex';
 const chatMsgById = id => chatMsgs.find(m => m.id === id);
+const chatGroupSub = g => (chatMembers[g.id] || []).length + ' members';
 function chatTitle(c) {
+  if (c._kind === 'group') return c.name;
   return chatMember(c) ? chatNm(c.user_a === currentUser.id ? c.user_b : c.user_a) : chatNm(c.user_a) + ' ↔ ' + chatNm(c.user_b);
 }
+function chatDayLabel(ts) {
+  const d = new Date(ts), t = new Date(), y = new Date(); y.setDate(t.getDate() - 1);
+  if (d.toDateString() === t.toDateString()) return 'Today';
+  if (d.toDateString() === y.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+function chatSnippet(m) {
+  if (!m) return '';
+  if (m.deleted_at) return 'This message was unsent';
+  if (m.body) return String(m.body).replace(/\s+/g, ' ').trim().slice(0, 120);
+  if (m.card) return '[section] ' + (m.card.name || '');
+  if (m.image_path) return '[image]';
+  if (m.attachment_name) return '[file] ' + m.attachment_name;
+  return '';
+}
+function chatUid() {
+  try { if (crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+  return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+function chatLoadMuted() {
+  try { chatMuted = new Set(JSON.parse(localStorage.getItem('lv-chat-muted') || '[]')); } catch (e) { chatMuted = new Set(); }
+}
+function chatSaveMuted() {
+  try { localStorage.setItem('lv-chat-muted', JSON.stringify([...chatMuted])); } catch (e) {}
+}
+function chatUnreadTotal() {
+  let n = 0;
+  Object.keys(chatUnreadMap).forEach(id => { if (!chatMuted.has(id)) n += chatUnreadMap[id] || 0; });
+  return n;
+}
 
+// ---------- tiny syntax highlighter (js / css / html / liquid) ----------
+const CHAT_HL = {
+  js: [/(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`)|\b(const|let|var|function|return|if|else|for|while|do|switch|case|break|continue|new|class|extends|import|export|from|default|async|await|try|catch|finally|throw|typeof|instanceof|in|of|this|null|undefined|true|false)\b|(\b\d+(?:\.\d+)?\b)/g, ['c', 's', 'k', 'n']],
+  css: [/(\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(@[\w-]+)|([\w-]+(?=\s*:))|(#[0-9a-fA-F]{3,8}\b|\b\d+(?:\.\d+)?(?:px|em|rem|%|vh|vw|ms|s|deg|fr)?(?!\w))/g, ['c', 's', 'k', 't', 'n']],
+  html: [/(<!--[\s\S]*?-->|\{%-?\s*comment\s*-?%\}[\s\S]*?\{%-?\s*endcomment\s*-?%\})|(=\s*"[^"]*"|=\s*'[^']*')|(\{%-?[\s\S]*?-?%\}|\{\{-?[\s\S]*?-?\}\})|(<\/?[a-zA-Z][\w:-]*|\/?>)/g, ['c', 's', 'l', 't']]
+};
+function chatLangKey(l) {
+  l = String(l || '').toLowerCase().replace(/^\./, '');
+  if (['js', 'javascript', 'ts', 'typescript', 'jsx', 'tsx', 'json', 'mjs', 'node'].includes(l)) return 'js';
+  if (['css', 'scss', 'less', 'sass'].includes(l)) return 'css';
+  if (['html', 'htm', 'liquid', 'xml', 'svg', 'vue', 'twig'].includes(l)) return 'html';
+  return '';
+}
+const chatExt = name => { const m = /\.(\w+)$/.exec(name || ''); return m ? m[1] : ''; };
+function chatHL(code, lang) {
+  code = String(code == null ? '' : code);
+  const k = chatLangKey(lang);
+  if (!k || code.length > 60000) return esc(code);
+  const re = CHAT_HL[k][0], cls = CHAT_HL[k][1];
+  re.lastIndex = 0;
+  let out = '', last = 0, m;
+  while ((m = re.exec(code))) {
+    if (m.index > last) out += esc(code.slice(last, m.index));
+    let c = '';
+    for (let i = 1; i < m.length; i++) { if (m[i] !== undefined) { c = cls[i - 1]; break; } }
+    out += '<span class="hl-' + c + '">' + esc(m[0]) + '</span>';
+    last = re.lastIndex;
+    if (m[0].length === 0) re.lastIndex++;
+  }
+  return out + esc(code.slice(last));
+}
+function chatCodeBlock(code, lang) {
+  return '<div class="chat-cb"><div class="chat-cb-head"><span>' + esc(lang || 'code') + '</span><button class="chat-cb-copy" onclick="chatCopyBlock(this)">COPY</button></div><pre class="chat-cb-pre">' + chatHL(code, lang) + '</pre></div>';
+}
+function chatRich(body) {
+  if (!body) return '';
+  const text = t => {
+    t = t.replace(/^\n+|\n+$/g, '');
+    return t ? '<div class="chat-text">' + esc(t).replace(/`([^`\n]+)`/g, '<code class="chat-ic">$1</code>') + '</div>' : '';
+  };
+  const re = /```(?:([\w+#.-]+)[ \t]*\n|[ \t]*\n)?([\s\S]*?)```/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(body))) {
+    out += text(body.slice(last, m.index));
+    out += chatCodeBlock(m[2].replace(/\n$/, ''), m[1] || '');
+    last = re.lastIndex;
+  }
+  return out + text(body.slice(last));
+}
+function chatCopyBlock(btn) {
+  const pre = btn.closest('.chat-cb').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => showToast('Code copied!'));
+}
+
+// ---------- start / stop ----------
 async function chatStart() {
   document.getElementById('chatTabAll').style.display = can('view_all_chats') ? '' : 'none';
   const { data } = await sb.from('profiles').select('id,display_name');
   (data || []).forEach(p => chatNames[p.id] = p.display_name || 'user');
   document.getElementById('chatEmoji').innerHTML = CHAT_EMOJI.map(e => `<button onclick="chatAddEmoji('${e}')">${e}</button>`).join('');
+  chatLoadMuted();
+  chatBind();
+  await chatLoadBlocks();
   await chatRefresh();
   if (chatChan) sb.removeChannel(chatChan);
   chatChan = sb.channel('chat-' + currentUser.id)
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatOnNew(p.new))
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, p => chatOnUpdate(p.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatOnNew(p.new, 'dm'))
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, p => chatOnUpdate(p.new, 'dm'))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_group_messages' }, p => chatOnNew(p.new, 'group'))
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_group_messages' }, p => chatOnUpdate(p.new, 'group'))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_reactions' }, p => chatOnReact('add', p.new))
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_reactions' }, p => chatOnReact('del', p.old))
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_groups' }, () => chatRefreshSoon())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_group_members' }, () => chatRefreshSoon())
     .subscribe();
   clearInterval(chatTimer);
   chatTimer = setInterval(chatRefresh, 20000);
@@ -2799,32 +3064,67 @@ async function chatStart() {
 
 function chatStop() {
   clearInterval(chatTimer);
+  clearTimeout(chatRefreshTimer);
   if (chatChan) { sb.removeChannel(chatChan); chatChan = null; }
-  chatConvs = []; chatMsgs = []; chatActive = null; chatUnreadMap = {}; chatAttach = null; chatTabSel = 'mine';
-  closeModal('chatModal');
+  chatConvs = []; chatGroups = []; chatMembers = {}; chatMsgs = []; chatActive = null; chatUnreadMap = {};
+  chatAttach = null; chatCard = null; chatReply = null; chatEditing = null; chatClearImage();
+  chatBlocked = new Set(); chatReacts = {}; chatHist = {}; chatArch = {}; chatReplyCache = {}; chatTabSel = 'mine';
+  chatOpenTok++;
+  closeModal('chatModal'); closeModal('chatGroupModal'); closeModal('chatReportModal');
+  chatMenuClose();
   chatBadge();
   supportStop();
 }
 
+function chatRefreshSoon() {
+  clearTimeout(chatRefreshTimer);
+  chatRefreshTimer = setTimeout(chatRefresh, 400);
+}
+
+async function chatLoadBlocks() {
+  const { data, error } = await sb.from('chat_blocks').select('blocked_id');
+  if (error) { chatBlocked = new Set(); return; }
+  chatBlocked = new Set((data || []).map(r => r.blocked_id));
+}
+
 async function chatRefresh() {
   if (!currentUser) return;
-  const { data, error } = await sb.from('chat_conversations').select('*').order('last_message_at', { ascending: false });
-  if (error) { console.log('chat error:', error.message); return; }
-  chatConvs = data || [];
-  const mine = chatConvs.filter(c => chatMember(c) && !chatHidden(c)).map(c => c.id);
+  const [cv, gr, gm] = await Promise.all([
+    sb.from('chat_conversations').select('*').order('last_message_at', { ascending: false }),
+    sb.from('chat_groups').select('*').order('last_message_at', { ascending: false }),
+    sb.from('chat_group_members').select('*')
+  ]);
+  if (cv.error) { console.log('chat error:', cv.error.message); return; }
+  chatConvs = (cv.data || []).map(c => { c._kind = 'dm'; return c; });
+  chatGroups = gr.error ? [] : (gr.data || []).map(g => { g._kind = 'group'; return g; });
+  chatMembers = {};
+  (gm.error ? [] : (gm.data || [])).forEach(x => (chatMembers[x.group_id] = chatMembers[x.group_id] || []).push(x));
   chatUnreadMap = {};
+  const mine = chatConvs.filter(c => chatMember(c) && !chatHidden(c)).map(c => c.id);
   if (mine.length) {
-    const { data: um } = await sb.from('chat_messages').select('conversation_id')
-      .in('conversation_id', mine).neq('sender_id', currentUser.id).is('read_at', null);
-    (um || []).forEach(m => chatUnreadMap[m.conversation_id] = (chatUnreadMap[m.conversation_id] || 0) + 1);
+    const { data: um } = await sb.from('chat_messages').select('conversation_id,sender_id')
+      .in('conversation_id', mine).neq('sender_id', currentUser.id).is('read_at', null).is('deleted_at', null);
+    (um || []).forEach(m => {
+      if (chatBlocked.has(m.sender_id)) return;
+      chatUnreadMap[m.conversation_id] = (chatUnreadMap[m.conversation_id] || 0) + 1;
+    });
   }
-  if (chatActive) chatActive = chatConvs.find(c => c.id === chatActive.id) || null;
+  if (chatGroups.some(chatGMember)) {
+    const { data: gu } = await sb.rpc('chat_group_unread');
+    (gu || []).forEach(r => { chatUnreadMap[r.group_id] = Number(r.n) || 0; });
+  }
+  if (chatActive) {
+    const kind = chatActive._kind;
+    const fresh = (kind === 'group' ? chatGroups : chatConvs).find(c => c.id === chatActive.id) || null;
+    chatActive = fresh;
+    if (!fresh) { chatMsgs = []; chatBack(); }
+  }
   chatBadge();
-  if (chatIsOpen()) { chatRenderList(); if (!chatActive) chatRenderThread(); }
+  if (chatIsOpen()) { chatRenderList(); if (!chatActive) chatRenderThread(); else chatRenderHead(); }
 }
 
 function chatBadge() {
-  const n = Object.values(chatUnreadMap).reduce((a, b) => a + b, 0);
+  const n = chatUnreadTotal();
   const el = document.getElementById('chatBadge');
   if (!el) return;
   el.textContent = n; el.style.display = n ? 'flex' : 'none';
@@ -2836,7 +3136,7 @@ function openChat() {
   sel.innerHTML = users.length ? users.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('') : '<option value="">No other users yet</option>';
   document.getElementById('chatModal').style.display = 'flex';
   chatSetTab(chatTabSel);
-  chatRefresh().then(() => { if (chatActive) chatOpenConv(chatActive.id); else chatRenderThread(); });
+  chatRefresh().then(() => { if (chatActive) chatOpenConv(chatActive._kind, chatActive.id); else chatRenderThread(); });
 }
 
 function chatSetTab(t) {
@@ -2844,21 +3144,35 @@ function chatSetTab(t) {
   document.getElementById('chatTabMine').classList.toggle('active', t === 'mine');
   document.getElementById('chatTabAll').classList.toggle('active', t === 'all');
   document.getElementById('chatNew').style.display = t === 'mine' ? 'flex' : 'none';
+  chatSideClear();
   chatRenderList();
 }
 
+// ---------- chat list ----------
+function chatItems() {
+  const mineTab = chatTabSel === 'mine';
+  const dms = chatConvs.filter(c => mineTab ? (chatMember(c) && !chatHidden(c)) : !chatMember(c));
+  const gs = chatGroups.filter(g => mineTab ? chatGMember(g) : !chatGMember(g));
+  return [...dms, ...gs].sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+}
+
 function chatRenderList() {
-  const list = chatConvs.filter(c => chatTabSel === 'mine' ? (chatMember(c) && !chatHidden(c)) : !chatMember(c));
+  if (chatSideQ) return;
+  const list = chatItems();
   const el = document.getElementById('chatList');
   if (!list.length) {
-    el.innerHTML = '<div class="bin-empty">' + (chatTabSel === 'mine' ? 'No chats yet. Pick a user above and press CHAT.' : 'No chats between other users yet') + '</div>';
+    el.innerHTML = '<div class="bin-empty">' + (chatTabSel === 'mine' ? 'No chats yet. Pick a user above and press CHAT, or create a group.' : 'No chats between other users yet') + '</div>';
     return;
   }
   el.innerHTML = list.map(c => {
     const u = chatUnreadMap[c.id] || 0;
     const ou = presOther(c);
-    return `<div class="chat-row${chatActive && chatActive.id === c.id ? ' active' : ''}" data-uid="${ou||''}" onclick="chatOpenConv('${c.id}')">
-      <div class="chat-row-top"><span class="chat-row-name">${ou?`<span class="pdot${isOnline(ou)?' on':''}"></span>`:''}${esc(chatTitle(c))}</span>${u ? `<span class="bin-count" style="display:flex">${u}</span>` : ''}</div>
+    const isG = c._kind === 'group';
+    const active = chatActive && chatActive.id === c.id;
+    const muted = chatMuted.has(c.id) ? '<span class="chat-row-mute" title="Muted">🔕</span>' : '';
+    const lead = isG ? '<span style="margin-right:6px">👥</span>' : (ou ? `<span class="pdot${isOnline(ou) ? ' on' : ''}"></span>` : '');
+    return `<div class="chat-row${active ? ' active' : ''}" data-uid="${ou || ''}" onclick="chatOpenConv('${c._kind}','${c.id}')">
+      <div class="chat-row-top"><span class="chat-row-name">${lead}${esc(chatTitle(c))}${muted}</span>${u ? `<span class="bin-count" style="display:flex">${u}</span>` : ''}</div>
       <div class="chat-row-prev">${esc(c.last_preview || 'No messages yet')}</div>
       <div class="chat-row-time">${c.last_preview ? chatTime(c.last_message_at) : ''}</div>
     </div>`;
@@ -2872,136 +3186,616 @@ async function chatStartWith() {
   if (!c) {
     const { data, error } = await sb.from('chat_conversations').insert({ user_a: currentUser.id, user_b: other }).select().single();
     if (error) { showToast('Error: ' + error.message, 'error'); await chatRefresh(); return; }
-    c = data; chatConvs.unshift(c);
+    data._kind = 'dm'; c = data; chatConvs.unshift(c);
   } else if (chatHidden(c)) {
     await sb.rpc('chat_unhide', { cid: c.id });
     c['hidden_' + chatSide(c)] = false;
   }
   chatSetTab('mine');
-  chatOpenConv(c.id);
+  chatOpenConv('dm', c.id);
 }
 
-async function chatOpenConv(id) {
-  const c = chatConvs.find(x => x.id === id);
+// ---------- open a chat + load pages ----------
+async function chatOpenConv(kind, id, opt) {
+  opt = opt || {};
+  const c = (kind === 'group' ? chatGroups : chatConvs).find(x => x.id === id);
   if (!c) return;
-  chatActive = c; chatAttach = window._pendAtt || null; window._pendAtt = null; chatRenderAttach();
+  const tok = ++chatOpenTok;
+  chatActive = c; chatMsgs = []; chatReacts = {}; chatHist = {}; chatArch = {}; chatReplyCache = {};
+  chatReply = null; chatEditing = null; chatNewFromId = null; chatNewWhileUp = 0; chatAtLatest = true; chatHasOlder = false;
+  chatResetSearchUI();
+  const member = chatIsMember(c);
+  chatAttach = (member && window._pendAtt) || null; chatCard = (member && window._pendCard) || null;
+  if (member) { window._pendAtt = null; window._pendCard = null; }
+  chatClearImage();
+  document.getElementById('chatInput').value = ''; chatAutoGrow();
+  chatRenderAttach(); chatRenderBanner();
   document.getElementById('chatWrap').classList.add('open');
-  let q = sb.from('chat_messages').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(300);
+  document.getElementById('chatHeadTitle').textContent = chatTitle(c);
+  document.getElementById('chatMsgsEl').innerHTML = '<div class="bin-empty">Loading...</div>';
+  const ok = await chatLoadLatest(tok, true);
+  if (!ok || tok !== chatOpenTok) return;
+  await Promise.all([chatLoadReacts(tok), chatLoadHist(tok)]);
+  if (tok !== chatOpenTok) return;
+  if (opt.jump) { chatRenderThread(); await chatJumpTo(opt.jump); }
+  else chatRenderThread({ divider: true });
+  chatRenderList();
+  chatMarkRead(true);
+}
+
+async function chatLoadLatest(tok, withDivider) {
+  const c = chatActive;
+  if (!c) return false;
+  let q = sb.from(chatTable(c)).select('*').eq('conversation_id', c.id).order('created_at', { ascending: false }).limit(CHAT_PAGE);
   const cl = chatCleared(c);
   if (cl) q = q.gt('created_at', cl);
   const { data, error } = await q;
-  if (error) { showToast('Error: ' + error.message, 'error'); return; }
-  chatMsgs = data || [];
-  await chatLoadArchive();
-  chatRenderThread(); chatRenderList();
-  chatMarkRead();
+  if (tok !== chatOpenTok) return false;
+  if (error) { showToast('Error: ' + error.message, 'error'); return false; }
+  chatMsgs = (data || []).reverse();
+  chatHasOlder = (data || []).length === CHAT_PAGE;
+  chatAtLatest = true;
+  if (withDivider && chatIsMember(c)) {
+    let first;
+    if (c._kind === 'group') {
+      const mm = (chatMembers[c.id] || []).find(x => x.user_id === currentUser.id);
+      const lr = mm ? new Date(mm.last_read_at).getTime() : Infinity;
+      first = chatMsgs.find(m => m.sender_id !== currentUser.id && !m.deleted_at && new Date(m.created_at).getTime() > lr);
+    } else {
+      first = chatMsgs.find(m => m.sender_id !== currentUser.id && !m.read_at && !m.deleted_at);
+    }
+    chatNewFromId = first ? first.id : null;
+  }
+  await chatEnsureReply(chatMsgs);
+  return tok === chatOpenTok;
 }
 
-async function chatLoadArchive() {
-  chatArch = {};
+async function chatEnsureReply(msgs) {
+  const ids = [...new Set(msgs.map(m => m.reply_to).filter(Boolean))].filter(id => !chatMsgById(id) && !(id in chatReplyCache));
+  if (!ids.length || !chatActive) return;
+  const { data } = await sb.from(chatTable()).select('id,sender_id,body,card,image_path,attachment_name,deleted_at').in('id', ids);
+  (data || []).forEach(r => chatReplyCache[r.id] = r);
+  ids.forEach(id => { if (!(id in chatReplyCache)) chatReplyCache[id] = false; });
+}
+
+async function chatLoadOlder() {
+  if (chatLoadingMore || !chatHasOlder || !chatMsgs.length || !chatActive) return;
+  chatLoadingMore = true;
+  const tok = chatOpenTok, c = chatActive;
+  let q = sb.from(chatTable(c)).select('*').eq('conversation_id', c.id).lt('created_at', chatMsgs[0].created_at)
+    .order('created_at', { ascending: false }).limit(CHAT_PAGE);
+  const cl = chatCleared(c);
+  if (cl) q = q.gt('created_at', cl);
+  const { data, error } = await q;
+  if (tok !== chatOpenTok) { chatLoadingMore = false; return; }
+  if (error) { chatLoadingMore = false; showToast('Error: ' + error.message, 'error'); return; }
+  const older = (data || []).reverse();
+  chatHasOlder = (data || []).length === CHAT_PAGE;
+  chatMsgs = [...older, ...chatMsgs];
+  await chatEnsureReply(older);
+  chatLoadingMore = false;
+  if (tok === chatOpenTok) chatRenderThread();
+}
+
+async function chatLoadNewer() {
+  if (chatLoadingMore || chatAtLatest || !chatMsgs.length || !chatActive) return;
+  chatLoadingMore = true;
+  const tok = chatOpenTok, c = chatActive;
+  const { data, error } = await sb.from(chatTable(c)).select('*').eq('conversation_id', c.id)
+    .gt('created_at', chatMsgs[chatMsgs.length - 1].created_at).order('created_at', { ascending: true }).limit(CHAT_PAGE);
+  if (tok !== chatOpenTok) { chatLoadingMore = false; return; }
+  if (error) { chatLoadingMore = false; return; }
+  const newer = data || [];
+  chatMsgs = [...chatMsgs, ...newer];
+  if (newer.length < CHAT_PAGE) { chatAtLatest = true; chatNewWhileUp = 0; }
+  await chatEnsureReply(newer);
+  chatLoadingMore = false;
+  if (tok === chatOpenTok) { chatRenderThread(); if (chatAtLatest) chatMarkRead(true); }
+}
+
+async function chatGoLatest() {
+  if (!chatActive) return;
+  chatNewWhileUp = 0;
+  if (!chatAtLatest) {
+    const tok = chatOpenTok;
+    const ok = await chatLoadLatest(tok, false);
+    if (!ok) return;
+  }
+  chatRenderThread({ bottom: true });
+  chatMarkRead(true);
+}
+
+async function chatJumpTo(mid) {
+  if (!chatActive) return;
+  let el = document.getElementById('cm_' + mid);
+  if (!el) {
+    const tok = chatOpenTok, c = chatActive, table = chatTable(c);
+    const { data: t } = await sb.from(table).select('*').eq('id', mid).maybeSingle();
+    if (!t) { showToast('That message is not available', 'warn'); return; }
+    const cl = chatCleared(c);
+    let qo = sb.from(table).select('*').eq('conversation_id', c.id).lt('created_at', t.created_at).order('created_at', { ascending: false }).limit(20);
+    let qn = sb.from(table).select('*').eq('conversation_id', c.id).gte('created_at', t.created_at).order('created_at', { ascending: true }).limit(CHAT_PAGE);
+    if (cl) { qo = qo.gt('created_at', cl); qn = qn.gt('created_at', cl); }
+    const [o, n] = await Promise.all([qo, qn]);
+    if (tok !== chatOpenTok) return;
+    const older = (o.data || []).reverse(), newer = n.data || [];
+    chatMsgs = [...older, ...newer];
+    chatHasOlder = (o.data || []).length === 20;
+    chatAtLatest = newer.length < CHAT_PAGE;
+    if (chatAtLatest) chatNewWhileUp = 0;
+    await chatEnsureReply(chatMsgs);
+    if (tok !== chatOpenTok) return;
+    chatRenderThread();
+    el = document.getElementById('cm_' + mid);
+  }
+  if (el) {
+    chatStick = false;
+    el.scrollIntoView({ block: 'center' });
+    el.classList.add('chat-flash');
+    setTimeout(() => el.classList.remove('chat-flash'), 1900);
+  }
+}
+
+async function chatLoadReacts(tok) {
+  chatReacts = {};
+  if (!chatActive) return;
+  const { data, error } = await sb.from('chat_reactions').select('message_id,user_id,emoji').eq('conversation_id', chatActive.id).limit(5000);
+  if (error || (tok != null && tok !== chatOpenTok)) return;
+  (data || []).forEach(r => chatReactAdd(r));
+}
+
+async function chatLoadHist(tok) {
+  chatHist = {}; chatArch = {};
   if (!can('view_unsent') || !chatActive) return;
-  const { data } = await sb.from('chat_unsent').select('*').eq('conversation_id', chatActive.id);
-  (data || []).forEach(a => chatArch[a.message_id] = a);
+  const id = chatActive.id, kind = chatActive._kind;
+  const { data } = await sb.from('chat_message_history').select('*').eq('conversation_id', id).order('created_at', { ascending: true }).limit(1000);
+  if (tok != null && tok !== chatOpenTok) return;
+  (data || []).forEach(h => {
+    const o = chatHist[h.message_id] = chatHist[h.message_id] || { edits: [] };
+    if (h.kind === 'edit') o.edits.push(h); else o.unsent = h;
+  });
+  if (kind === 'dm') {
+    const { data: a } = await sb.from('chat_unsent').select('*').eq('conversation_id', id);
+    if (tok != null && tok !== chatOpenTok) return;
+    (a || []).forEach(x => chatArch[x.message_id] = x);
+  }
 }
 
 function chatBack() { document.getElementById('chatWrap').classList.remove('open'); }
 
-async function chatMarkRead() {
-  if (!chatActive || !chatMember(chatActive) || !chatIsOpen()) return;
-  if (!chatMsgs.some(m => m.sender_id !== currentUser.id && !m.read_at)) return;
-  await sb.rpc('mark_chat_read', { cid: chatActive.id });
+async function chatMarkRead(force) {
+  if (!chatActive || !chatIsMember(chatActive) || !chatIsOpen()) return;
+  const id = chatActive.id;
+  if (chatActive._kind === 'group') {
+    if (!force && !chatUnreadMap[id]) return;
+    await sb.rpc('chat_group_mark_read', { p_gid: id });
+    chatUnreadMap[id] = 0;
+    chatBadge(); chatRenderList();
+    return;
+  }
+  if (!chatMsgs.some(m => m.sender_id !== currentUser.id && !m.read_at)) { if (chatUnreadMap[id]) { chatUnreadMap[id] = 0; chatBadge(); chatRenderList(); } return; }
+  await sb.rpc('mark_chat_read', { cid: id });
   const now = new Date().toISOString();
   chatMsgs.forEach(m => { if (m.sender_id !== currentUser.id && !m.read_at) m.read_at = now; });
-  chatUnreadMap[chatActive.id] = 0;
+  chatUnreadMap[id] = 0;
   chatBadge(); chatRenderList();
 }
 
-function chatRenderThread() {
+// ---------- header ----------
+function chatRenderHead() {
+  if (!chatActive) return;
+  const member = chatIsMember(chatActive);
+  document.getElementById('chatHeadTitle').textContent = chatTitle(chatActive);
+  const muted = chatMuted.has(chatActive.id);
+  document.getElementById('chatHeadActions').innerHTML =
+    '<button class="phi-btn" title="Search in this chat" onclick="chatToggleSearch()">🔍</button>' +
+    (member ? `<button class="phi-btn" title="${muted ? 'Unmute notifications' : 'Mute notifications for this chat'}" onclick="chatToggleMute()">${muted ? '🔕' : '🔔'}</button>` : '') +
+    '<button class="phi-btn" title="More" onclick="chatHeadMenu(event)">⋮</button>';
+}
+
+function chatHeadMenu(ev) {
+  if (!chatActive) return;
+  const member = chatIsMember(chatActive), items = [];
+  if (chatActive._kind === 'group') {
+    items.push({ t: 'Group info and members', f: () => chatGroupInfo() });
+  } else if (member) {
+    const o = presOther(chatActive), b = chatBlocked.has(o);
+    items.push({ t: b ? 'Unblock ' + chatNm(o) : 'Block ' + chatNm(o), d: !b, f: () => chatToggleBlock(o) });
+    items.push({ t: 'Delete chat', d: true, f: () => chatDeleteChat() });
+  } else if (can('delete_conversations')) {
+    items.push({ t: 'Delete conversation', d: true, f: () => chatAdminDelete() });
+  }
+  chatShowMenu(ev.currentTarget, items, null);
+}
+
+function chatToggleMute() {
+  if (!chatActive) return;
+  const id = chatActive.id;
+  if (chatMuted.has(id)) { chatMuted.delete(id); showToast('Notifications on for this chat'); }
+  else { chatMuted.add(id); showToast('Chat muted. No sound or popups for it.', 'warn'); }
+  chatSaveMuted();
+  chatRenderHead(); chatRenderList(); chatBadge();
+}
+
+// ---------- thread rendering ----------
+function chatNearBottom() {
+  const el = document.getElementById('chatMsgsEl');
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+}
+
+function chatRenderThread(opt) {
+  opt = opt || {};
   const head = document.getElementById('chatHeadTitle');
   const acts = document.getElementById('chatHeadActions');
   const notice = document.getElementById('chatNotice');
   const comp = document.getElementById('chatCompose');
   const el = document.getElementById('chatMsgsEl');
-  const priv = '';
   if (!chatActive) {
     head.textContent = 'Select a chat'; acts.innerHTML = '';
     notice.style.display = 'none'; notice.textContent = '';
     comp.style.display = 'none';
     el.innerHTML = '<div class="bin-empty">Select a chat on the left or start a new one</div>';
+    chatUpdateToLatest();
     return;
   }
-  const member = chatMember(chatActive);
-  head.textContent = chatTitle(chatActive);
-  acts.innerHTML = member
-    ? '<button class="phi-btn" style="color:var(--red)" onclick="chatDeleteChat()">DELETE CHAT</button>'
-    : (can('delete_conversations') ? '<button class="phi-btn" style="color:var(--red)" onclick="chatAdminDelete()">DELETE CONVERSATION</button>' : '');
-  notice.style.display = (isAdmin && !member) ? 'block' : 'none';
-  notice.textContent = member ? priv : 'Admin monitoring view: read-only. You are not part of this conversation.';
-  comp.style.display = member ? 'block' : 'none';
-  if (!chatMsgs.length) { el.innerHTML = '<div class="bin-empty">No messages yet. Say hello!</div>'; return; }
-  el.innerHTML = chatMsgs.map(m => {
-    const mine = member && m.sender_id === currentUser.id;
-    const del = !!m.deleted_at;
-    let inner;
-    if (del) {
-      const a = isAdmin ? chatArch[m.id] : null;
-      inner = '<div class="chat-text chat-unsent">This message was unsent</div>' +
-        (a ? `<div class="chat-arch"><b>Admin only, original:</b> ${esc(a.body || '')}${a.attachment_name ? ' [file: ' + esc(a.attachment_name) + ']' : ''}</div>` : '');
-    } else {
-      const text = m.body ? `<div class="chat-text">${esc(m.body)}</div>` : '';
-      const att = m.attachment_code != null ? `<div class="chat-att">
-        <div class="chat-att-name">${esc(m.attachment_name || 'code.txt')} <span>${m.attachment_code.split('\n').length} lines</span></div>
+  const member = chatIsMember(chatActive);
+  const other = chatActive._kind === 'dm' ? presOther(chatActive) : null;
+  const blockedDm = !!(other && chatBlocked.has(other));
+  chatRenderHead();
+  if (isAdmin && !member) {
+    notice.style.display = 'block';
+    notice.textContent = 'Admin monitoring view: read-only. You are not part of this conversation.';
+  } else if (blockedDm) {
+    notice.style.display = 'block';
+    notice.innerHTML = 'You blocked ' + esc(chatNm(other)) + '. Their messages are hidden and you cannot send. <button class="phi-btn" style="display:inline-flex;margin-left:6px" onclick="chatToggleBlock(\'' + other + '\')">UNBLOCK</button>';
+  } else {
+    notice.style.display = 'none'; notice.textContent = '';
+  }
+  comp.style.display = (member && !blockedDm) ? 'block' : 'none';
+
+  const prevDist = el.scrollHeight - el.scrollTop;
+  const me = currentUser.id;
+  const visible = chatMsgs.filter(m => m.sender_id === me || !chatBlocked.has(m.sender_id));
+  let html = '';
+  if (chatHasOlder) html += '<div class="chat-older"><button class="phi-btn" onclick="chatLoadOlder()">LOAD OLDER MESSAGES</button></div>';
+  if (!visible.length) {
+    html += '<div class="bin-empty">' + (chatMsgs.length ? 'Messages from blocked users are hidden' : 'No messages yet. Say hello!') + '</div>';
+  } else {
+    let lastDay = '';
+    visible.forEach(m => {
+      const dk = new Date(m.created_at).toDateString();
+      if (dk !== lastDay) { html += '<div class="chat-day"><span>' + esc(chatDayLabel(m.created_at)) + '</span></div>'; lastDay = dk; }
+      if (m.id === chatNewFromId) html += '<div class="chat-newline" id="chatNewLine"><span>NEW MESSAGES</span></div>';
+      html += chatMsgHtml(m, member);
+    });
+  }
+  el.innerHTML = html;
+  if (opt.bottom) { el.scrollTop = el.scrollHeight; chatStick = true; }
+  else if (opt.divider) {
+    const nl = document.getElementById('chatNewLine');
+    if (nl) { el.scrollTop = nl.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 60; chatStick = false; }
+    else { el.scrollTop = el.scrollHeight; chatStick = true; }
+  } else el.scrollTop = el.scrollHeight - prevDist;
+  chatHydrate();
+  chatUpdateToLatest();
+}
+
+function chatImgSrc(path) {
+  const c = chatImgCache[path];
+  return c && Date.now() - c.t < 50 * 60 * 1000 ? c.u : '';
+}
+
+function chatSrcAttr(path) {
+  const u = chatImgSrc(path);
+  return u ? ' src="' + esc(u) + '"' : '';
+}
+
+function chatReactHtml(m, member) {
+  const o = chatReacts[m.id];
+  if (!o) return '';
+  const chips = Object.keys(o).filter(e => o[e].length).map(e => {
+    const users = o[e], mine = users.includes(currentUser.id);
+    const names = users.map(chatNm).join(', ');
+    return `<button class="chat-react${mine ? ' mine' : ''}" data-m="${m.id}" data-e="${esc(e)}" title="${esc(names)}" ${member ? '' : 'disabled'} onclick="chatReactEl(this)">${esc(e)} ${users.length}</button>`;
+  }).join('');
+  return chips ? '<div class="chat-reacts">' + chips + '</div>' : '';
+}
+
+function chatMsgHtml(m, member) {
+  const mine = member && m.sender_id === currentUser.id;
+  const del = !!m.deleted_at;
+  const canSee = can('view_unsent');
+  let inner = '';
+  if (del) {
+    const h = chatHist[m.id], a = (h && h.unsent) || chatArch[m.id];
+    inner = '<div class="chat-text chat-unsent">This message was unsent</div>';
+    if (canSee && a) {
+      inner += '<div class="chat-arch"><b>Admin only, original:</b> ' + esc(a.body || '') +
+        (a.attachment_name ? ' [file: ' + esc(a.attachment_name) + ']' : '') +
+        (a.card ? ' [section card: ' + esc(a.card.name || '') + ']' : '') +
+        (a.image_path ? '<br><img class="chat-img" data-path="' + esc(a.image_path) + '"' + chatSrcAttr(a.image_path) + ' alt="unsent image" onclick="chatOpenImg(this)" style="max-height:140px">' : '') + '</div>';
+    }
+  } else {
+    if (m.reply_to) {
+      const r = chatMsgById(m.reply_to) || chatReplyCache[m.reply_to];
+      const nm = r ? chatNm(r.sender_id) : '';
+      const sn = r ? chatSnippet(r) : 'Original message is not available';
+      inner += `<div class="chat-quote" onclick="chatJumpTo('${m.reply_to}')"><b>${esc(nm || 'Reply')}</b><span>${esc(sn)}</span></div>`;
+    }
+    inner += chatRich(m.body);
+    if (m.image_path) {
+      inner += `<img class="chat-img" data-path="${esc(m.image_path)}" ${chatSrcAttr(m.image_path)} alt="${esc(m.image_name || 'image')}" onclick="chatOpenImg(this)" onload="chatImgLoaded()">`;
+    }
+    if (m.card) {
+      const c = m.card;
+      const prev = String(c.code || '').split('\n').slice(0, 6).join('\n').slice(0, 400);
+      const saved = chatSavedCards.has(m.id);
+      inner += `<div class="chat-card">
+        ${c.thumb ? `<img class="chat-card-thumb" data-path="${esc(c.thumb)}" ${chatSrcAttr(c.thumb)} alt="" onclick="chatOpenImg(this)" onload="chatImgLoaded()">` : ''}
+        <div class="chat-card-body">
+          <div class="chat-card-top"><span class="vis-tag vis-public">${esc(String(c.type || 'section').toUpperCase())}</span><b>${esc(c.name || 'Untitled')}</b></div>
+          ${c.description ? `<div class="chat-card-desc">${esc(String(c.description).slice(0, 160))}</div>` : ''}
+          <pre class="chat-card-prev">${esc(prev)}</pre>
+          <div class="chat-att-actions">
+            <button class="phi-btn" onclick="chatCardAct('${m.id}','view')">VIEW CODE</button>
+            <button class="phi-btn" onclick="chatCardAct('${m.id}','copy')">COPY</button>
+            <button class="phi-btn" onclick="chatCardAct('${m.id}','download')">.LIQUID</button>
+            ${c.css ? `<button class="phi-btn" onclick="chatCardAct('${m.id}','css')">CSS</button>` : ''}
+            ${member ? `<button class="phi-btn" ${saved ? 'disabled' : ''} onclick="chatSaveCard('${m.id}')">${saved ? 'SAVED ✓' : 'SAVE TO MY VAULT'}</button>` : ''}
+          </div>
+          <pre class="chat-code" id="cd_${m.id}" style="display:none"></pre>
+        </div></div>`;
+    }
+    if (m.attachment_code != null) {
+      inner += `<div class="chat-att">
+        <div class="chat-att-name">${esc(m.attachment_name || 'code.txt')} <span>${String(m.attachment_code).split('\n').length} lines</span></div>
         <div class="chat-att-actions">
           <button class="phi-btn" onclick="chatToggleCode('${m.id}')">VIEW</button>
           <button class="phi-btn" onclick="chatCopyCode('${m.id}')">COPY</button>
           <button class="phi-btn" onclick="chatDownload('${m.id}')">DOWNLOAD</button>
         </div>
-        <pre class="chat-code" id="cc_${m.id}" style="display:none"></pre></div>` : '';
-      inner = text + att;
+        <pre class="chat-code" id="cc_${m.id}" style="display:none"></pre></div>`;
     }
-    const un = mine && !del ? ` · <button class="chat-unsend" onclick="chatUnsend('${m.id}')">Unsend</button>` : '';
-    return `<div class="chat-msg${mine ? ' mine' : ''}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatTime(m.created_at)}${un}</div><div class="chat-bubble">${inner}</div></div>`;
-  }).join('');
-  el.scrollTop = el.scrollHeight;
+  }
+  let hist = '';
+  const h = chatHist[m.id];
+  if (!del && canSee && h && h.edits.length) {
+    hist = '<div class="chat-arch"><b>Admin only, earlier versions:</b>' +
+      h.edits.map(e => '<div>' + esc(e.body || '') + ' <span class="p-sub">(' + esc(chatTime(e.created_at)) + ')</span></div>').join('') + '</div>';
+  }
+  const more = del ? '' : `<button class="chat-more" onclick="chatMsgMenu(event,'${m.id}')" aria-label="Message options">⋯</button>`;
+  const edited = m.edited_at && !del ? ' · <span class="chat-edited">edited</span>' : '';
+  return `<div class="chat-msg${mine ? ' mine' : ''}" id="cm_${m.id}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatClock(m.created_at)}${edited}${more}</div><div class="chat-bubble">${inner}</div>${chatReactHtml(m, member)}${hist}</div>`;
 }
 
-async function chatSend() {
-  if (!chatActive || !chatMember(chatActive)) return;
+async function chatHydrate() {
+  const imgs = [...document.querySelectorAll('#chatMsgsEl img[data-path]')];
+  const need = [...new Set(imgs.map(i => i.dataset.path).filter(p => !chatImgSrc(p)))];
+  if (need.length) {
+    try {
+      const { data } = await sb.storage.from('chat-images').createSignedUrls(need, 3600);
+      (data || []).forEach(d => { if (d.signedUrl && d.path) chatImgCache[d.path] = { u: d.signedUrl, t: Date.now() }; });
+    } catch (e) {}
+  }
+  imgs.forEach(i => { const u = chatImgSrc(i.dataset.path); if (u && i.getAttribute('src') !== u) i.src = u; });
+}
+function chatImgLoaded() {
+  if (!chatStick) return;
+  const el = document.getElementById('chatMsgsEl');
+  el.scrollTop = el.scrollHeight;
+}
+function chatOpenImg(img) {
+  const src = img.getAttribute('src');
+  if (!src) return;
+  const d = document.createElement('div');
+  d.className = 'chat-lightbox'; d.id = 'chatLightbox';
+  d.innerHTML = '<img alt="">'; d.firstChild.src = src;
+  d.onclick = () => d.remove();
+  document.body.appendChild(d);
+}
+
+function chatUpdateToLatest() {
+  const b = document.getElementById('chatToLatest'), n = document.getElementById('chatToLatestN');
+  if (!b) return;
+  const el = document.getElementById('chatMsgsEl');
+  const far = !!chatActive && (!chatAtLatest || el.scrollHeight - el.scrollTop - el.clientHeight > 240);
+  b.style.display = far ? 'flex' : 'none';
+  n.textContent = chatNewWhileUp ? chatNewWhileUp + ' new' : '';
+}
+
+function chatOnScroll() {
+  const el = document.getElementById('chatMsgsEl');
+  const dist = el.scrollHeight - el.scrollTop - el.clientHeight;
+  chatStick = dist < 120;
+  if (dist < 80) {
+    if (!chatAtLatest) chatLoadNewer();
+    else if (chatNewWhileUp) { chatNewWhileUp = 0; chatMarkRead(true); }
+  }
+  if (el.scrollTop < 60 && chatHasOlder) chatLoadOlder();
+  chatUpdateToLatest();
+}
+
+// ---------- message menu (reply, react, copy, edit, unsend, save, report, block) ----------
+function chatMenuEl() {
+  let m = document.getElementById('chatMenu');
+  if (!m) { m = document.createElement('div'); m.id = 'chatMenu'; m.className = 'chat-menu'; document.body.appendChild(m); }
+  return m;
+}
+function chatMenuClose() {
+  const m = document.getElementById('chatMenu');
+  if (m) m.style.display = 'none';
+}
+function chatShowMenu(anchor, items, mid) {
+  chatMenuItems = items; chatMenuMid = mid || null;
+  const m = chatMenuEl();
+  let h = '';
+  if (mid) h += '<div class="chat-menu-react">' + CHAT_QUICK.map(e => `<button data-e="${e}" onclick="chatMenuReact(this)">${e}</button>`).join('') + '</div>';
+  items.forEach((it, i) => { h += `<button class="chat-menu-it${it.d ? ' danger' : ''}" onclick="chatMenuPick(${i})">${esc(it.t)}</button>`; });
+  if (!h) return;
+  m.innerHTML = h; m.style.display = 'block'; m.style.left = '0px'; m.style.top = '0px';
+  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  const x = Math.min(Math.max(8, r.right - mw), window.innerWidth - mw - 8);
+  let y = r.bottom + 4;
+  if (y + mh > window.innerHeight - 8) y = Math.max(8, r.top - mh - 4);
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+}
+function chatMenuPick(i) {
+  const it = chatMenuItems[i];
+  chatMenuClose();
+  if (it && it.f) it.f();
+}
+function chatMenuReact(btn) {
+  const mid = chatMenuMid;
+  chatMenuClose();
+  if (mid) chatReact(mid, btn.dataset.e);
+}
+function chatMsgMenu(ev, id) {
+  ev.stopPropagation();
+  const m = chatMsgById(id);
+  if (!m || !chatActive) return;
+  const member = chatIsMember(chatActive), mine = member && m.sender_id === currentUser.id, del = !!m.deleted_at;
+  if (del) return;
+  const items = [];
+  if (member) items.push({ t: 'Reply', f: () => chatStartReply(id) });
+  if (m.body) items.push({ t: 'Copy text', f: () => navigator.clipboard.writeText(m.body).then(() => showToast('Copied!')) });
+  if (m.card && member) items.push({ t: chatSavedCards.has(id) ? 'Saved to your vault' : 'Save section to my vault', f: () => chatSaveCard(id) });
+  if (mine) {
+    items.push({ t: 'Edit', f: () => chatStartEdit(id) });
+    items.push({ t: 'Unsend', d: true, f: () => chatUnsend(id) });
+  } else if (member) {
+    items.push({ t: 'Report message', d: true, f: () => chatReportOpen(id) });
+    if (chatActive._kind === 'group') items.push({ t: 'Block ' + chatNm(m.sender_id), d: true, f: () => chatToggleBlock(m.sender_id) });
+  }
+  chatShowMenu(ev.currentTarget, items, member ? id : null);
+}
+
+// ---------- reply + edit ----------
+function chatStartReply(id) {
+  const m = chatMsgById(id);
+  if (!m) return;
+  chatEditing = null;
+  chatReply = { id, name: chatNm(m.sender_id), snip: chatSnippet(m) };
+  chatRenderBanner();
+  document.getElementById('chatInput').focus();
+}
+function chatStartEdit(id) {
+  const m = chatMsgById(id);
+  if (!m || m.deleted_at) return;
+  chatReply = null;
+  chatEditing = { id };
+  const ta = document.getElementById('chatInput');
+  ta.value = m.body || ''; chatAutoGrow();
+  chatRenderBanner();
+  ta.focus();
+}
+function chatCancelMode() {
+  if (chatEditing) { document.getElementById('chatInput').value = ''; chatAutoGrow(); }
+  chatEditing = null; chatReply = null;
+  chatRenderBanner();
+}
+function chatRenderBanner() {
+  const b = document.getElementById('chatBanner'), btn = document.getElementById('chatSendBtn');
+  if (!b) return;
+  if (chatEditing) {
+    const m = chatMsgById(chatEditing.id);
+    b.innerHTML = `<div><b>Editing message</b><span>${esc(chatSnippet(m))}</span></div><button class="phi-btn" onclick="chatCancelMode()">CANCEL</button>`;
+    b.style.display = 'flex';
+  } else if (chatReply) {
+    b.innerHTML = `<div><b>Replying to ${esc(chatReply.name)}</b><span>${esc(chatReply.snip)}</span></div><button class="phi-btn" onclick="chatCancelMode()">✕</button>`;
+    b.style.display = 'flex';
+  } else { b.style.display = 'none'; b.innerHTML = ''; }
+  if (btn) btn.innerHTML = (chatEditing ? 'SAVE ' : 'SEND ') + CHAT_SEND_SVG;
+}
+
+async function chatSaveEdit() {
+  if (!chatEditing || chatSending) return;
   const ta = document.getElementById('chatInput');
   const body = ta.value.trim();
-  if (!body && !chatAttach) return;
-  const btn = document.getElementById('chatSendBtn');
-  btn.disabled = true;
-  const { data, error } = await sb.from('chat_messages').insert({
-    conversation_id: chatActive.id, sender_id: currentUser.id, body,
+  const id = chatEditing.id, m = chatMsgById(id);
+  if (!m) return;
+  if (body === (m.body || '')) { chatCancelMode(); return; }
+  chatSending = true;
+  const { error } = await sb.rpc('chat_edit', { p_mid: id, p_body: body, p_scope: chatActive._kind === 'group' ? 'group' : 'dm' });
+  chatSending = false;
+  if (error) { showToast('Edit error: ' + error.message, 'error'); return; }
+  m.body = body; m.edited_at = new Date().toISOString();
+  ta.value = ''; chatAutoGrow();
+  chatEditing = null; chatRenderBanner();
+  await chatLoadHist();
+  chatRenderThread();
+  showToast('Message edited');
+}
+
+// ---------- send ----------
+async function chatSend() {
+  if (!chatActive || !chatIsMember(chatActive) || chatSending) return;
+  if (chatEditing) return chatSaveEdit();
+  const ta = document.getElementById('chatInput');
+  const body = ta.value.trim();
+  if (!body && !chatAttach && !chatImage && !chatCard) return;
+  const conv = chatActive, btn = document.getElementById('chatSendBtn');
+  chatSending = true; btn.disabled = true;
+  let imgPath = null, card = null;
+  try {
+    if (chatImage) imgPath = await chatUpload(conv.id, chatImage.blob, chatImage.ext);
+    if (chatCard) card = await chatBuildCard(conv.id, chatCard);
+  } catch (e) {
+    chatSending = false; btn.disabled = false;
+    if (imgPath) sb.storage.from('chat-images').remove([imgPath]);
+    showToast('Upload error: ' + (e.message || e), 'error');
+    return;
+  }
+  const row = {
+    conversation_id: conv.id, sender_id: currentUser.id, body,
     attachment_name: chatAttach ? chatAttach.name : null,
-    attachment_code: chatAttach ? chatAttach.code : null
-  }).select().single();
-  btn.disabled = false;
-  if (error) { showToast('Send error: ' + error.message, 'error'); return; }
-  ta.value = ''; chatAttach = null; chatRenderAttach();
+    attachment_code: chatAttach ? chatAttach.code : null,
+    reply_to: chatReply ? chatReply.id : null,
+    image_path: imgPath, image_name: chatImage ? chatImage.name : null,
+    card
+  };
+  const { data, error } = await sb.from(chatTable(conv)).insert(row).select().single();
+  chatSending = false; btn.disabled = false;
+  if (error) {
+    const dead = [imgPath, card && card.thumb].filter(Boolean);
+    if (dead.length) sb.storage.from('chat-images').remove(dead);
+    showToast('Send error: ' + error.message, 'error');
+    return;
+  }
+  ta.value = ''; chatAutoGrow();
+  chatAttach = null; chatCard = null; chatReply = null; chatClearImage();
+  chatRenderAttach(); chatRenderBanner();
   document.getElementById('chatEmoji').style.display = 'none';
-  if (!chatMsgs.some(x => x.id === data.id)) chatMsgs.push(data);
-  chatActive.last_preview = body ? body.slice(0, 80) : '[file] ' + (data.attachment_name || '');
-  chatActive.last_message_at = data.created_at;
-  chatActive['hidden_a'] = false; chatActive['hidden_b'] = false;
+  conv.last_preview = (body || chatSnippet(data)).slice(0, 80);
+  conv.last_message_at = data.created_at;
+  if (conv._kind === 'dm') { conv['hidden_a'] = false; conv['hidden_b'] = false; }
   chatConvs.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
-  chatRenderThread(); chatRenderList();
+  chatGroups.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+  if (chatActive && chatActive.id === conv.id) {
+    if (!chatAtLatest) { await chatLoadLatest(chatOpenTok, false); }
+    else if (!chatMsgs.some(x => x.id === data.id)) chatMsgs.push(data);
+    chatNewWhileUp = 0;
+    chatRenderThread({ bottom: true });
+  }
+  chatRenderList();
 }
 
 async function chatUnsend(id) {
-  if (!confirm('Unsend this message? It will be removed for both of you.')) return;
-  const { error } = await sb.rpc('chat_unsend', { mid: id });
+  if (!confirm('Unsend this message? It will be removed for everyone in this chat.')) return;
+  const isG = chatActive._kind === 'group';
+  const { error } = await sb.rpc(isG ? 'chat_group_unsend' : 'chat_dm_unsend', { p_mid: id });
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
   const m = chatMsgById(id);
-  if (m) { m.deleted_at = new Date().toISOString(); m.body = ''; m.attachment_name = null; m.attachment_code = null; }
-  await chatLoadArchive();
+  if (m) {
+    m.deleted_at = new Date().toISOString(); m.body = ''; m.attachment_name = null; m.attachment_code = null;
+    m.image_path = null; m.image_name = null; m.card = null;
+  }
+  await chatLoadHist();
   chatRenderThread(); chatRefresh();
   showToast('Message unsent');
 }
 
 async function chatDeleteChat() {
-  if (!chatActive || !chatMember(chatActive)) return;
+  if (!chatActive || chatActive._kind !== 'dm' || !chatMember(chatActive)) return;
   if (!confirm('Delete this chat from your side? The other person keeps their copy. If they message you again, only new messages will appear.')) return;
   const { error } = await sb.rpc('chat_clear', { cid: chatActive.id });
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
@@ -3013,7 +3807,7 @@ async function chatDeleteChat() {
 }
 
 async function chatAdminDelete() {
-  if (!can('delete_conversations') || !chatActive) return;
+  if (!can('delete_conversations') || !chatActive || chatActive._kind !== 'dm') return;
   if (!confirm('Permanently delete this whole conversation for BOTH users? This cannot be undone.')) return;
   const { error } = await sb.from('chat_conversations').delete().eq('id', chatActive.id);
   if (error) { showToast('Error: ' + error.message, 'error'); return; }
@@ -3023,32 +3817,236 @@ async function chatAdminDelete() {
   showToast('Conversation deleted', 'error');
 }
 
-async function chatOnNew(m) {
-  if (chatActive && m.conversation_id === chatActive.id) {
-    if (!chatMsgs.some(x => x.id === m.id)) { chatMsgs.push(m); chatRenderThread(); }
-    chatMarkRead();
+// ---------- realtime handlers ----------
+async function chatOnNew(m, kind) {
+  const act = !!chatActive && chatActive._kind === kind && m.conversation_id === chatActive.id;
+  const fromMe = m.sender_id === currentUser.id;
+  const hiddenSender = !fromMe && chatBlocked.has(m.sender_id);
+  if (act && !chatMsgs.some(x => x.id === m.id)) {
+    if (chatAtLatest) {
+      const near = chatNearBottom();
+      chatMsgs.push(m);
+      await chatEnsureReply([m]);
+      chatRenderThread({ bottom: near || fromMe });
+      if (!near && !fromMe && !hiddenSender) { chatNewWhileUp++; chatUpdateToLatest(); }
+    } else if (!fromMe && !hiddenSender) { chatNewWhileUp++; chatUpdateToLatest(); }
   }
+  if (act && !hiddenSender && chatIsMember(chatActive) && chatAtLatest && chatNearBottom()) await chatMarkRead(true);
   await chatRefresh();
-  const c = chatConvs.find(x => x.id === m.conversation_id);
-  const viewing = chatIsOpen() && chatActive && chatActive.id === m.conversation_id;
-  if (c && chatMember(c) && m.sender_id !== currentUser.id) {
-    if (!viewing) showToast('New message from ' + chatNm(m.sender_id), 'warn');
-    lvNotify('New message from ' + chatNm(m.sender_id), m.body ? String(m.body).slice(0, 100) : '[file] ' + (m.attachment_name || ''));
+  const c = (kind === 'group' ? chatGroups : chatConvs).find(x => x.id === m.conversation_id);
+  const viewing = chatIsOpen() && act;
+  if (c && chatIsMember(c) && !fromMe && !hiddenSender && !chatMuted.has(c.id)) {
+    const who = kind === 'group' ? chatNm(m.sender_id) + ' in ' + c.name : chatNm(m.sender_id);
+    if (!viewing) showToast('New message from ' + who, 'warn');
+    lvNotify('New message from ' + who, chatSnippet(m).slice(0, 100));
   }
 }
 
-async function chatOnUpdate(m) {
-  if (chatActive && m.conversation_id === chatActive.id) {
+async function chatOnUpdate(m, kind) {
+  if (chatActive && chatActive._kind === kind && m.conversation_id === chatActive.id) {
     const x = chatMsgById(m.id);
     if (x) {
       Object.assign(x, m);
-      if (m.deleted_at) await chatLoadArchive();
+      if ((m.deleted_at || m.edited_at) && can('view_unsent')) await chatLoadHist();
       chatRenderThread();
     }
   }
   chatRefresh();
 }
 
+function chatOnReact(type, r) {
+  if (!chatActive || !r || !r.message_id) return;
+  if (type === 'add') {
+    if (r.conversation_id !== chatActive.id) return;
+    if (!chatReactAdd(r)) return;
+  } else if (!chatReactDel(r)) return;
+  chatRenderThread();
+}
+
+// ---------- reactions ----------
+function chatReactAdd(r) {
+  const o = chatReacts[r.message_id] = chatReacts[r.message_id] || {};
+  const a = o[r.emoji] = o[r.emoji] || [];
+  if (a.includes(r.user_id)) return false;
+  a.push(r.user_id);
+  return true;
+}
+function chatReactDel(r) {
+  const o = chatReacts[r.message_id];
+  if (!o || !o[r.emoji]) return false;
+  const i = o[r.emoji].indexOf(r.user_id);
+  if (i < 0) return false;
+  o[r.emoji].splice(i, 1);
+  if (!o[r.emoji].length) delete o[r.emoji];
+  if (!Object.keys(o).length) delete chatReacts[r.message_id];
+  return true;
+}
+function chatReactEl(btn) { chatReact(btn.dataset.m, btn.dataset.e); }
+async function chatReact(mid, emoji) {
+  if (!chatActive || !chatIsMember(chatActive)) return;
+  const me = currentUser.id;
+  const have = ((chatReacts[mid] || {})[emoji] || []).includes(me);
+  const r = { message_id: mid, user_id: me, emoji };
+  if (have) {
+    chatReactDel(r); chatRenderThread();
+    const { error } = await sb.from('chat_reactions').delete().eq('message_id', mid).eq('user_id', me).eq('emoji', emoji);
+    if (error) { chatReactAdd(r); chatRenderThread(); showToast('Error: ' + error.message, 'error'); }
+  } else {
+    chatReactAdd(r); chatRenderThread();
+    const { error } = await sb.from('chat_reactions').insert({ message_id: mid, conversation_id: chatActive.id, user_id: me, emoji });
+    if (error) { chatReactDel(r); chatRenderThread(); showToast('Error: ' + error.message, 'error'); }
+  }
+}
+
+// ---------- block + report ----------
+async function chatToggleBlock(uid) {
+  if (!uid || uid === currentUser.id) return;
+  const nm = chatNm(uid);
+  if (chatBlocked.has(uid)) {
+    const { error } = await sb.from('chat_blocks').delete().eq('blocker_id', currentUser.id).eq('blocked_id', uid);
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    chatBlocked.delete(uid);
+    showToast(nm + ' unblocked');
+  } else {
+    if (!confirm('Block ' + nm + '? Their messages will be hidden for you and you will get no notifications from them. They are not told.')) return;
+    const { error } = await sb.from('chat_blocks').insert({ blocker_id: currentUser.id, blocked_id: uid });
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    chatBlocked.add(uid);
+    showToast(nm + ' blocked', 'warn');
+  }
+  await chatRefresh();
+  chatRenderThread();
+  if (document.getElementById('chatGroupModal').style.display === 'flex' && chatGMode === 'info') chatGroupRender();
+}
+
+function chatReportOpen(mid) {
+  const m = chatMsgById(mid);
+  if (!m) return;
+  window._reportMid = mid;
+  document.getElementById('chatReportSnip').textContent = chatNm(m.sender_id) + ': ' + chatSnippet(m);
+  document.getElementById('chatReportReason').selectedIndex = 0;
+  document.getElementById('chatReportDetails').value = '';
+  setBtn('chatReportBtn', false, 'SEND REPORT');
+  show('chatReportModal');
+}
+async function chatReportSend() {
+  const mid = window._reportMid;
+  if (!mid || !chatActive) return;
+  setBtn('chatReportBtn', true, 'SENDING...');
+  const { error } = await sb.rpc('chat_report_message', {
+    p_mid: mid, p_scope: chatActive._kind === 'group' ? 'group' : 'dm',
+    p_reason: v('chatReportReason'), p_details: v('chatReportDetails').trim()
+  });
+  setBtn('chatReportBtn', false, 'SEND REPORT');
+  if (error) { showToast('Report error: ' + error.message, 'error'); return; }
+  closeModal('chatReportModal');
+  showToast('Report sent to the admins');
+}
+
+// ---------- search (in this chat + across all chats) ----------
+async function chatSearchQuery(q, table, ids) {
+  const pat = '"%' + q.replace(/[\\%_]/g, '\\$&').replace(/[\\"]/g, '\\$&') + '%"';
+  const cols = 'id,conversation_id,sender_id,body,attachment_name,attachment_code,card,created_at,deleted_at';
+  const run = filt => sb.from(table).select(cols).in('conversation_id', ids).is('deleted_at', null).or(filt)
+    .order('created_at', { ascending: false }).limit(25);
+  const base = 'body.ilike.' + pat + ',attachment_name.ilike.' + pat + ',attachment_code.ilike.' + pat;
+  let r = await run(base + ',card->>name.ilike.' + pat);
+  if (r.error) r = await run(base);
+  return r.error ? [] : (r.data || []);
+}
+function chatSnip(m, q) {
+  const lq = q.toLowerCase();
+  const line = String(m.attachment_code || '').split('\n').find(l => l.toLowerCase().includes(lq));
+  const pick = [m.body, m.attachment_name, m.card && m.card.name, line];
+  let t = pick.find(x => x && String(x).toLowerCase().includes(lq)) || m.body || m.attachment_name || '';
+  t = String(t).replace(/\s+/g, ' ').trim();
+  const i = t.toLowerCase().indexOf(lq);
+  if (i > 60) t = '…' + t.slice(i - 40);
+  t = t.slice(0, 160);
+  const eq = esc(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return esc(t).replace(new RegExp(eq, 'ig'), x => '<mark>' + x + '</mark>');
+}
+
+function chatToggleSearch() {
+  if (!chatActive) return;
+  const bar = document.getElementById('chatSearchBar');
+  if (bar.style.display === 'flex') { chatCloseSearch(); return; }
+  bar.style.display = 'flex';
+  document.getElementById('chatSearchIn').focus();
+}
+function chatResetSearchUI() {
+  const bar = document.getElementById('chatSearchBar'), res = document.getElementById('chatSearchRes');
+  if (bar) bar.style.display = 'none';
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  const i = document.getElementById('chatSearchIn'); if (i) i.value = '';
+}
+function chatCloseSearch() { chatResetSearchUI(); }
+function chatSearchInput() {
+  clearTimeout(chatSearchTimer);
+  chatSearchTimer = setTimeout(chatSearchRun, 300);
+}
+async function chatSearchRun() {
+  const q = document.getElementById('chatSearchIn').value.trim();
+  const res = document.getElementById('chatSearchRes');
+  if (!chatActive || q.length < 2) { res.style.display = 'none'; res.innerHTML = ''; return; }
+  const c = chatActive;
+  res.style.display = 'block'; res.innerHTML = '<div class="bin-empty">Searching...</div>';
+  let rows = await chatSearchQuery(q, chatTable(c), [c.id]);
+  if (!chatActive || chatActive.id !== c.id || document.getElementById('chatSearchIn').value.trim() !== q) return;
+  const cl = chatCleared(c);
+  rows = rows.filter(r => (!cl || r.created_at > cl) && (r.sender_id === currentUser.id || !chatBlocked.has(r.sender_id)));
+  res.innerHTML = rows.length ? rows.map(r => `<div class="chat-sr" onclick="chatSearchPick('${r.id}')">
+      <div class="chat-sr-top"><span>${esc(chatNm(r.sender_id))}</span><span>${esc(chatTime(r.created_at))}</span></div>
+      <div class="chat-sr-snip">${chatSnip(r, q)}</div></div>`).join('') : '<div class="bin-empty">No messages found</div>';
+}
+function chatSearchPick(mid) {
+  chatResetSearchUI();
+  chatJumpTo(mid);
+}
+
+function chatSideClear() {
+  chatSideQ = '';
+  const i = document.getElementById('chatSideSearch'); if (i) i.value = '';
+}
+function chatSideSearchInput() {
+  clearTimeout(chatSideTimer);
+  chatSideQ = document.getElementById('chatSideSearch').value.trim();
+  if (!chatSideQ) { chatRenderList(); return; }
+  chatSideTimer = setTimeout(chatSideSearchRun, 300);
+}
+async function chatSideSearchRun() {
+  const q = chatSideQ, el = document.getElementById('chatList');
+  if (!q) return;
+  const lq = q.toLowerCase();
+  const chats = chatItems().filter(c => chatTitle(c).toLowerCase().includes(lq));
+  let h = '';
+  if (chats.length) {
+    h += '<div class="chat-sr-head">CHATS</div>' + chats.map(c => `<div class="chat-sr" onclick="chatSearchPickGlobal('${c._kind}','${c.id}','')">
+      <div class="chat-sr-snip">${c._kind === 'group' ? '👥 ' : ''}<b>${esc(chatTitle(c))}</b></div></div>`).join('');
+  }
+  if (q.length < 2) { el.innerHTML = h || '<div class="bin-empty">Type at least 2 characters to search messages</div>'; return; }
+  el.innerHTML = h + '<div class="chat-sr-head">MESSAGES</div><div class="bin-empty">Searching...</div>';
+  const myDm = chatConvs.filter(chatMember).map(c => c.id), myG = chatGroups.filter(chatGMember).map(g => g.id);
+  const [a, b] = await Promise.all([
+    myDm.length ? chatSearchQuery(q, 'chat_messages', myDm) : [],
+    myG.length ? chatSearchQuery(q, 'chat_group_messages', myG) : []
+  ]);
+  if (q !== chatSideQ) return;
+  const conv = (k, id) => (k === 'group' ? chatGroups : chatConvs).find(x => x.id === id);
+  const rows = [...a.map(r => ({ ...r, _k: 'dm' })), ...b.map(r => ({ ...r, _k: 'group' }))]
+    .filter(r => { const c = conv(r._k, r.conversation_id); const cl = c && chatCleared(c); return c && (!cl || r.created_at > cl) && (r.sender_id === currentUser.id || !chatBlocked.has(r.sender_id)); })
+    .sort((x, y) => new Date(y.created_at) - new Date(x.created_at)).slice(0, 40);
+  h += '<div class="chat-sr-head">MESSAGES</div>' + (rows.length ? rows.map(r => `<div class="chat-sr" onclick="chatSearchPickGlobal('${r._k}','${r.conversation_id}','${r.id}')">
+      <div class="chat-sr-top"><span>${r._k === 'group' ? '👥 ' : ''}${esc(chatTitle(conv(r._k, r.conversation_id)))} · ${esc(chatNm(r.sender_id))}</span><span>${esc(chatTime(r.created_at))}</span></div>
+      <div class="chat-sr-snip">${chatSnip(r, q)}</div></div>`).join('') : '<div class="bin-empty">No messages found</div>');
+  el.innerHTML = h;
+}
+function chatSearchPickGlobal(kind, cid, mid) {
+  chatSetTab('mine');
+  chatOpenConv(kind, cid, mid ? { jump: mid } : {});
+}
+
+// ---------- composer: emoji, files, images, code blocks, paste, drag and drop ----------
 function chatToggleEmoji() {
   const e = document.getElementById('chatEmoji');
   e.style.display = e.style.display === 'grid' ? 'none' : 'grid';
@@ -3059,46 +4057,367 @@ function chatAddEmoji(e) {
   ta.value = ta.value.slice(0, s) + e + ta.value.slice(en);
   ta.focus(); ta.selectionStart = ta.selectionEnd = s + e.length;
 }
+function chatAutoGrow() {
+  const ta = document.getElementById('chatInput');
+  if (!ta) return;
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+}
+function chatInsertText(txt, selStart, selEnd) {
+  const ta = document.getElementById('chatInput');
+  ta.focus();
+  let ok = false;
+  try { ok = document.execCommand('insertText', false, txt); } catch (e) {}
+  if (!ok) { ta.setRangeText(txt, ta.selectionStart, ta.selectionEnd, 'end'); }
+  if (selStart != null) {
+    const base = ta.selectionStart - txt.length;
+    ta.selectionStart = base + selStart; ta.selectionEnd = base + (selEnd != null ? selEnd : selStart);
+  }
+  chatAutoGrow();
+}
+function chatInsertCode() {
+  if (!chatActive || !chatIsMember(chatActive)) return;
+  chatInsertText('```\n\n```', 4, 4);
+}
 
 function chatPickFile(e) {
   const f = e.target.files[0]; e.target.value = '';
-  if (!f) return;
+  if (f) chatTakeFile(f);
+}
+function chatPickImageEv(e) {
+  const f = e.target.files[0]; e.target.value = '';
+  if (f) chatTakeFile(f);
+}
+async function chatTakeFile(f) {
+  if (!chatActive || !chatIsMember(chatActive)) return;
+  if (chatEditing) { showToast('Finish editing first', 'warn'); return; }
+  if (f.type && f.type.startsWith('image/')) {
+    try {
+      const p = await chatPrepImage(f);
+      chatClearImage();
+      chatImage = { ...p, url: URL.createObjectURL(p.blob) };
+      chatRenderAttach();
+    } catch (err) { showToast(err.message || 'Image error', 'error'); }
+    return;
+  }
   if (f.size > CHAT_MAX) { showToast('File too large (max 300 KB)', 'error'); return; }
-  const r = new FileReader();
-  r.onload = () => {
-    const txt = String(r.result);
-    if (txt.includes('\u0000')) { showToast('Only text / code files are supported', 'error'); return; }
-    chatAttach = { name: f.name, code: txt }; chatRenderAttach();
-  };
-  r.readAsText(f);
+  let txt = '';
+  try { txt = await f.text(); } catch (e) { showToast('Could not read this file', 'error'); return; }
+  if (txt.includes('\u0000')) { showToast('Only text / code files and images are supported', 'error'); return; }
+  chatAttach = { name: f.name, code: txt }; chatRenderAttach();
+}
+
+function chatShrink(src, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const isBlob = typeof src !== 'string';
+    const url = isBlob ? URL.createObjectURL(src) : src;
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, maxDim / Math.max(w, h));
+      w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      const cx = cv.getContext('2d');
+      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      if (isBlob) URL.revokeObjectURL(url);
+      cv.toBlob(b => b ? resolve(b) : reject(new Error('Could not process this image')), 'image/jpeg', quality);
+    };
+    img.onerror = () => { if (isBlob) URL.revokeObjectURL(url); reject(new Error('Could not read this image')); };
+    img.src = url;
+  });
+}
+async function chatPrepImage(f) {
+  const ext0 = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' }[f.type];
+  if (!ext0) throw new Error('Only PNG, JPG, WEBP or GIF images are supported');
+  let blob = f, ext = ext0;
+  if (f.type !== 'image/gif' && f.size > 1.2 * 1024 * 1024) {
+    blob = await chatShrink(f, 1600, 0.85); ext = 'jpg';
+    if (blob.size > CHAT_IMG_MAX) blob = await chatShrink(f, 1200, 0.7);
+  }
+  if (blob.size > CHAT_IMG_MAX) throw new Error('Image is too large (max 3 MB)');
+  const base = (f.name || 'image').replace(/\.\w+$/, '');
+  return { blob, ext, name: base + '.' + ext };
+}
+async function chatUpload(convId, blob, ext) {
+  const path = convId + '/' + chatUid() + '.' + ext;
+  const { error } = await sb.storage.from('chat-images').upload(path, blob, { contentType: blob.type || 'image/jpeg', cacheControl: '3600', upsert: false });
+  if (error) throw error;
+  return path;
+}
+function chatClearImage() {
+  if (chatImage && chatImage.url) { try { URL.revokeObjectURL(chatImage.url); } catch (e) {} }
+  chatImage = null;
+}
+async function chatBuildCard(convId, pc) {
+  const card = { name: pc.name, type: pc.type, description: String(pc.description || '').slice(0, 300), code: pc.code, css: pc.css || '', tags: pc.tags || '' };
+  if (pc.imageData) {
+    try { card.thumb = await chatUpload(convId, await chatShrink(pc.imageData, 480, 0.8), 'jpg'); } catch (e) {}
+  }
+  return card;
 }
 
 function chatRenderAttach() {
   const el = document.getElementById('chatAttachChip');
   if (!el) return;
-  el.innerHTML = chatAttach
-    ? `<span class="vis-tag vis-public">${esc(chatAttach.name)}</span><button class="phi-btn" onclick="chatAttach=null;chatRenderAttach()">REMOVE</button>`
-    : '';
+  let h = '';
+  if (chatCard) h += `<span class="vis-tag vis-public">SECTION</span><b style="font-size:13px">${esc(chatCard.name)}</b><button class="phi-btn" onclick="chatCard=null;chatRenderAttach()">REMOVE</button>`;
+  if (chatAttach) h += `<span class="vis-tag vis-public">${esc(chatAttach.name)}</span><button class="phi-btn" onclick="chatAttach=null;chatRenderAttach()">REMOVE</button>`;
+  if (chatImage) h += `<img class="chat-chip-thumb" src="${chatImage.url}" alt=""><span class="vis-tag vis-public">${esc(chatImage.name)}</span><button class="phi-btn" onclick="chatClearImage();chatRenderAttach()">REMOVE</button>`;
+  el.innerHTML = h;
+  el.style.display = h ? 'flex' : 'none';
 }
 
+function chatLooksLikeCode(t) {
+  if (!t || t.includes('```')) return false;
+  const lines = t.split('\n');
+  if (lines.length < 5) return false;
+  const tests = [/\{%|%\}|\{\{/, /<\/?[a-z][\w-]*[^>]*>/i, /[;{}]\s*$/m, /\b(function|const|let|var|return|class|import|export)\b/, /=>/, /^\s*[.#@]?[\w-]+[^{\n]*\{\s*$/m, /^\s{2,}\S/m];
+  return tests.filter(r => r.test(t)).length >= 3;
+}
+function chatGuessLang(t) {
+  if (/\{%|\{\{/.test(t)) return 'liquid';
+  if (/<\/?[a-z][\w-]*[^>]*>/i.test(t)) return 'html';
+  if (/^\s*[.#@]?[\w-]+[^{\n]*\{\s*$/m.test(t) && /:\s*[^;\n]+;/.test(t) && !/\b(function|const|let|var)\b/.test(t)) return 'css';
+  return 'js';
+}
+
+function chatBind() {
+  if (chatBound) return;
+  chatBound = true;
+  const ta = document.getElementById('chatInput');
+  const main = document.getElementById('chatMain');
+  ta.addEventListener('paste', e => {
+    if (!chatActive || !chatIsMember(chatActive)) return;
+    const cd = e.clipboardData; if (!cd) return;
+    const img = [...(cd.files || [])].find(f => f.type.startsWith('image/'));
+    if (img) { e.preventDefault(); chatTakeFile(img); return; }
+    const txt = cd.getData('text');
+    if (!chatEditing && chatLooksLikeCode(txt)) {
+      e.preventDefault();
+      chatInsertText('```' + chatGuessLang(txt) + '\n' + txt.replace(/\s+$/, '') + '\n```\n');
+      showToast('Pasted as a code block');
+    }
+  });
+  let dragDepth = 0;
+  const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
+  main.addEventListener('dragenter', e => { if (!hasFiles(e) || !chatActive || !chatIsMember(chatActive)) return; e.preventDefault(); dragDepth++; main.classList.add('drag'); });
+  main.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+  main.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) main.classList.remove('drag'); });
+  main.addEventListener('drop', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); dragDepth = 0; main.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) chatTakeFile(f);
+  });
+  document.addEventListener('click', e => {
+    const m = document.getElementById('chatMenu');
+    if (m && m.style.display === 'block' && !m.contains(e.target) && !(e.target.closest && e.target.closest('.chat-more'))) chatMenuClose();
+  }, true);
+  document.getElementById('chatMsgsEl').addEventListener('scroll', chatMenuClose, { passive: true });
+  window.addEventListener('resize', chatMenuClose);
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const stop = () => { e.stopImmediatePropagation(); e.preventDefault(); };
+    const m = document.getElementById('chatMenu');
+    if (m && m.style.display === 'block') { chatMenuClose(); stop(); return; }
+    const lb = document.getElementById('chatLightbox');
+    if (lb) { lb.remove(); stop(); return; }
+    for (const id of ['chatReportModal', 'chatGroupModal']) {
+      const x = document.getElementById(id);
+      if (x && x.style.display === 'flex') { x.style.display = 'none'; stop(); return; }
+    }
+    if (chatIsOpen()) {
+      const bar = document.getElementById('chatSearchBar');
+      if (bar && bar.style.display === 'flex') { chatCloseSearch(); stop(); return; }
+      if (chatEditing || chatReply) { chatCancelMode(); stop(); return; }
+    }
+  }, true);
+}
+
+// ---------- attachments and section cards ----------
 function chatToggleCode(id) {
   const pre = document.getElementById('cc_' + id), m = chatMsgById(id);
   if (!pre || !m) return;
-  if (pre.style.display === 'none') { pre.textContent = m.attachment_code; pre.style.display = 'block'; }
+  if (pre.style.display === 'none') { pre.innerHTML = chatHL(m.attachment_code, chatExt(m.attachment_name)); pre.style.display = 'block'; }
   else pre.style.display = 'none';
 }
 function chatCopyCode(id) {
   const m = chatMsgById(id);
   if (m) navigator.clipboard.writeText(m.attachment_code || '').then(() => showToast('Code copied!'));
 }
-function chatDownload(id) {
-  const m = chatMsgById(id);
-  if (!m) return;
+function chatSaveBlob(text, name) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([m.attachment_code || ''], { type: 'text/plain' }));
-  a.download = (m.attachment_name || 'code.txt').replace(/[^\w.\-]/g, '_');
+  a.href = URL.createObjectURL(new Blob([text || ''], { type: 'text/plain' }));
+  a.download = String(name || 'code.txt').replace(/[^\w.\-]/g, '_');
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function chatDownload(id) {
+  const m = chatMsgById(id);
+  if (m) chatSaveBlob(m.attachment_code, m.attachment_name || 'code.txt');
+}
+function chatCardAct(id, act) {
+  const m = chatMsgById(id), c = m && m.card;
+  if (!c) return;
+  const fileName = String(c.name || 'section').replace(/[^\w.\-]/g, '-').replace(/\.liquid$/i, '') + '.liquid';
+  if (act === 'view') {
+    const pre = document.getElementById('cd_' + id);
+    if (!pre) return;
+    if (pre.style.display === 'none') { pre.innerHTML = chatHL(c.code || '', 'liquid'); pre.style.display = 'block'; }
+    else pre.style.display = 'none';
+  } else if (act === 'copy') navigator.clipboard.writeText(c.code || '').then(() => showToast('Code copied!'));
+  else if (act === 'css') navigator.clipboard.writeText(c.css || '').then(() => showToast('CSS copied!'));
+  else if (act === 'download') chatSaveBlob(c.code, fileName);
+}
+function chatBlobToDataUrl(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(blob); });
+}
+async function chatSaveCard(id) {
+  const m = chatMsgById(id), c = m && m.card;
+  if (!c || chatSavedCards.has(id)) return;
+  let fo = folders.find(x => x.id === activeFolderId) || folders[0];
+  if (!fo) {
+    const { data, error } = await sb.from('folders').insert({ user_id: currentUser.id, name: 'From chat' }).select().single();
+    if (error) { showToast('Error: ' + error.message, 'error'); return; }
+    fo = data; folders.push(fo);
+  }
+  let img = null;
+  if (c.thumb) {
+    try {
+      const { data: s } = await sb.storage.from('chat-images').createSignedUrl(c.thumb, 120);
+      if (s && s.signedUrl) { const r = await fetch(s.signedUrl); img = await chatBlobToDataUrl(await r.blob()); }
+    } catch (e) { img = null; }
+  }
+  const type = ['section', 'header', 'snippet', 'template'].includes(c.type) ? c.type : 'section';
+  const { data, error } = await sb.from('sections').insert({
+    user_id: currentUser.id, folder_id: fo.id, name: c.name || 'Section from chat', type,
+    description: c.description || '', code: c.code || '', image_data: img, is_public: false,
+    tags: c.tags || '', status: 'draft', notes: 'Received in chat from ' + chatNm(m.sender_id), css: c.css || ''
+  }).select().single();
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  sections.unshift(data);
+  chatSavedCards.add(id);
+  renderFolders(); renderSections(); updateStats();
+  chatRenderThread();
+  showToast('Saved to folder "' + fo.name + '"');
+}
+
+// ---------- group chats ----------
+let chatGMode = 'create', chatGSel = new Set();
+function chatGroupOpen() {
+  chatGMode = 'create'; chatGSel = new Set();
+  chatGroupRender();
+  show('chatGroupModal');
+}
+function chatGroupInfo() {
+  if (!chatActive || chatActive._kind !== 'group') return;
+  chatGMode = 'info';
+  chatGroupRender();
+  show('chatGroupModal');
+}
+function chatGroupRender() {
+  const body = document.getElementById('chatGroupBody'), title = document.getElementById('chatGroupTitle');
+  if (chatGMode === 'create') {
+    title.textContent = '// NEW GROUP';
+    body.innerHTML = `<div><label class="form-label">GROUP NAME</label><input class="form-input" id="chatGName" maxlength="40" placeholder="e.g. Agency team" style="width:100%;margin-top:6px"></div>
+      <div><label class="form-label">ADD MEMBERS (<span id="chatGCount">0</span> selected, max 49)</label>
+      <input class="form-input" id="chatGFilter" placeholder="search user..." oninput="chatGroupFilter()" style="width:100%;margin:6px 0">
+      <div class="chat-gusers" id="chatGUsers"></div></div>
+      <button class="btn-save" id="chatGCreateBtn" onclick="chatGroupCreate()">CREATE GROUP</button>`;
+    chatGroupFilter();
+    return;
+  }
+  const g = chatActive;
+  if (!g || g._kind !== 'group') { closeModal('chatGroupModal'); return; }
+  title.textContent = '// ' + String(g.name).toUpperCase();
+  const mem = (chatMembers[g.id] || []).slice().sort((a, b) => (a.role === 'owner' ? -1 : 0) - (b.role === 'owner' ? -1 : 0) || new Date(a.joined_at) - new Date(b.joined_at));
+  const meRow = mem.find(x => x.user_id === currentUser.id);
+  const owner = !!meRow && meRow.role === 'owner';
+  const canDel = owner || can('delete_conversations');
+  const inGroup = new Set(mem.map(x => x.user_id));
+  const addable = Object.entries(chatNames).filter(([id]) => !inGroup.has(id)).sort((a, b) => a[1].localeCompare(b[1]));
+  let h = '';
+  if (owner) h += `<div><label class="form-label">GROUP NAME</label><div style="display:flex;gap:8px;margin-top:6px"><input class="form-input" id="chatGRename" maxlength="40" value="${esc(g.name)}" style="flex:1;min-width:0"><button class="btn-save" onclick="chatGroupRename()">RENAME</button></div></div>`;
+  h += `<div><label class="form-label">MEMBERS (${mem.length})</label><div class="chat-gusers" style="margin-top:6px;max-height:300px">` + mem.map(x => {
+    const self = x.user_id === currentUser.id;
+    return `<div class="chat-gm"><span class="nm">${esc(chatNm(x.user_id))}${self ? ' (you)' : ''}</span>${x.role === 'owner' ? '<span class="vis-tag vis-public">OWNER</span>' : ''}` +
+      (!self && meRow ? `<button class="phi-btn" onclick="chatToggleBlock('${x.user_id}')">${chatBlocked.has(x.user_id) ? 'UNBLOCK' : 'BLOCK'}</button>` : '') +
+      (owner && !self ? `<button class="phi-btn" style="color:var(--red)" onclick="chatGroupRemove('${x.user_id}')">REMOVE</button>` : '') + '</div>';
+  }).join('') + '</div></div>';
+  if (owner) {
+    h += `<div><label class="form-label">ADD A MEMBER</label><div style="display:flex;gap:8px;margin-top:6px"><select class="form-select" id="chatGAddSel" style="flex:1;min-width:0">${addable.length ? addable.map(([id, n]) => `<option value="${id}">${esc(n)}</option>`).join('') : '<option value="">Everyone is already in</option>'}</select><button class="btn-save" onclick="chatGroupAdd()">ADD</button></div></div>`;
+  }
+  if (meRow) h += '<button class="btn-save" style="background:transparent;color:var(--red);border-color:var(--red)" onclick="chatGroupLeave()">LEAVE GROUP</button>';
+  if (canDel) h += '<button class="btn-save" style="background:transparent;color:var(--red);border-color:var(--red)" onclick="chatGroupDelete()">DELETE GROUP FOR EVERYONE</button>';
+  body.innerHTML = h;
+}
+function chatGroupFilter() {
+  const q = ((document.getElementById('chatGFilter') || {}).value || '').trim().toLowerCase();
+  const users = Object.entries(chatNames).filter(([id, n]) => id !== currentUser.id && (!q || n.toLowerCase().includes(q))).sort((a, b) => a[1].localeCompare(b[1]));
+  const el = document.getElementById('chatGUsers');
+  if (!el) return;
+  el.innerHTML = users.length ? users.map(([id, n]) => `<label class="chat-guser"><input type="checkbox" ${chatGSel.has(id) ? 'checked' : ''} onchange="chatGroupToggle('${id}',this.checked)"> ${esc(n)}</label>`).join('') : '<div class="bin-empty">No users found</div>';
+}
+function chatGroupToggle(id, on) {
+  if (on) chatGSel.add(id); else chatGSel.delete(id);
+  const c = document.getElementById('chatGCount'); if (c) c.textContent = chatGSel.size;
+}
+async function chatGroupCreate() {
+  const name = v('chatGName').trim();
+  if (name.length < 2 || name.length > 40) { showToast('Group name must be 2 to 40 characters', 'error'); return; }
+  if (chatGSel.size > 49) { showToast('A group can have at most 50 members', 'error'); return; }
+  setBtn('chatGCreateBtn', true, 'CREATING...');
+  const { data, error } = await sb.rpc('chat_group_create', { p_name: name, p_members: [...chatGSel] });
+  setBtn('chatGCreateBtn', false, 'CREATE GROUP');
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  closeModal('chatGroupModal');
+  chatSetTab('mine');
+  await chatRefresh();
+  showToast('Group created');
+  if (data) chatOpenConv('group', data);
+}
+async function chatGroupRename() {
+  const name = v('chatGRename').trim();
+  const { error } = await sb.rpc('chat_group_rename', { p_gid: chatActive.id, p_name: name });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await chatRefresh(); chatGroupRender(); chatRenderThread();
+  showToast('Group renamed');
+}
+async function chatGroupAdd() {
+  const uid = v('chatGAddSel');
+  if (!uid) return;
+  const { error } = await sb.rpc('chat_group_add', { p_gid: chatActive.id, p_user: uid });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await chatRefresh(); chatGroupRender(); chatRenderHead();
+  showToast('Member added');
+}
+async function chatGroupRemove(uid) {
+  if (!confirm('Remove ' + chatNm(uid) + ' from this group?')) return;
+  const { error } = await sb.rpc('chat_group_remove', { p_gid: chatActive.id, p_user: uid });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  await chatRefresh(); chatGroupRender(); chatRenderHead();
+  showToast('Member removed');
+}
+async function chatGroupLeave() {
+  if (!confirm('Leave this group? You will stop getting its messages.')) return;
+  const { error } = await sb.rpc('chat_group_remove', { p_gid: chatActive.id, p_user: currentUser.id });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  chatActive = null; chatMsgs = [];
+  closeModal('chatGroupModal'); chatBack();
+  await chatRefresh(); chatRenderThread();
+  showToast('You left the group');
+}
+async function chatGroupDelete() {
+  if (!confirm('Delete this group and all its messages for EVERYONE? This cannot be undone.')) return;
+  const g = chatActive, nm = g.name, wasMember = chatGMember(g);
+  const { error } = await sb.rpc('chat_group_delete', { p_gid: g.id });
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  if (!wasMember) lvAudit('conversation_deleted', null, null, 'Group: ' + nm);
+  chatActive = null; chatMsgs = [];
+  closeModal('chatGroupModal'); chatBack();
+  await chatRefresh(); chatRenderThread();
+  showToast('Group deleted', 'error');
 }
 
 // ============================================================
@@ -3383,7 +4702,7 @@ function presRefreshUI(){
   const sub = document.getElementById('chatHeadSub');
   if (sub) {
     const other = presOther(chatActive);
-    if (!other) { sub.textContent = ''; sub.className = 'p-sub'; }
+    if (!other) { sub.textContent = (chatActive && chatActive._kind === 'group') ? chatGroupSub(chatActive) : ''; sub.className = 'p-sub'; }
     else if (isTyping(other)) { sub.textContent = 'typing...'; sub.className = 'p-sub p-typing'; }
     else { sub.textContent = lastSeenText(other); sub.className = 'p-sub' + (isOnline(other) ? ' on' : ''); }
   }
@@ -3430,7 +4749,7 @@ document.addEventListener('input', e => { if (e.target && e.target.id === 'chatI
 setInterval(() => { if (currentUser) presRefreshUI(); }, 30000);
 
 const _origRenderThread = chatRenderThread;
-chatRenderThread = function(){ _origRenderThread(); presRefreshUI(); };
+chatRenderThread = function(...a){ _origRenderThread(...a); presRefreshUI(); };
 
 
 // ============================================================
@@ -3516,7 +4835,7 @@ function notifyStop() {
 
 setInterval(() => {
   if (!currentUser) { document.title = LV_TITLE; return; }
-  let n = Object.values(chatUnreadMap).reduce((a, b) => a + b, 0) + fbUnread();
+  let n = chatUnreadTotal() + fbUnread();
   if (can('support_center')) n += parseInt((document.getElementById('supportBadge') || {}).textContent) || 0;
   document.title = n ? '(' + n + ') ' + LV_TITLE : LV_TITLE;
 }, 2000);
@@ -3639,9 +4958,15 @@ function lvDownload(id){
 }
 function lvSendChat(id){
   const s = lvFind(id); if (!s) return;
-  window._pendAtt = { name: lvFile(s), code: s.code || '' };
+  if (new Blob([s.code || '']).size > CHAT_MAX) { showToast('This section is too large to send in chat (max 300 KB)', 'error'); return; }
+  window._pendAtt = null;
+  window._pendCard = {
+    name: s.name || 'Section', type: s.type || 'section', description: s.description || '',
+    code: s.code || '', css: s.css || '', tags: s.tags || '',
+    imageData: (s.image_data || '').startsWith('data:image/') ? s.image_data : null
+  };
   openChat();
-  showToast('Pick a chat. The file is attached, then press SEND.', 'warn');
+  showToast('Pick a chat. The section card is attached, then press SEND.', 'warn');
 }
 
 function lvImportClick(){
@@ -4394,6 +5719,7 @@ function lvApplyAdminBoxes(){
   set('adBroadcastBox', can('broadcast'));
   set('adAuditBox', can('view_audit'));
   set('adAppealsBox', can('manage_users'));
+  set('adReportsBox', can('manage_users'));
 }
 
 // ---------- Audit log ----------
@@ -4415,11 +5741,13 @@ const LV_AUDIT_LABELS = {
   maintenance_on: 'Maintenance turned on',
   maintenance_off: 'Maintenance turned off',
   ticket_deleted: 'Ticket deleted',
-  conversation_deleted: 'Conversation deleted'
+  conversation_deleted: 'Conversation deleted',
+  report_resolved: 'Chat report resolved',
+  report_dismissed: 'Chat report dismissed'
 };
 const LV_AUDIT_GROUPS = {
   names: ['display_name_changed'],
-  users: ['user_blocked', 'user_unblocked', 'reset_link_sent', 'appeal_submitted', 'appeal_ignored'],
+  users: ['user_blocked', 'user_unblocked', 'reset_link_sent', 'appeal_submitted', 'appeal_ignored', 'report_resolved', 'report_dismissed'],
   perms: ['permissions_changed'],
   bulk: ['bulk_status', 'bulk_visibility'],
   sections: ['section_deleted', 'section_edited_by_admin'],
@@ -4583,7 +5911,7 @@ async function lvSetBlocked(p, block, reason){
   p.blocked_at = block ? new Date().toISOString() : null;
   lvRenderUsers();
   if (can('view_audit')) lvAuditLoad();
-  if (can('manage_users')) lvAppealsLoad();
+  if (can('manage_users')) { lvAppealsLoad(); lvReportsLoad(); }
   showToast(block ? 'User blocked' : 'User unblocked', block ? 'warn' : 'success');
 }
 
@@ -4711,6 +6039,52 @@ async function lvAppealIgnore(id){
   lvAudit('appeal_ignored', a.user_id, p ? (p.display_name || p.email) : null, a.message.slice(0, 200));
   await lvAppealsLoad();
   showToast('Appeal ignored', 'warn');
+}
+
+// ---------- Chat reports (admin side) ----------
+let lvReports = [], lvReportPending = null;
+async function lvReportsLoad(){
+  if (!can('manage_users')) return;
+  const box = document.getElementById('reportList');
+  if (!box) return;
+  const { data, error } = await sb.from('chat_reports').select('*').order('created_at', { ascending: false }).limit(40);
+  if (error) { box.innerHTML = '<div class="p-sub">' + esc(lvDbErr(error)) + '</div>'; return; }
+  lvReports = data || [];
+  lvReportPending = lvReports.filter(r => r.status === 'pending').length;
+  setEl('reportCount', '(' + lvReportPending + ' pending)');
+  const nameOf = id => { const p = (window.lvAdminProfiles || []).find(x => x.id === id); return p ? (p.display_name || p.email || 'user') : chatNm(id); };
+  box.innerHTML = lvReports.length ? lvReports.map(r => {
+    const p = (window.lvAdminProfiles || []).find(x => x.id === r.reported_user_id);
+    const tag = r.status === 'pending' ? '<span class="lv-tag amber">PENDING</span>' : (r.status === 'resolved' ? '<span class="lv-tag blue">RESOLVED</span>' : '<span class="lv-tag">DISMISSED</span>');
+    const acts = r.status === 'pending'
+      ? `<button class="phi-btn" onclick="lvReportHandle('${r.id}','resolved')">RESOLVED</button><button class="phi-btn" onclick="lvReportHandle('${r.id}','dismissed')">DISMISS</button>${p && !p.is_blocked && can('manage_users') ? `<button class="phi-btn" style="color:var(--red)" onclick="lvBlockUser('${r.reported_user_id}')">BLOCK ACCOUNT</button>` : ''}`
+      : '';
+    return `<div class="fb-item lv-ann-row">
+      <div class="lv-ann-row-main">
+        ${tag} <span class="lv-tag">${r.scope === 'group' ? 'GROUP' : '1-TO-1'}</span> <b>${esc(nameOf(r.reported_user_id))}</b> <span class="p-sub">reported by ${esc(nameOf(r.reporter_id))}</span>
+        <div class="lv-ann-row-msg"><b>${esc(r.reason)}</b>${r.details ? ': ' + esc(r.details) : ''}</div>
+        <div class="lv-ann-row-msg" style="color:var(--text2)">Message: ${esc(r.snapshot || '')}</div>
+        <div class="p-sub">${lvFmtTime(r.created_at)}</div>
+      </div>
+      <div class="lv-ann-row-act">${acts}</div>
+    </div>`;
+  }).join('') : '<div class="p-sub">No reports yet</div>';
+}
+async function lvReportsPoll(){
+  const before = lvReportPending;
+  await lvReportsLoad();
+  if (before !== null && lvReportPending > before) showToast('New chat report received', 'warn');
+}
+async function lvReportHandle(id, status){
+  if (!can('manage_users')) return;
+  const r = lvReports.find(x => x.id === id);
+  if (!r) return;
+  const { error } = await sb.from('chat_reports').update({ status, handled_by: currentUser.id, handled_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showToast(lvDbErr(error), 'error'); return; }
+  const p = (window.lvAdminProfiles || []).find(x => x.id === r.reported_user_id);
+  lvAudit(status === 'resolved' ? 'report_resolved' : 'report_dismissed', r.reported_user_id, p ? (p.display_name || p.email) : chatNm(r.reported_user_id), r.reason);
+  await lvReportsLoad();
+  showToast(status === 'resolved' ? 'Report marked resolved' : 'Report dismissed');
 }
 
 // ---------- Announcements ----------
@@ -4863,7 +6237,7 @@ async function lvBroadcastPoll(){
   await Promise.all([lvAnnLoad(), lvMaintLoad()]);
   lvMaintRender();
   if (adminViewOn && can('broadcast')) lvMaintFill();
-  if (can('manage_users')) lvAppealsPoll();
+  if (can('manage_users')) { lvAppealsPoll(); lvReportsPoll(); }
 }
 function lvBroadcastReset(){
   lvAnnList = []; lvAnnAdminRows = [];
