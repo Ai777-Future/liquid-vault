@@ -536,6 +536,9 @@ html[data-theme="light"] .ic-sun{display:none}
 .chat-who{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .chat-msg.mine .chat-who{justify-content:flex-end}
 .chat-edited{color:var(--text3);font-style:italic}
+.chat-tick{display:inline-flex;align-items:center;margin-left:2px;color:var(--text3)}
+.chat-tick.seen{color:#2f8cff}
+.chat-tick svg{display:block}
 .chat-more{background:none;border:none;color:var(--text2);cursor:pointer;font-size:17px;line-height:1;padding:0 5px;border-radius:4px;font-family:var(--ui);opacity:0;transition:opacity .12s}
 .chat-msg:hover .chat-more,.chat-more:focus{opacity:1}
 .chat-more:hover{background:var(--hover)}
@@ -3130,6 +3133,7 @@ async function chatRefresh() {
     if (!fresh) { chatMsgs = []; chatBack(); }
   }
   chatBadge();
+  try { chatTicksRefresh(); } catch (e) {}
   if (chatIsOpen()) { chatRenderList(); if (!chatActive) chatRenderThread(); else chatRenderHead(); }
 }
 
@@ -3511,6 +3515,52 @@ function chatReactHtml(m, member) {
   return chips ? '<div class="chat-reacts">' + chips + '</div>' : '';
 }
 
+// ---------- delivery / seen ticks (own messages only) ----------
+const chatDelivered = new Set();
+const CHAT_TICK_1 = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const CHAT_TICK_2 = '<svg width="18" height="16" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="M26 6 15 17l-2.5-2.5"/></svg>';
+function chatReached(uid, m) {
+  // delivered = the person is online now, or was online after the message was sent
+  if (presState[uid]) return true;
+  const ls = chatLastSeen[uid];
+  return !!ls && new Date(ls).getTime() >= new Date(m.created_at).getTime();
+}
+function chatTickState(m) {
+  const c = chatActive;
+  if (!c) return 'sent';
+  const t = new Date(m.created_at).getTime();
+  if (c._kind === 'group') {
+    const others = (chatMembers[c.id] || []).filter(x => x.user_id !== currentUser.id);
+    if (!others.length) return 'sent';
+    if (others.every(x => x.last_read_at && new Date(x.last_read_at).getTime() >= t)) return 'seen';
+    if (chatDelivered.has(m.id)) return 'delivered';
+    if (others.every(x => chatReached(x.user_id, m))) { chatDelivered.add(m.id); return 'delivered'; }
+    return 'sent';
+  }
+  if (m.read_at) return 'seen';
+  if (chatDelivered.has(m.id)) return 'delivered';
+  const other = c.user_a === currentUser.id ? c.user_b : c.user_a;
+  if (chatReached(other, m)) { chatDelivered.add(m.id); return 'delivered'; }
+  return 'sent';
+}
+const CHAT_TICK_TITLE = { sent: 'Sent', delivered: 'Delivered', seen: 'Seen' };
+function chatTickInner(st) { return st === 'sent' ? CHAT_TICK_1 : CHAT_TICK_2; }
+function chatTickHtml(m) {
+  const st = chatTickState(m);
+  return `<span class="chat-tick ${st}" data-m="${m.id}" title="${CHAT_TICK_TITLE[st]}">${chatTickInner(st)}</span>`;
+}
+function chatTicksRefresh() {
+  document.querySelectorAll('#chatMsgsEl .chat-tick').forEach(el => {
+    const m = chatMsgById(el.dataset.m);
+    if (!m) return;
+    const st = chatTickState(m);
+    if (el.classList.contains(st)) return;
+    el.className = 'chat-tick ' + st;
+    el.title = CHAT_TICK_TITLE[st];
+    el.innerHTML = chatTickInner(st);
+  });
+}
+
 function chatMsgHtml(m, member) {
   const mine = member && m.sender_id === currentUser.id;
   const del = !!m.deleted_at;
@@ -3575,7 +3625,7 @@ function chatMsgHtml(m, member) {
   }
   const more = del ? '' : `<button class="chat-more" onclick="chatMsgMenu(event,'${m.id}')" aria-label="Message options"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`;
   const edited = m.edited_at && !del ? ' · <span class="chat-edited">edited</span>' : '';
-  return `<div class="chat-msg${mine ? ' mine' : ''}" id="cm_${m.id}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatClock(m.created_at)}${edited}${more}</div><div class="chat-bubble">${inner}</div>${chatReactHtml(m, member)}${hist}</div>`;
+  return `<div class="chat-msg${mine ? ' mine' : ''}" id="cm_${m.id}"><div class="chat-who">${esc(chatNm(m.sender_id))} · ${chatClock(m.created_at)}${mine && !del ? chatTickHtml(m) : ''}${edited}${more}</div><div class="chat-bubble">${inner}</div>${chatReactHtml(m, member)}${hist}</div>`;
 }
 
 async function chatHydrate() {
@@ -4710,6 +4760,7 @@ function presOther(c){
 
 function presRefreshUI(){
   lvPresAdminSync();
+  try { Object.keys(presState).forEach(id => { chatLastSeen[id] = new Date().toISOString(); }); chatTicksRefresh(); } catch (e) {}
   const sub = document.getElementById('chatHeadSub');
   if (sub) {
     const other = presOther(chatActive);
