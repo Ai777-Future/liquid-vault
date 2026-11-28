@@ -1845,10 +1845,9 @@ async function bootApp(user) {
   currentProfile = prof;
   if (prof && prof.is_blocked && !isSuper) { lvShowBlocked(prof.blocked_reason); return; }
 
-  // Set admin flag in DB if needed
-  if (isSuper && prof && !prof.is_admin) {
-    await sb.from('profiles').update({ is_admin: true }).eq('id', user.id);
-  }
+  // NOTE: is_admin is no longer self-set from the client — it's auto-assigned
+  // server-side by the trg_auto_admin_signup trigger on profile creation, and
+  // the column is REVOKEd from the authenticated role anyway (security hardening).
 
   // Update UI
   const name = prof?.display_name || user.email.split('@')[0];
